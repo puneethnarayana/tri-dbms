@@ -14,6 +14,8 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalVariables.h"
+#include "../diskManagement/basicDiskOperations.h"
+
 class LRUPageReplacement;
 class BufferManager {
 public:
