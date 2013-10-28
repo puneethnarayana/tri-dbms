@@ -12,6 +12,7 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalVariables.h"
+#include "../diskManagement/basicDiskOperations.h"
 BufferManager::BufferManager() {
 	// TODO Auto-generated constructor stub
 	pageSize_=PAGE_SIZE;
