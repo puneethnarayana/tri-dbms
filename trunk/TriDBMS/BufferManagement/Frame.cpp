@@ -10,6 +10,9 @@
 #include "string.h"
 #include "LRUPageReplacement.h"
 
+#include "../Global/globalDefines.h"
+#include "../Global/globalStructures.h"
+#include "../Global/globalVariables.h"
 Frame::Frame() {
 	// TODO Auto-generated constructor stub
 	pageNumber_=-1;

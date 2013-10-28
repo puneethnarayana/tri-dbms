@@ -8,6 +8,9 @@
 #ifndef FRAME_H_
 #define FRAME_H_
 
+#include "../Global/globalDefines.h"
+#include "../Global/globalStructures.h"
+#include "../Global/globalVariables.h"
 class Frame {
 public:
 	Frame();
