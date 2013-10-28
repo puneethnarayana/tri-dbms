@@ -11,6 +11,10 @@
 #include "BufferManager.h"
 #include "string.h"
 #include "Frame.h"
+
+#include "../Global/globalDefines.h"
+#include "../Global/globalStructures.h"
+#include "../Global/globalVariables.h"
 class BufferManager;
 class LRUPageReplacement {
 public:
@@ -23,7 +27,7 @@ public:
 	void resetPriority(int frameNumber);
 	int getFrameToBeReplaced();
 	unsigned long getMaximumPriority();
-	void replaceFrameWithAnother(unsigned long oldFrameNumber,int pageNumber, char *newPageContent);
+
 private:
 	BufferManager *bufManager_;
 };
