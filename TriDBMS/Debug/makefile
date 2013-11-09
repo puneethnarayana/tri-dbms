@@ -9,6 +9,8 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include diskManagement/subdir.mk
+-include SystemCatalogs/subdir.mk
+-include HeapFileManagement/subdir.mk
 -include BufferManagement/subdir.mk
 -include subdir.mk
 -include objects.mk

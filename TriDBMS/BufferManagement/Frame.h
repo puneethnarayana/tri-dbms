@@ -13,11 +13,15 @@
 #include "../Global/globalVariables.h"
 class Frame {
 public:
-	Frame();
+	Frame(int frameSize);
 	virtual ~Frame();
+	//long int fd_;
 	bool dirtyFlag_;
 	int pinCount_;
 	unsigned long priority_;
+	char *priorityType_; 	/* main header page,dir page, index root, index leaf,
+							* index intermediate, data page etc.,
+							*/
 	int pageNumber_;
 	char *pageData_;
 };

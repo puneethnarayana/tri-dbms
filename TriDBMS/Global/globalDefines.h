@@ -18,6 +18,8 @@
 #define DIRECTORY_PAGE 5
 #define DB_PAGE 6
 
-#define PAGE_SIZE 4096
+#define DEFAULT_PAGE_SIZE 4096
+#define MAX_FILE_NAME_LENGTH 128
+#define SUCCESS 1
 
 #endif /* GLOBALDEFINES_H_ */

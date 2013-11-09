@@ -14,7 +14,7 @@
 #include "../Global/globalVariables.h"
 LRUPageReplacement::LRUPageReplacement() {
 	// TODO Auto-generated constructor stub
-	bufManager_=BufferManager::getInstance();
+
 
 }
 
@@ -47,6 +47,7 @@ unsigned long LRUPageReplacement::getMaximumPriority(){
 	return maxPriority_;
 }
 int LRUPageReplacement::getFrameToBeReplaced(){
+	bufManager_=BufferManager::getInstance();
 	int freeFrameIndex=-1;
 	unsigned long minPriority=getMaximumPriority();//initialize this to some number which is greater than all priorities.
 	for(int i=0;i<bufManager_->numberOfFrames_;i++)

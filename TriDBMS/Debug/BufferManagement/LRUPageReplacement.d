@@ -5,7 +5,7 @@ BufferManagement/LRUPageReplacement.d: \
  ../BufferManagement/../Global/globalDefines.h \
  ../BufferManagement/../Global/globalStructures.h \
  ../BufferManagement/../Global/globalVariables.h \
- ../BufferManagement/../diskManagement/basicDiskOperations.h \
+ ../BufferManagement/../diskManagement/BasicDiskOperations.h \
  ../BufferManagement/../diskManagement/../Global/globalDefines.h \
  ../BufferManagement/../diskManagement/../Global/globalStructures.h \
  ../BufferManagement/../diskManagement/../Global/globalVariables.h
@@ -22,7 +22,7 @@ BufferManagement/LRUPageReplacement.d: \
 
 ../BufferManagement/../Global/globalVariables.h:
 
-../BufferManagement/../diskManagement/basicDiskOperations.h:
+../BufferManagement/../diskManagement/BasicDiskOperations.h:
 
 ../BufferManagement/../diskManagement/../Global/globalDefines.h:
 

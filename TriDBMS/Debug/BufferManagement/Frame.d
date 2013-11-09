@@ -5,7 +5,7 @@ BufferManagement/Frame.d: ../BufferManagement/Frame.cpp \
  ../BufferManagement/../Global/globalVariables.h \
  ../BufferManagement/BufferManager.h \
  ../BufferManagement/LRUPageReplacement.h \
- ../BufferManagement/../diskManagement/basicDiskOperations.h \
+ ../BufferManagement/../diskManagement/BasicDiskOperations.h \
  ../BufferManagement/../diskManagement/../Global/globalDefines.h \
  ../BufferManagement/../diskManagement/../Global/globalStructures.h \
  ../BufferManagement/../diskManagement/../Global/globalVariables.h
@@ -22,7 +22,7 @@ BufferManagement/Frame.d: ../BufferManagement/Frame.cpp \
 
 ../BufferManagement/LRUPageReplacement.h:
 
-../BufferManagement/../diskManagement/basicDiskOperations.h:
+../BufferManagement/../diskManagement/BasicDiskOperations.h:
 
 ../BufferManagement/../diskManagement/../Global/globalDefines.h:
 

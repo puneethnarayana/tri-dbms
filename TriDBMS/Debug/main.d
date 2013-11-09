@@ -1,4 +1,4 @@
-main.d: ../main.cpp ../diskManagement/basicDiskOperations.h \
+main.d: ../main.cpp ../diskManagement/BasicDiskOperations.h \
  ../diskManagement/../Global/globalDefines.h \
  ../diskManagement/../Global/globalStructures.h \
  ../diskManagement/../Global/globalVariables.h \
@@ -8,10 +8,10 @@ main.d: ../main.cpp ../diskManagement/basicDiskOperations.h \
  ../BufferManagement/../Global/globalVariables.h \
  ../BufferManagement/LRUPageReplacement.h \
  ../BufferManagement/BufferManager.h \
- ../BufferManagement/../diskManagement/basicDiskOperations.h \
+ ../BufferManagement/../diskManagement/BasicDiskOperations.h \
  ../Global/globalDefines.h ../Global/globalStructures.h
 
-../diskManagement/basicDiskOperations.h:
+../diskManagement/BasicDiskOperations.h:
 
 ../diskManagement/../Global/globalDefines.h:
 
@@ -33,7 +33,7 @@ main.d: ../main.cpp ../diskManagement/basicDiskOperations.h \
 
 ../BufferManagement/BufferManager.h:
 
-../BufferManagement/../diskManagement/basicDiskOperations.h:
+../BufferManagement/../diskManagement/BasicDiskOperations.h:
 
 ../Global/globalDefines.h:
 
