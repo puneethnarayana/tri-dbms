@@ -13,13 +13,18 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalVariables.h"
-Frame::Frame() {
+Frame::Frame(int frameSize) {
 	// TODO Auto-generated constructor stub
+	//fd_=-1;
 	pageNumber_=-1;
 	dirtyFlag_=false;
 	pinCount_=-1;
 	priority_=0;
-	pageData_=new char[4096];//page size=4KB
+	priorityType_=new char[2];	/* main header page,dir page, index root, index leaf,
+								* index intermediate, data page etc.,
+								*/
+	strcpy(priorityType_,"DATA_PAGE");
+	pageData_=new char[frameSize];//page size=4KB
 
 }
 

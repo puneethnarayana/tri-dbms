@@ -25,5 +25,7 @@ C_UPPER_DEPS :=
 SUBDIRS := \
 . \
 diskManagement \
+SystemCatalogs \
+HeapFileManagement \
 BufferManagement \
 

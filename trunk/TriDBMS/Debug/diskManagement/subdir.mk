@@ -4,13 +4,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../diskManagement/basicDiskOperations.cpp 
+../diskManagement/BasicDiskOperations.cpp 
 
 OBJS += \
-./diskManagement/basicDiskOperations.o 
+./diskManagement/BasicDiskOperations.o 
 
 CPP_DEPS += \
-./diskManagement/basicDiskOperations.d 
+./diskManagement/BasicDiskOperations.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
