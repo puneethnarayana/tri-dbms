@@ -6,8 +6,10 @@
  */
 
 #include <iostream>
+#include <istream>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cstring>
 
 #include "diskManagement/BasicDiskOperations.h"
 #include "BufferManagement/BufferManager.h"
@@ -23,7 +25,9 @@ int main(){
 	//basicDiskOperations *diskOps=new basicDiskOperations();
 	int fileDesc;
 	char *DBName=new char[12];
-	char *command;
+	char *command=new char[MAX_QUERY_LENGTH];
+	char *temp;
+	char *query_string=new char[MAX_QUERY_LENGTH];
 	char *dbname;
 	int fd,frameNo,pageNo,cacheSize,noOfPages,noOfFrames;
 	//int PAGE_SIZE=4096;
@@ -34,46 +38,113 @@ int main(){
 
 	while(1){
 		cout << endl << endl <<"Cache-Console$$";
-		command=new char[10];
-		cin >> command;
+		query_string=new char[10];
+		//cin >> command;
+		cin.getline(query_string,MAX_QUERY_LENGTH);
+		cout << query_string << endl;
+		command=strtok(query_string," ");
+		cout << command << endl;
 		if(strcasecmp(command,"createdb")==0){
 			dbname=new char[MAX_FILE_NAME_LENGTH];
-			cin >> dbname;
-			cin >> noOfPages;
+			dbname=strtok(NULL," ");
+			if(dbname==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			temp=strtok(NULL," ");
+
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			noOfPages=atoi(temp);
 			cout << endl << command;
 			cout << endl << dbname;
 			cout << endl << noOfPages;
 			cout << endl;
+			if(noOfPages==0){
+				cout << "Invalid Number of Pages" << endl;
+				continue;
+			}
 			buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,noOfPages);
 		}
 		else if(strcasecmp(command,"opendb")==0){
 			dbname=new char[MAX_FILE_NAME_LENGTH];
-			cin >> dbname;
+			dbname=strtok(NULL," ");
+			if(!dbname){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
 			cout << endl << command;
 			cout << endl << fd;
 			cout << "fd is :"<< buffManager->openDatabase(dbname);
 		}
 		else if(strcasecmp(command,"closedb")==0){
-			cin >> fd;
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			fd=atoi(temp);
+
 			buffManager->closeDatabase(fd);
 		}
 		else if(strcasecmp(command,"readpage")==0){
-			cin >> fd;
-			cin >> pageNo;
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			fd=atoi(temp);
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			pageNo=atoi(temp);
 			readPage=new char[DEFAULT_PAGE_SIZE];
 			buffManager->readPage(fd,pageNo,readPage);
 			cout << "page read is :" << readPage;
 		}
 		else if(strcasecmp(command,"writepage")==0){
-			cin >> fd;
-			cin >> pageNo;
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			fd=atoi(temp);
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			pageNo=atoi(temp);
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+
 			pageContent=new char[DEFAULT_PAGE_SIZE];
-			cin.get(pageContent,DEFAULT_PAGE_SIZE);
+			pageContent=strtok(NULL," ");
+			if(pageContent==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
 			buffManager->writePage(fd,pageNo,pageContent);
 		}
 		else if(strcasecmp(command,"hexdump")==0){
-			cin >> fd;
-			cin >> pageNo;
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			fd=atoi(temp);
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			pageNo=atoi(temp);
 			buffManager->hexDump(fd,pageNo);
 		}
 		else if(strcasecmp(command,"bufferlist")==0){
@@ -81,12 +152,23 @@ int main(){
 			buffManager->displayBufferList();
 		}
 		else if(strcasecmp(command,"viewbuffer")==0){
-			cin >> frameNo;
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			frameNo=atoi(temp);
+
 			cout << endl << command;
 			buffManager->viewFrameBuffer(frameNo);
 		}
 		else if(strcasecmp(command,"startcache")==0){
-			cin >> noOfFrames;
+			temp=strtok(NULL," ");
+			if(temp==NULL){
+				cout << "Wrong Number of Aurguments for " << command << endl;
+				continue;
+			}
+			noOfFrames=atoi(temp);
 			cout << endl << command;
 			buffManager->initializeCache(noOfFrames);
 		}
@@ -107,7 +189,7 @@ int main(){
 			break;
 		}
 		else{
-			cout << "WRONG COMMAND! Please try again :)";
+			cout << "WRONG COMMAND " << command << " Please try again :)";
 		}
 	}
 	/*

@@ -239,7 +239,7 @@ int BufferManager::dropDatabase(){
 }
 int BufferManager::commitCache(){
 	flushAllPagesToDisk();
-	return -1;
+	return SUCCESS;
 }
 int BufferManager::resetCache(){
 	flushAllPagesToDisk();
@@ -337,7 +337,11 @@ int BufferManager::hexDump(int fd,int pageNumber){
 	//char c;
 	int ptr=0;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
-	diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
+	int err=diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
+	if(err==-1){
+		cout<< endl << "FILE_NOT_OPENED" << endl;
+		return -1;
+	}
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
