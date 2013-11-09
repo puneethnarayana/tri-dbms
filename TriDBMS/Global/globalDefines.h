@@ -22,4 +22,5 @@
 #define MAX_FILE_NAME_LENGTH 128
 #define SUCCESS 1
 
+#define MAX_QUERY_LENGTH 256
 #endif /* GLOBALDEFINES_H_ */
