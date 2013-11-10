@@ -8,6 +8,8 @@
 #ifndef DBMAINHEADERPAGE_H_
 #define DBMAINHEADERPAGE_H_
 
+#include "../Global/globalStructures.h"
+
 class DBMainHeaderPage {
 public:
 	DBMainHeaderPage();
@@ -25,8 +27,8 @@ private:
 		int sysColumnsHeaderPageNumber_;
 		int indexCatalogHeaderPageNumber_;
 		int freeStructurePageNumber_;
-	}DBMainPageHeaderStruct;
-
+	}DBMainHeaderStruct;
+	DBMainHeaderStruct dbMainHeader_;
 };
 
 #endif /* DBMAINHEADERPAGE_H_ */

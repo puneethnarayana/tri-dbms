@@ -12,6 +12,12 @@ class DataPage {
 public:
 	DataPage();
 	virtual ~DataPage();
+private:
+	typedef struct{
+		GenPageHeaderStruct genPageHeader_;
+		int noOfRecords_;
+	}DataPageHeaderStruct;
+	DataPageHeaderStruct dataPageHeader_;
 };
 
 #endif /* DATAPAGE_H_ */

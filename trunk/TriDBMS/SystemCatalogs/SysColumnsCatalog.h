@@ -12,6 +12,17 @@ class SysColumnsCatalog {
 public:
 	SysColumnsCatalog();
 	virtual ~SysColumnsCatalog();
+
+private:
+	GenPageHeaderStruct genPageHeader_;
+	typedef struct{
+		char* columnName_;
+		char* tableName_;
+		int columnPosition_;
+		char* columnType_;
+
+	}SysColumnStruct;
+	SysColumnStruct sysColumnEntry_;
 };
 
 #endif /* SYSCOLUMNSCATALOG_H_ */
