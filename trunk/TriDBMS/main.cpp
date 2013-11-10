@@ -125,7 +125,7 @@ int main(){
 			}
 
 			pageContent=new char[DEFAULT_PAGE_SIZE];
-			pageContent=strtok(NULL," ");
+			pageContent=strtok(NULL,"\n");
 			if(pageContent==NULL){
 				cout << "Wrong Number of Aurguments for " << command << endl;
 				continue;
