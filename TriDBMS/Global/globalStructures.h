@@ -12,17 +12,9 @@ typedef struct{
 	int pageNumber;
 	int pageType;
 	int nextPageNumber;
-}PageHeaderStruct;
+}GenPageHeaderStruct;
 
-typedef struct{
-	int dbName;
-	int pageSize;
-	int noOfPages;
-	int pageType;
-	int sysTablesHeaderPageNumber;
-	int sysColumnsHeaderPageNumber;
-	int indexCatalogHeaderPageNumber;
-}DBMainPageHeaderStruct;
+
 
 typedef struct{
 	int pageNumber;

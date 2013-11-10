@@ -12,6 +12,21 @@ class DBMainHeaderPage {
 public:
 	DBMainHeaderPage();
 	virtual ~DBMainHeaderPage();
+
+private:
+	typedef struct{
+		GenPageHeaderStruct genPageHeader_;
+		int dbName_;
+		int pageSize_;
+		int noOfTables_;
+		int noOfPages_;
+		int pageType_;
+		int sysTablesHeaderPageNumber_;
+		int sysColumnsHeaderPageNumber_;
+		int indexCatalogHeaderPageNumber_;
+		int freeStructurePageNumber_;
+	}DBMainPageHeaderStruct;
+
 };
 
 #endif /* DBMAINHEADERPAGE_H_ */

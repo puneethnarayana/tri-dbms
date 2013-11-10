@@ -64,7 +64,7 @@ int BufferManager::initializeCache(int noOfPages){
 	return SUCCESS;
 }
 int BufferManager::createDatabase(char *fileName, int pageSize, int noOfPages){
-	int fd=diskManager_->createDiskFile(fileName,pageSize,noOfPages);
+	int fd= diskManager_->createDiskFile(fileName,pageSize,noOfPages);
 	return fd;
 }
 int BufferManager::openDatabase(char *fileName){
