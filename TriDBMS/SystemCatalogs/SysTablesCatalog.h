@@ -12,6 +12,17 @@ class SysTablesCatalog {
 public:
 	SysTablesCatalog();
 	virtual ~SysTablesCatalog();
+
+private:
+	GenPageHeaderStruct genPageHeader_;
+	typedef struct{
+		char* tableName_;
+		int recordSize_;
+		int noOfColumns_;
+		int* dpChainHeaderAddress_;
+	}SysTableStruct;
+
+	SysTableStruct sysTableEntry_;
 };
 
 #endif /* SYSTABLESCATALOG_H_ */

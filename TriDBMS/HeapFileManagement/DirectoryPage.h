@@ -12,6 +12,13 @@ class DirectoryPage {
 public:
 	DirectoryPage();
 	virtual ~DirectoryPage();
+private:
+	typedef struct{
+		GenPageHeaderStruct genPageHeader_;
+		int noOfDirectoryEntries;
+		int maxFreeSpace;
+	}DirectoryPageHeaderStruct;
+	DirectoryPageHeaderStruct directoryPageHeader_;
 };
 
 #endif /* DIRECTORYPAGE_H_ */

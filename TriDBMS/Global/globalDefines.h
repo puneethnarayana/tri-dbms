@@ -22,5 +22,10 @@
 #define MAX_FILE_NAME_LENGTH 128
 #define SUCCESS 1
 
+#define INT_SIZE 4
+#define BOOL_SIZE 1
+#define CHAR_SIZE 1
+#define DATE_SIZE 3
+
 #define MAX_QUERY_LENGTH 256
 #endif /* GLOBALDEFINES_H_ */
