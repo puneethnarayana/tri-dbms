@@ -27,7 +27,7 @@ public:
 	int initializeCache(int noOfPages);
 	int createDatabase(char *fileName, int pageSize, int noOfPages);
 	int openDatabase(char *fileName);
-	int readPage(int cd, int pageNumber, char*& ageContent);
+	int readPage(int cd, int pageNumber, char*& pageContent);
 	int writePage(int cd, int pageNumber, char *pageContent);
 	int closeDatabase(int fd);
 	int dropDatabase();
@@ -48,6 +48,15 @@ public:
 	int pageSize_;
 	int bufferSizeInMB_;
 	int numberOfFrames_;
+
+	typedef struct{
+		int fd_;
+		char fileName_[MAX_FILE_NAME_LENGTH+1];
+	}Cache_Index;
+	Cache_Index cacheIndex[MAX_DATABASES];
+
+
+
 private:
 	BufferManager();
 	std::time_t t;
@@ -59,6 +68,9 @@ private:
 	bool initCache_;
 	static BufferManager* BufferManagerInstance_;
 	BasicDiskOperations *diskManager_;
+
+
+
 };
 
 #endif /* BUFFERMANAGER_H_ */

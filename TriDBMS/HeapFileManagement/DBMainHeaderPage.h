@@ -12,8 +12,23 @@
 
 class DBMainHeaderPage {
 public:
-	DBMainHeaderPage();
+	DBMainHeaderPage(int fd,int pageNumber);
 	virtual ~DBMainHeaderPage();
+	int createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize,char *pageData);
+
+	int getPageNumber();
+	int getNoOfPagesUsed();
+	int getSysTablesHeaderPageNumber();
+	int getSysColumnHeaderPageNumber();
+	int getIndexCatalogHeaderPageNumber();
+	int getFreeStructurePageNumber();
+
+	void setPageNumber(int pageNumber);
+	void setNoOfPagesUsed(int noOfPagesUsed);
+	void setSysTablesHeaderPageNumber(int sysTableHeaderPageNumber);
+	void setSysColumnHeaderPageNumber(int sysColumnsHeaderPageNumber);
+	void setIndexCatalogHeaderPageNumber(int indexCatalogHeaderPageNumber);
+	void setFreeStructurePageNumber(int freeStructurePageNumber);
 
 private:
 	typedef struct{
@@ -22,13 +37,14 @@ private:
 		int pageSize_;
 		int noOfTables_;
 		int noOfPages_;
-		int pageType_;
+		int noOfPagesUsed_;
 		int sysTablesHeaderPageNumber_;
 		int sysColumnsHeaderPageNumber_;
 		int indexCatalogHeaderPageNumber_;
 		int freeStructurePageNumber_;
 	}DBMainHeaderStruct;
 	DBMainHeaderStruct dbMainHeader_;
+	BufferManager *buffManager_;
 };
 
 #endif /* DBMAINHEADERPAGE_H_ */
