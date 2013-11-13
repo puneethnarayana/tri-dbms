@@ -14,10 +14,13 @@
 class IndexHeader {
 public:
 	IndexHeader();
-	IndexHeader(int indexHeaderPageNumber);
+	IndexHeader(int fd,int indexHeaderPageNumber);
 	void createIndexHeaderPage(int numOfColumns, int colTypes[],int colSizes[], int keySize);
 	virtual ~IndexHeader();
 
+	int getPageNumber();
+	int getPageType();
+	int getNextPageNumber();
 	int getRootPageNumber();
 	int getFanout();
 	int getHeightOfTree();
@@ -25,6 +28,10 @@ public:
 	int getKeySize();
 	int getNoOfKeys();
 	int getNoOfColumns();
+
+	void setPageNumber(int pageNumber);
+	void setPageType(int pageType);
+	void setNextPageNumber(int nextPageNumber);
 	void setRootPageNumber(int rootPageNumber);
 	void setFanout(int fanout);
 	void setHeightOfTree(int heightOfTree);
@@ -32,11 +39,11 @@ public:
 	void setKeySize(int keySize);
 	void setNoOfKeys(int numberOfKeys);
 	void setNoOfColumns(int noOfColumns);
-
-
+	int* colTypes_;
+	int* colSizes_;
 
 private:
-	void initialize();
+	void initializeColumns();
 	typedef struct IndexHeaderStructure {
 			GenPageHeaderStruct generalPageHeaderStruct;
 			int rootPageNumber;
@@ -49,8 +56,11 @@ private:
 	} IndexHeaderStruct;
 	IndexHeaderStruct indexHeaderPage_;
 	char *pageData_;
-	int* colTypes_;
-	int* colSizes_;
+
+	int fd_;
+	int pageNumber_;
+	BufferManager *buffManager_;
+	bool isIndexHeaderChanged_;
 };
 
 #endif /* INDEXHEADER_H_ */
