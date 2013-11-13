@@ -20,6 +20,7 @@ using namespace std;
 
 
 int main(){
+	cout <<"hi";
 	BufferManager *buffManager=BufferManager::getInstance();
 	//buffMan->getHitRate();
 	//basicDiskOperations *diskOps=new basicDiskOperations();
