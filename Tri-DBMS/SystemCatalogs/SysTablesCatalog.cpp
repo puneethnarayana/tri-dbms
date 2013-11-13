@@ -45,7 +45,11 @@ int SysTablesCatalog::insertSysTableEntry(char *tableName,int recordSize,int noO
 SysTablesCatalog::~SysTablesCatalog() {
 	// TODO Auto-generated destructor stub
 
-
+	if(isSysTableChanged_==true){
+		buffManager_=BufferManager::getInstance();
+		buffManager_->writePage(fd_,pageNumber_,pageData_);
+	}
+	delete []pageData_;
 
 }
 
