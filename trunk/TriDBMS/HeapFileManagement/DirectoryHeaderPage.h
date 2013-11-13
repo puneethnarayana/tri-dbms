@@ -10,8 +10,25 @@
 #include "../Global/globalStructures.h"
 class DirectoryHeaderPage {
 public:
-	DirectoryHeaderPage();
+	DirectoryHeaderPage(int fd,int pageNumber);
 	virtual ~DirectoryHeaderPage();
+
+	int getPageNumber();
+	int getPageType();
+	int getNextPageNumber();
+	int getNoOfRecordsInTable();
+	int getNoOfDirectoryPages();
+	int getMaxDirectoryEntriesPerDP();
+
+	void setPageNumber(int pageNumber);
+	void setPageType(int pageType);
+	void setNextPageNumber(int nextPageNumber);
+	void setNoOfRecordsInTable(int noOfRecordsInTable);
+	void setNoOfDirectoryPages(int noOfDirectoryPages);
+	void setMaxDirectoryEntriesPerDP(int maxDirectoryEntriesPerDP);
+
+
+
 private:
 	typedef struct{
 		GenPageHeaderStruct genPageHeader_;
@@ -20,6 +37,11 @@ private:
 		int maxDirectoryEntriesPerDP;
 	}DirectoryHeaderPageHeaderStruct;
 	DirectoryHeaderPageHeaderStruct directoryHeaderPageHeader_;
+	BufferManager *buffManager_;
+	char* pageData_;
+	bool isDirectoryHeaderChanged_;
+	int fd_;
+	int pageNumber_;
 };
 
 #endif /* DIRECTORYHEADERPAGE_H_ */
