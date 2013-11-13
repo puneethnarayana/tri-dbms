@@ -8,6 +8,8 @@
 #ifndef DIRECTORYHEADERPAGE_H_
 #define DIRECTORYHEADERPAGE_H_
 #include "../Global/globalStructures.h"
+#include "../BufferManagement/BufferManager.h"
+
 class DirectoryHeaderPage {
 public:
 	DirectoryHeaderPage(int fd,int pageNumber);
