@@ -7,6 +7,7 @@
 
 #ifndef SYSCOLUMNSCATALOG_H_
 #define SYSCOLUMNSCATALOG_H_
+#include "../Global/globalStructures.h"
 
 class SysColumnsCatalog {
 public:
@@ -14,8 +15,9 @@ public:
 	virtual ~SysColumnsCatalog();
 
 private:
-	GenPageHeaderStruct genPageHeader_;
+
 	typedef struct{
+		GenPageHeaderStruct genPageHeader_;
 		char* columnName_;
 		char* tableName_;
 		int columnPosition_;

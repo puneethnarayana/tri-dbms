@@ -32,7 +32,7 @@ DirectoryHeaderPage::~DirectoryHeaderPage() {
 		}
 		delete []pageData_;
 	}
-}
+
 
 int DirectoryHeaderPage::getPageNumber(){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));

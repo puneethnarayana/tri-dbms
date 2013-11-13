@@ -7,6 +7,7 @@
 
 #ifndef SYSTABLESCATALOG_H_
 #define SYSTABLESCATALOG_H_
+#include "../Global/globalStructures.h"
 
 class SysTablesCatalog {
 public:
@@ -14,8 +15,9 @@ public:
 	virtual ~SysTablesCatalog();
 
 private:
-	GenPageHeaderStruct genPageHeader_;
+
 	typedef struct{
+		GenPageHeaderStruct genPageHeader_;
 		char* tableName_;
 		int recordSize_;
 		int noOfColumns_;
