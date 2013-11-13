@@ -24,9 +24,12 @@ DatabaseOperations::DatabaseOperations() {
 DatabaseOperations::~DatabaseOperations() {
 	// TODO Auto-generated destructor stub
 }
-
+/*
 int DatabaseOperations::createDatabase(char *databaseName){
 	createDatabase(databaseName,DEFAULT_DB_SIZE);
+
+
+	return SUCCESS;
 }
 
 int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
@@ -40,3 +43,4 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 
 	return SUCCESS;
 }
+*/

@@ -9,7 +9,7 @@
 #define DBMAINHEADERPAGE_H_
 
 #include "../Global/globalStructures.h"
-
+#include "../BufferManagement/BufferManager.h"
 class DBMainHeaderPage {
 public:
 	DBMainHeaderPage(int fd,int pageNumber);
@@ -45,6 +45,10 @@ private:
 	}DBMainHeaderStruct;
 	DBMainHeaderStruct dbMainHeader_;
 	BufferManager *buffManager_;
+	int fd_;
+	int pageNumber_;
+	char *pageData_;
+	bool isDBMainHeaderChanged_;
 };
 
 #endif /* DBMAINHEADERPAGE_H_ */

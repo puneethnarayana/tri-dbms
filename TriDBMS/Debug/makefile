@@ -11,6 +11,7 @@ RM := rm -rf
 -include diskManagement/subdir.mk
 -include SystemCatalogs/subdir.mk
 -include HeapFileManagement/subdir.mk
+-include DatabaseManagement/subdir.mk
 -include BufferManagement/subdir.mk
 -include subdir.mk
 -include objects.mk
