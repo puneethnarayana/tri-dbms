@@ -11,6 +11,7 @@
 #include "../BufferManagement/BufferManager.h"
 #include <stdio.h>
 #include <string.h>
+
 DataPage::DataPage(int fd,int pageNumber) {
 	// TODO Auto-generated constructor stub
 	fd_=fd;
