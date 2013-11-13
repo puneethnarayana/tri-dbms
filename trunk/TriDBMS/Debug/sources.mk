@@ -27,5 +27,6 @@ SUBDIRS := \
 diskManagement \
 SystemCatalogs \
 HeapFileManagement \
+DatabaseManagement \
 BufferManagement \
 

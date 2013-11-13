@@ -7,7 +7,7 @@
 
 #ifndef DIRECTORYHEADERPAGE_H_
 #define DIRECTORYHEADERPAGE_H_
-
+#include "../Global/globalStructures.h"
 class DirectoryHeaderPage {
 public:
 	DirectoryHeaderPage();

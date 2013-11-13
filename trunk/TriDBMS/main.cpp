@@ -38,7 +38,7 @@ int main(){
 
 	while(1){
 		cout << endl << endl <<"Cache-Console$$";
-		query_string=new char[10];
+		query_string=new char[100];
 		//cin >> command;
 		cin.getline(query_string,MAX_QUERY_LENGTH);
 		cout << query_string << endl;
