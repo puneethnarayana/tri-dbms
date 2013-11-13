@@ -33,5 +33,18 @@
 #define CHAR_SIZE 1
 #define DATE_SIZE 3
 
+//Pour l'index
+#define COL_INTEGER 1
+#define COL_FLOAT 2
+#define COL_DOUBLE 3
+#define COL_VARCHAR 4
+#define COL_LONG 5
+
+#define EQUAL_TO 1
+#define GREATER_THAN 2
+#define GREATER_THAN_OR_EQUAL_TO 3
+#define LESS_THAN 4
+#define LESS_THAN_OR_EQUAL_TO 5
+
 #define MAX_QUERY_LENGTH 256
 #endif /* GLOBALDEFINES_H_ */
