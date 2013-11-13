@@ -56,7 +56,14 @@ int DBMainHeaderPage::getPageNumber(){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	return dbMainHeader_.genPageHeader_.pageNumber;
 }
-
+int DBMainHeaderPage::getPageType(){
+	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
+	return dbMainHeader_.genPageHeader_.pageType;
+}
+int DBMainHeaderPage::getNextPageNumber(){
+	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
+	return dbMainHeader_.genPageHeader_.nextPageNumber;
+}
 int DBMainHeaderPage::getNoOfPagesUsed(){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 		return dbMainHeader_.noOfPagesUsed_;
@@ -89,6 +96,19 @@ void DBMainHeaderPage::setPageNumber(int pageNumber){
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
 	isDBMainHeaderChanged_=true;
 }
+void DBMainHeaderPage::setPageType(int pageType){
+	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
+	dbMainHeader_.genPageHeader_.pageType=pageType;
+	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	isDBMainHeaderChanged_=true;
+}
+void DBMainHeaderPage::setNextPageNumber(int nextPageNumber){
+	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
+	dbMainHeader_.genPageHeader_.nextPageNumber=nextPageNumber;
+	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	isDBMainHeaderChanged_=true;
+}
+
 void DBMainHeaderPage::setNoOfPagesUsed(int noOfPagesUsed){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	dbMainHeader_.genPageHeader_.pageNumber=noOfPagesUsed;
