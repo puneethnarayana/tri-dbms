@@ -9,22 +9,35 @@
 #define SYSTABLESCATALOG_H_
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
+#include "../BufferManagement/BufferManager.h"
 class SysTablesCatalog {
 public:
-	SysTablesCatalog();
+	SysTablesCatalog(int fd,int pageNumber);
 	virtual ~SysTablesCatalog();
-
+	//int createSysTableEntry(char *tableName,int recordSize,int noOfColumns,int dpChainHeader);
+	int insertSysTableEntry(char *tableName,int recordSize,int noOfColumns,int dpChainHeader,char *pageData);
 private:
 
 	typedef struct{
-		GenPageHeaderStruct genPageHeader_;
 		char* tableName_;
 		int recordSize_;
 		int noOfColumns_;
-		int* dpChainHeaderAddress_;
-	}SysTableStruct;
+		int dpChainHeaderAddress_;
+	}SysTableEntryStruct;
 
-	SysTableStruct sysTableEntry_;
+	typedef struct{
+		GenPageHeaderStruct genPageHeader_;
+		int noOfEntries;
+		SysTableEntryStruct *sysTableEntries_;
+	}sysTablePageStruct;
+
+	sysTablePageStruct sysTablePage_;
+	int fd_;
+	int pageNumber_;
+	char *pageData_;
+	BufferManager *buffManager_;
+	bool isSysTableChanged_;
+	int maxSysTableEntriesPerPage_;
 };
 
 #endif /* SYSTABLESCATALOG_H_ */
