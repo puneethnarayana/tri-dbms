@@ -60,6 +60,10 @@ int DataPage::getNoOfRecords(){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	return dataPageHeader_.noOfRecords_;
 }
+int DataPage::getDataPageSize(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return sizeof(DataPageHeaderStruct);
+}
 
 void DataPage::setPageNumber(int pageNumber){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
