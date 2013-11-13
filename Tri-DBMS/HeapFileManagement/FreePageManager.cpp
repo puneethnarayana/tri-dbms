@@ -7,12 +7,17 @@
 
 #include "FreePageManager.h"
 
-FreePageManager::FreePageManager() {
+FreePageManager::FreePageManager(int totalNoOfPages) {
 	// TODO Auto-generated constructor stub
-
+	freePageManager=new freePageStruct[totalNoOfPages];
+	int i;
+	for(i=0;i<totalNoOfPages;i++){
+		freePageManager[i].isFree_=true;
+	}
 }
 
 FreePageManager::~FreePageManager() {
 	// TODO Auto-generated destructor stub
+	delete []freePageManager;
 }
 
