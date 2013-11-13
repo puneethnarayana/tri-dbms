@@ -28,10 +28,18 @@
 #define MAX_DATABASES 50
 #define SUCCESS 1
 
-#define INT_SIZE 4
-#define BOOL_SIZE 1
-#define CHAR_SIZE 1
-#define DATE_SIZE 3
+#define SIZE_INT 4
+#define SIZE_BOOL 1
+#define SIZE_CHAR 1
+#define SIZE_DATE 3
+#define SIZE_FLOAT 8
+
+#define TYPE_INT 1
+#define TYPE_BOOL 2
+#define TYPE_CHAR 3
+#define TYPE_DATE 4
+#define TYPE_FLOAT 5
+
 
 //Pour l'index
 #define COL_INTEGER 1
