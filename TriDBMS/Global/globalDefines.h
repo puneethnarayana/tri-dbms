@@ -19,7 +19,7 @@
 #define INDEX_ROOT_PAGE 6
 #define INDEX_INTERNAL_PAGE 7
 #define INDEX_LEAF_PAGE 8
-#define DB_PAGE 9
+#define DATA_PAGE 9
 
 
 #define DEFAULT_PAGE_SIZE 4096

@@ -17,6 +17,8 @@ public:
 	int createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize,char *pageData);
 
 	int getPageNumber();
+	int getPageType();
+	int getNextPageNumber();
 	int getNoOfPagesUsed();
 	int getSysTablesHeaderPageNumber();
 	int getSysColumnHeaderPageNumber();
@@ -24,6 +26,8 @@ public:
 	int getFreeStructurePageNumber();
 
 	void setPageNumber(int pageNumber);
+	void setPageType(int pageType);
+	void setNextPageNumber(int nextPageNumber);
 	void setNoOfPagesUsed(int noOfPagesUsed);
 	void setSysTablesHeaderPageNumber(int sysTableHeaderPageNumber);
 	void setSysColumnHeaderPageNumber(int sysColumnsHeaderPageNumber);
