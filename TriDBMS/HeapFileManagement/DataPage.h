@@ -19,6 +19,7 @@ public:
 	int getPageType();
 	int getnextPageNumber();
 	int getNoOfRecords();
+	int getDataPageSize();
 
 	void setPageNumber(int pageNumber);
 	void setPageType(int pageType);
