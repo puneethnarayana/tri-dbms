@@ -97,10 +97,11 @@ int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
 	directoryPageHeader_.genPageHeader_.pageNumber=pageNumber;
 	directoryPageHeader_.genPageHeader_.nextPageNumber=-1;
 	directoryPageHeader_.genPageHeader_.pageType=DIRECTORY_PAGE;
-	//directoryPageHeader_.maxFreeSpace=DEFAULT_PAGE_SIZE-getDataPageSize();
+	directoryPageHeader_.maxFreeSpace=DEFAULT_PAGE_SIZE-DataPage::getDataPageSize();
 	directoryPageHeader_.noOfDirectoryEntries=
 			(DEFAULT_PAGE_SIZE-sizeof(DirectoryPageHeaderStruct))/8;
 	//Directory Entry = page number + free space
+	memcpy(&pageData,&directoryPageHeader_,sizeof(directoryPageHeader_));
 	memcpy(pageData_,&directoryPageHeader_,sizeof(directoryPageHeader_));
 	isDirectoryPageChanged_=true;
 	return SUCCESS;
