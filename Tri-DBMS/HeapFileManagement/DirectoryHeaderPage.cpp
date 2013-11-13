@@ -32,6 +32,19 @@ DirectoryHeaderPage::~DirectoryHeaderPage() {
 	delete []pageData_;
 }
 
+int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber,char *pageData){
+	directoryHeaderPageHeader_.genPageHeader_.pageNumber=pageNumber;
+	directoryHeaderPageHeader_.genPageHeader_.pageType=DIRECTORY_HEADER_PAGE;
+	directoryHeaderPageHeader_.genPageHeader_.nextPageNumber=-1;
+	directoryHeaderPageHeader_.noOfRecordsInTable=0;
+	directoryHeaderPageHeader_.noOfDirectoryPages=0;
+	directoryHeaderPageHeader_.maxDirectoryEntriesPerDP=(DEFAULT_PAGE_SIZE-sizeof(DirectoryPage::DirectoryPageHeaderStruct))/8;
+	memcpy(pageData,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
+	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
+	isDirectoryHeaderChanged_=true;
+	return SUCCESS;
+}
+
 int DirectoryHeaderPage::getPageNumber(){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
 	return directoryHeaderPageHeader_.genPageHeader_.pageNumber;
