@@ -10,8 +10,16 @@
 
 class FreePageManager {
 public:
-	FreePageManager();
+	FreePageManager(int totalNoOfPages);
 	virtual ~FreePageManager();
+	int getFreePage();
+private:
+
+	typedef struct{
+		bool isFree_;
+	}freePageStruct;
+
+	freePageStruct *freePageManager;
 };
 
 #endif /* FREEPAGEMANAGER_H_ */

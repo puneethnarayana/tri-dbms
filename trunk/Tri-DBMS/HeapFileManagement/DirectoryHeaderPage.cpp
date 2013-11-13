@@ -9,6 +9,7 @@
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
 #include "../BufferManagement/BufferManager.h"
+#include "DirectoryPage.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -38,7 +39,7 @@ int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber,ch
 	directoryHeaderPageHeader_.genPageHeader_.nextPageNumber=-1;
 	directoryHeaderPageHeader_.noOfRecordsInTable=0;
 	directoryHeaderPageHeader_.noOfDirectoryPages=0;
-	directoryHeaderPageHeader_.maxDirectoryEntriesPerDP=(DEFAULT_PAGE_SIZE-sizeof(DirectoryPage::DirectoryPageHeaderStruct))/8;
+	directoryHeaderPageHeader_.maxDirectoryEntriesPerDP=(DEFAULT_PAGE_SIZE-sizeof(DirectoryPage::getDirectoryPageSize()))/8;
 	memcpy(pageData,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
 	isDirectoryHeaderChanged_=true;

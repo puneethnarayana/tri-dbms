@@ -21,7 +21,7 @@ public:
 	int getPageNumber();
 	int getPageType();
 	int getNextPageNumber();
-
+	static int getDirectoryPageSize();
 	void setNoOfDirectoryEntries(int noOfDirectoryEntries);
 	void setMaxFreeSpace(int maxFreeSpace);
 	void setPageNumber(int pageNumber);

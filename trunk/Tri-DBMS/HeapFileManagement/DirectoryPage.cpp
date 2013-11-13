@@ -58,6 +58,12 @@ int DirectoryPage::getNextPageNumber(){
 	return directoryPageHeader_.genPageHeader_.nextPageNumber;
 }
 
+int DirectoryPage::getDirectoryPageSize(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return sizeof(DirectoryPageHeaderStruct);
+}
+
+
 void DirectoryPage::setNoOfDirectoryEntries(int noOfDirectoryEntries){
 	//memcpy(&directoryPageHeader_,pageData_,sizeof(DirectoryPageHeaderStruct));
 	directoryPageHeader_.noOfDirectoryEntries=noOfDirectoryEntries;
