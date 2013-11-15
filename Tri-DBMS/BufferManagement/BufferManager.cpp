@@ -104,7 +104,7 @@ int BufferManager::readPage(int fd, int pageNumber, char*& pageContent){
 
 		}
 		//cout << "+++++pageNumber is+++++++:"<<pageNumber<<endl;
-		strcpy(pageContent,BufferPool_[frameNo]->pageData_);
+		memcpy(pageContent,BufferPool_[frameNo]->pageData_,DEFAULT_PAGE_SIZE);
 		BufferPool_[frameNo]->pageNumber_=pageNumber;
 		t = std::time(0);
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
@@ -145,7 +145,7 @@ int BufferManager::writePage(int fd, int pageNumber, char *newPageContent){
 			numberOfHits_++;
 		}
 		//cout << "+++++pageNumber is+++++++:"<<pageNumber<<endl;
-		strcpy(BufferPool_[frameNo]->pageData_,newPageContent);
+		memcpy(BufferPool_[frameNo]->pageData_,newPageContent,DEFAULT_PAGE_SIZE);
 		BufferPool_[frameNo]->pageNumber_=pageNumber;
 		t = std::time(0);
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
@@ -215,7 +215,7 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 	t = std::time(0);
 	BufferPool_[frameNumber]->priority_ = t; //LRUReplacement->getMaximumPriority()+ 1;// use time-stamp
 	BufferPool_[frameNumber]->pageNumber_ = newPageNumber;
-	strcpy(BufferPool_[frameNumber]->pageData_,newPageContent);
+	memcpy(BufferPool_[frameNumber]->pageData_,newPageContent,DEFAULT_PAGE_SIZE);
 	BufferPool_[frameNumber]->pinCount_ = 0;
 	BufferPool_[frameNumber]->dirtyFlag_=false;
 
