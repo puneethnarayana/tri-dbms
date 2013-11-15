@@ -12,13 +12,15 @@
 
 class DatabaseOperations {
 public:
-	DatabaseOperations();
+	DatabaseOperations(int fd);
 	virtual ~DatabaseOperations();
 	int createDatabase(char *databaseName);
 	int createDatabase(char *databaseName,int databaseSize);
 
 private:
 	BufferManager *buffManager_;
+	int fd_;
+	char *pageData_;
 };
 
 #endif /* DATABASEOPERATIONS_H_ */

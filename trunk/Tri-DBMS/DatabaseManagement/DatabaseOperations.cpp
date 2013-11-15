@@ -16,15 +16,17 @@
 #include "../Global/globalStructures.h"
 #include "../BufferManagement/BufferManager.h"
 
-DatabaseOperations::DatabaseOperations() {
+DatabaseOperations::DatabaseOperations(int fd) {
 	// TODO Auto-generated constructor stub
-
+	fd_=fd;
+	pageData_=new char[DEFAULT_PAGE_SIZE];
+	buffManager_=BufferManager::getInstance();
 }
 
 DatabaseOperations::~DatabaseOperations() {
 	// TODO Auto-generated destructor stub
 }
-/*
+
 int DatabaseOperations::createDatabase(char *databaseName){
 	createDatabase(databaseName,DEFAULT_DB_SIZE);
 
@@ -33,14 +35,16 @@ int DatabaseOperations::createDatabase(char *databaseName){
 }
 
 int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
-	int fd;
+
 	int noOfPages=databaseSize*1024*1024/DEFAULT_PAGE_SIZE;
 	buffManager_=BufferManager::getInstance();
 	buffManager_->createDatabase(databaseName,DEFAULT_PAGE_SIZE,noOfPages);
-	fd=buffManager_->openDatabase(databaseName);
-	DBMainHeaderPage *dbMainHeader=new DBMainHeaderPage(fd,0);
-
+	fd_=buffManager_->openDatabase(databaseName);
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	dbMainHeader_->createDBMainHeaderStruct(databaseName,noOfPages,DEFAULT_PAGE_SIZE,pageData_);
+	dbMainHeader_->setFreeStructurePageNumber(1);
+	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
+	freePageManager_->createFreePageManagerPage(1,pageData_);
 
 	return SUCCESS;
 }
-*/
