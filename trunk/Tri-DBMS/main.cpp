@@ -14,13 +14,14 @@
 #include "diskManagement/BasicDiskOperations.h"
 #include "BufferManagement/BufferManager.h"
 
+#include "HeapFileManagement/FreePageManager.h"
+
 #include "Global/globalDefines.h"
 #include "Global/globalStructures.h"
 using namespace std;
 
 
 int main(){
-	cout <<"hi";
 	BufferManager *buffManager=BufferManager::getInstance();
 	//buffMan->getHitRate();
 	//basicDiskOperations *diskOps=new basicDiskOperations();
@@ -37,8 +38,82 @@ int main(){
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
 
 
+/*//freePageManager Testing!!
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test");
+
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+	fd=buffManager->openDatabase(dbname);
+	buffManager->hexDump(fd,1);
+	{
+		FreePageManager *fpm=new FreePageManager(fd,1);
+		fpm->createFreePageManagerPage(1,pageContent);
+		buffManager->commitCache();
+		buffManager->hexDump(fd,1);
+		cout << "getfreepage after create: " <<(int)fpm->getFreePage() << endl;
+		fpm->setPage(2);
+
+		cout << "getfreepage after 2: " <<fpm->getFreePage() << endl;
+		buffManager->commitCache();
+		buffManager->hexDump(fd,1);
+		fpm->setPage(3);
+		cout << "getfreepage after 3: " <<fpm->getFreePage() << endl;
+		buffManager->commitCache();
+		buffManager->hexDump(fd,1);
+		fpm->setPage(4);
+		cout << "getfreepage after 4: " <<fpm->getFreePage() << endl;
+
+		fpm->setPage(14);
+		cout << "getfreepage after 7: " <<fpm->getFreePage() << endl;
+		buffManager->commitCache();
+		buffManager->hexDump(fd,1);
+		int i;
+//	for(i=0;i<100;i++){
+//		cout << "is free (" << i << ") is:" << fpm->isPageFree(i) << endl;
+//	}
+
+	}
+
+	FreePageManager *fpm=new FreePageManager(fd,1);
+	int i;
+	cout << "getfreepage after second: " <<fpm->getFreePage() << endl;
+	for(i=0;i<20;i++){
+			cout << "is free (" << i << ") is:" << fpm->isPageFree(i) << endl;
+		}
+*/
+	/*
+	typedef struct abc{
+		int a;
+		char *c;
+
+	}Dummy;
+	Dummy dummy,dummy1;
+	dummy.a=64;
+	//dummy.b=20;
+	dummy.c=new char[10];
+	strcpy(dummy.c,"hisl;djf");
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test");
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,5);
+	fd=buffManager->openDatabase(dbname);
+	cout << sizeof(dummy) << endl;
+	//cout << dummy.a << " " << dummy.b << endl;
+	memcpy(pageContent,&dummy,sizeof(dummy));
+	memcpy(&dummy1,pageContent,sizeof(Dummy));
+	cout << pageContent << endl;
+	cout << dummy1.a << " " << dummy1.c << endl;
+	//strcpy(pageContent,"hi");
+	buffManager->writePage(fd,0,pageContent);
+	buffManager->commitCache();
+	//buffManager->hexDump(fd,0);
+	pageContent=new char[DEFAULT_PAGE_SIZE];
+	buffManager->readPage(fd,0,pageContent);
+	cout << pageContent << endl;
+
+*/
+/*
 	while(1){
-		cout << endl << endl <<"Cache-Console$$";
+		cout << endl << endl <<"Cache-Console>>";
 		query_string=new char[100];
 		//cin >> command;
 		cin.getline(query_string,MAX_QUERY_LENGTH);
@@ -193,6 +268,7 @@ int main(){
 			cout << "WRONG COMMAND " << command << " Please try again :)";
 		}
 	}
+*/
 	/*
 	cout << "Enter the database name:";
 	cin >> DBName;
