@@ -57,6 +57,8 @@ int main(){
 	buffManager->commitCache();
 	buffManager->hexDump(fd,3);
 	dp->insertRecord("hello",5);
+	dp->insertRecord("hello",5);
+	dp->insertRecord("hello",5);
 	buffManager->commitCache();
 	buffManager->hexDump(fd,3);
 	cout << "end!!!----------------------" << endl;
