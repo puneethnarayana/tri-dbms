@@ -15,7 +15,7 @@
 #include "BufferManagement/BufferManager.h"
 
 #include "HeapFileManagement/FreePageManager.h"
-
+#include "HeapFileManagement/DataPage.h"
 #include "Global/globalDefines.h"
 #include "Global/globalStructures.h"
 using namespace std;
@@ -37,7 +37,30 @@ int main(){
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
 
+/*//Data page testing!!
 
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test");
+
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+	fd=buffManager->openDatabase(dbname);
+	buffManager->hexDump(fd,3);
+
+	DataPage *dp=new DataPage(fd,3);
+	dp->createDataPageHeaderStruct(3,pageContent);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,3);
+
+	dp->insertRecord("hello",5);
+	dp->insertRecord("how are you !",13);
+	dp->freeSlotDirectoryEntry(1);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,3);
+	dp->insertRecord("hello",5);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,3);
+	cout << "end!!!----------------------" << endl;
+*/
 /*//freePageManager Testing!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -57,9 +80,12 @@ int main(){
 		buffManager->commitCache();
 		buffManager->hexDump(fd,1);
 		fpm->setPage(3);
+
 		cout << "getfreepage after 3: " <<fpm->getFreePage() << endl;
 		buffManager->commitCache();
 		buffManager->hexDump(fd,1);
+		fpm->freePage(2);
+
 		fpm->setPage(4);
 		cout << "getfreepage after 4: " <<fpm->getFreePage() << endl;
 
