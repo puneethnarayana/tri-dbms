@@ -35,6 +35,7 @@ private:
 		GenPageHeaderStruct genPageHeader_;
 		int noOfDirectoryEntries;
 		int maxFreeSpace;
+		int headerOffset;
 	}DirectoryPageHeaderStruct;
 	DirectoryPageHeaderStruct directoryPageHeader_;
 	BufferManager *buffManager_;
