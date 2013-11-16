@@ -37,7 +37,7 @@ int main(){
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
 
-/*//Data page testing!!
+//Data page testing!!
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -60,7 +60,7 @@ int main(){
 	buffManager->commitCache();
 	buffManager->hexDump(fd,3);
 	cout << "end!!!----------------------" << endl;
-*/
+
 /*//freePageManager Testing!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
