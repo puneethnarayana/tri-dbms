@@ -10,6 +10,7 @@
 
 #include "../Global/globalStructures.h"
 #include "../BufferManagement/BufferManager.h"
+#include "DirectoryEntry.h"
 
 class DirectoryPage {
 public:
@@ -17,25 +18,37 @@ public:
 	virtual ~DirectoryPage();
 
 	int getNoOfDirectoryEntries();
+	int getMaxNoOfDirectoryEntries();
 	int getMaxFreeSpace();
+	int getHeaderOffset();
 	int getPageNumber();
 	int getPageType();
 	int getNextPageNumber();
 	static int getDirectoryPageSize();
 	void setNoOfDirectoryEntries(int noOfDirectoryEntries);
+	void setMaxNoOfDirectoryEntries(int maxNoOfDirectoryEntries);
 	void setMaxFreeSpace(int maxFreeSpace);
+	void setHeaderOffset(int headerOffset);
 	void setPageNumber(int pageNumber);
 	void setPageType(int pageType);
 	void setNextPageNumber(int nextPageNumber);
 
 	int createDirectoryPage(int pageNumber, char *pageData);
+	int searchForSlotEntry(int sizeRequired);
+	int addSlotEntry(int sizeRequired);
+	int insertSlotEntry(int sizeRequired);
+	int updateSlotEntry(int slotNumber,int freeSpace);
+	int getFreeSpace(int slotNumber);
+	void updateMaxFreeSpace();
+
 
 private:
 	typedef struct{
 		GenPageHeaderStruct genPageHeader_;
-		int noOfDirectoryEntries;
-		int maxFreeSpace;
-		int headerOffset;
+		int noOfDirectoryEntries_;
+		int maxNoOfDirectoryEntries_;
+		int maxFreeSpace_;
+		int headerOffset_;
 	}DirectoryPageHeaderStruct;
 	DirectoryPageHeaderStruct directoryPageHeader_;
 	BufferManager *buffManager_;
