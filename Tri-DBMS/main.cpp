@@ -16,6 +16,7 @@
 
 #include "HeapFileManagement/FreePageManager.h"
 #include "HeapFileManagement/DataPage.h"
+#include "SystemCatalogs/SysTablesCatalog.h"
 #include "Global/globalDefines.h"
 #include "Global/globalStructures.h"
 using namespace std;
@@ -37,7 +38,24 @@ int main(){
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
 
-//Data page testing!!
+
+
+// SysTablePage Testing!!
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test");
+
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+	fd=buffManager->openDatabase(dbname);
+	buffManager->hexDump(fd,5);
+
+	SysTablesCatalog *syscat=new SysTablesCatalog(fd,5);
+	syscat->createSysTablePage(5,pageContent);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,5);
+	syscat->insertSysTableEntry("table1",35,7,5,pageContent);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,5);
+	/*//Data page testing!!
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -62,6 +80,7 @@ int main(){
 	buffManager->commitCache();
 	buffManager->hexDump(fd,3);
 	cout << "end!!!----------------------" << endl;
+*/
 
 /*//freePageManager Testing!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
@@ -109,17 +128,23 @@ int main(){
 			cout << "is free (" << i << ") is:" << fpm->isPageFree(i) << endl;
 		}
 */
-	/*
+/*
 	typedef struct abc{
 		int a;
 		char *c;
+		char *d;
+		char *e;
 
 	}Dummy;
+	cout << "sizeof struct before initialize :" << sizeof(Dummy) << endl;
 	Dummy dummy,dummy1;
-	dummy.a=64;
+	//dummy.a=64;
 	//dummy.b=20;
-	dummy.c=new char[10];
-	strcpy(dummy.c,"hisl;djf");
+	dummy.c=new char[100];
+	strcpy(dummy.c,"h");
+	cout << "sizeof struct after initialize :" << sizeof(Dummy) << endl;
+	cout << "sizeof variable after initialize :" << sizeof(dummy) << endl;
+
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
 	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,5);
