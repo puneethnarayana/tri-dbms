@@ -15,7 +15,7 @@ class SysColumnsCatalog {
 public:
 	SysColumnsCatalog(int fd, int pageNumber);
 	virtual ~SysColumnsCatalog();
-
+	int createSysColumnsPage(int pageNumber,char *pageData);
 	int insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType, char *pageData);
 
 private:
@@ -28,20 +28,13 @@ private:
 
 		}SysColumnEntryStruct;
 
-	typedef struct{
-
-		GenPageHeaderStruct genPageHeader_;
-		int noOfEntries;
-		SysColumnEntryStruct *sysColumnEntry_;
-	}sysColumnPageStruct;
-	sysColumnPageStruct sysColumnPage_;
 
 	char *pageData_;
 	BufferManager *buffManager_;
 	int fd_;
 	int pageNumber_;
 	bool isSysColumnChanged_;
-	int maxSysColumnEntriesPerPage_;
+	//int maxSysColumnEntriesPerPage_;
 };
 
 #endif /* SYSCOLUMNSCATALOG_H_ */
