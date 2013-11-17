@@ -31,28 +31,15 @@ int SysTablesCatalog::createSysTablePage(int pageNumber,char *pageData){
 	sysTablePage->setPageType(SYS_TABLES_PAGE);
 	return SUCCESS;
 }
-int SysTablesCatalog::insertSysTableEntry(char *tableName,int recordSize,int noOfColumns,int dpChainHeader,char *pageData){
+int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader,char *pageData){
 
-//		sysTablePage_.genPageHeader_.pageNumber=pageNumber_;
-//		sysTablePage_.genPageHeader_.pageType=SYS_TABLES_PAGE;
-//		sysTablePage_.genPageHeader_.nextPageNumber=-1;
-//		sysTablePage_.sysTableEntries_[sysTablePage_.noOfEntries].recordSize_=recordSize;
-//		sysTablePage_.sysTableEntries_[sysTablePage_.noOfEntries].noOfColumns_=noOfColumns;
-//		sysTablePage_.sysTableEntries_[sysTablePage_.noOfEntries].dpChainHeaderAddress_=dpChainHeader;
-//		memset(sysTablePage_.sysTableEntries_[sysTablePage_.noOfEntries].tableName_,0,MAX_FILE_NAME_LENGTH);
-//		memcpy(sysTablePage_.sysTableEntries_[sysTablePage_.noOfEntries].tableName_,tableName,MAX_FILE_NAME_LENGTH);
-//		sysTablePage_.noOfEntries++;
-//		memcpy(pageData_,&sysTablePage_,sizeof(sysTablePageStruct));
-//		memcpy(pageData,&sysTablePage_,sizeof(sysTablePageStruct));
-//		isSysTableChanged_=true;
-	SysTableEntryStruct sysTableEntry_={
-			recordSize,
-			noOfColumns,
-			dpChainHeader
-	};
-	memcpy(pageData_,tableName,strlen(tableName)+1);
-	memcpy(&pageData_[strlen(tableName)+1],&sysTableEntry_,sizeof(sysTableEntry_));
-
+	int sysTableEntrySize_= strlen(tableName)+sizeof(int)*3+1;
+	SysTableEntryStruct sysTableEntry_;
+	sysTableEntry_.recordSize_=maxRecordSize;
+	sysTableEntry_.noOfColumns_=noOfColumns;
+	sysTableEntry_.dpChainHeaderAddress_=dpChainHeader;
+	strcpy(sysTableEntry_.tableName_,tableName);
+	memcpy(pageData_,&sysTableEntry_,sysTableEntrySize_);
 	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
 	sysTablePage->insertRecord(pageData_,sizeof(sysTableEntry_)+strlen(tableName)+1);
 	return SUCCESS;
