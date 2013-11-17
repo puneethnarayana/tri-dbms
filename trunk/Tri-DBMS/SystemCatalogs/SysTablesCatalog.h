@@ -15,23 +15,16 @@ public:
         SysTablesCatalog(int fd,int pageNumber);
         virtual ~SysTablesCatalog();
         int createSysTablePage(int pageNumber,char *pageData);
-        int insertSysTableEntry(char *tableName,int recordSize,int noOfColumns,int dpChainHeader,char *pageData);
+        int insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader,char *pageData);
 private:
-
         typedef struct{
-                //char* tableName_;
-                int recordSize_;
-                int noOfColumns_;
-                int dpChainHeaderAddress_;
+
+        	int recordSize_;
+        	int noOfColumns_;
+        	int dpChainHeaderAddress_;
+        	char tableName_[MAX_FILE_NAME_LENGTH];
         }SysTableEntryStruct;
-//
-//        typedef struct{
-//                GenPageHeaderStruct genPageHeader_;
-//                int noOfEntries;
-//                SysTableEntryStruct *sysTableEntries_;
-//        }sysTablePageStruct;
-//
-//        sysTablePageStruct sysTablePage_;
+
         int fd_;
         int pageNumber_;
         char *pageData_;
