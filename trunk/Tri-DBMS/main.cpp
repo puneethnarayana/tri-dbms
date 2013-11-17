@@ -15,6 +15,7 @@
 #include "BufferManagement/BufferManager.h"
 
 #include "HeapFileManagement/FreePageManager.h"
+#include "HeapFileManagement/DirectoryPage.h"
 #include "HeapFileManagement/DataPage.h"
 #include "SystemCatalogs/SysTablesCatalog.h"
 #include "Global/globalDefines.h"
@@ -38,9 +39,37 @@ int main(){
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
 
+	/* //Directory page testing!!
+	cout<<"*******Started*******"<<endl;
+	        dbname=new char[MAX_FILE_NAME_LENGTH];
+	        strcpy(dbname,"test");
 
+	        buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+	        fd=buffManager->openDatabase(dbname);
+	        //buffManager->hexDump(fd,3);
+	        FreePageManager *fpm=new FreePageManager(fd,1);
+	        fpm->createFreePageManagerPage(1,pageContent);
+	        DirectoryPage *dp=new DirectoryPage(fd,3);
 
-/*// SysTablePage Testing!!
+	        dp->createDirectoryPage(3,pageContent);
+
+	        cout<<"*******Created*******"<<endl;
+	        buffManager->commitCache();
+	        buffManager->hexDump(fd,3);
+
+	        dp->insertSlotEntry(4000);
+	        dp->insertSlotEntry(1200);
+	        //dp->freeSlotDirectoryEntry(1);
+	        buffManager->commitCache();
+	        buffManager->hexDump(fd,3);
+	        dp->insertRecord("hello",5);
+	        buffManager->commitCache();
+	        buffManager->hexDump(fd,3);
+	        cout << "*****  end  *****" << endl;
+
+*/
+
+/* // SysTablePage Testing!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
 
@@ -55,9 +84,9 @@ int main(){
 	syscat->insertSysTableEntry("table1",35,7,5,pageContent);
 	buffManager->commitCache();
 	buffManager->hexDump(fd,5);
-	*/
+*/
 
-	/*//Data page testing!!
+	/* //Data page testing!!
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -84,7 +113,8 @@ int main(){
 	cout << "end!!!----------------------" << endl;
 */
 
-/*//freePageManager Testing!!
+/* //freePageManager Testing!!
+
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
 
@@ -323,7 +353,9 @@ int main(){
 			cout << "WRONG COMMAND " << command << " Please try again :)";
 		}
 	}
+
 */
+
 	/*
 	cout << "Enter the database name:";
 	cin >> DBName;
@@ -381,4 +413,5 @@ int main(){
 	cout << pageContent;
 	diskOps->closeDiskFile();
 	*/
+
 }
