@@ -40,7 +40,7 @@ int main(){
 
 
 
-// SysTablePage Testing!!
+/*// SysTablePage Testing!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
 
@@ -55,6 +55,8 @@ int main(){
 	syscat->insertSysTableEntry("table1",35,7,5,pageContent);
 	buffManager->commitCache();
 	buffManager->hexDump(fd,5);
+	*/
+
 	/*//Data page testing!!
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
