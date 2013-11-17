@@ -41,7 +41,7 @@ int BasicDiskOperations::createDiskFile(char *fileName, int pageSize, int noOfPa
 	fd_=open(fileName,O_RDWR);
 	totalWritten=write(fd_,writeNull,diskFileSize);
 	if(totalWritten==-1){
-		cout << strerror(errno);
+		//cout << strerror(errno);
 		fd_=-1;
 		goto ret;
 	}
