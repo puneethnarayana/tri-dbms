@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <cstring>
+#include <vector>
+#include <sstream>
+#include <string>
+#include <algorithm>
+#include <iterator>
 
 #include "diskManagement/BasicDiskOperations.h"
 #include "BufferManagement/BufferManager.h"
@@ -20,6 +25,8 @@
 #include "SystemCatalogs/SysTablesCatalog.h"
 #include "Global/globalDefines.h"
 #include "Global/globalStructures.h"
+#include "DatabaseManagement/DatabaseOperations.h"
+//#include <boost/serialization/vector.hpp>
 using namespace std;
 
 
@@ -38,6 +45,93 @@ int main(){
 	int DBSizeInMB;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
+
+
+
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test");
+
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+
+
+	//Create Database Testing!!!
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test1");
+	DatabaseOperations *dbOps=new DatabaseOperations();
+
+	dbOps->createDatabase(dbname,1);
+
+	fd=dbOps->openDatabase(dbname);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,0);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,1);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,2);
+
+/*	//Vector testing!!
+
+	vector<string> SS;
+
+	SS.push_back("The number is 10");
+	SS.push_back("The number is 20");
+	SS.push_back("The number is 30");
+	cout << "Loop by index:" << endl;
+	unsigned int ii;
+	for(ii=0; ii < SS.size(); ii++)
+	{
+		cout << SS[ii] << endl;
+	}
+
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test");
+
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+	fd=buffManager->openDatabase(dbname);
+	//buffManager->hexDump(fd,3);
+
+	DataPage *dp=new DataPage(fd,3);
+	dp->createDataPageHeaderStruct(3,pageContent);
+//	buffManager->commitCache();
+//	buffManager->hexDump(fd,3);
+
+//	memcpy(pageContent,&SS,SS.size());
+//	//cout << pageContent << endl;
+//	memcpy(&SS2,pageContent,SS.size());
+	stringstream ss;
+	copy( SS.begin(), SS.end(), ostream_iterator<string>(ss, "\0"));
+	string s = ss.str();
+
+	s = s.substr(0, s.length()-1);
+	cout << s << endl;
+	string str = "hello";
+	dp->insertRecord((char *)s.c_str(),s.size());
+	buffManager->commitCache();
+	buffManager->hexDump(fd,3);
+
+	vector<char> SS2;
+	vector<string> SS3;
+	//SS3(s.begin(), s.end());
+	std::copy(s.begin(), s.end(),back_inserter(SS2));
+	vector<string> s2(SS2.begin(),SS2.end());
+	//cout << "s2 is :" << s2 << endl;
+//	cout << "ss2 size is :" << SS2.size() << endl;
+//	for(ii=0; ii < SS2.size(); ii++)
+//		{
+//			cout << SS2[ii] ;
+//		}
+//	cout << "ss2 size is :" << SS2.size() << endl;
+//
+//	dp->insertRecord(pageContent,SS.size());
+//	dp->insertRecord("how are you !",13);
+//	buffManager->commitCache();
+//	buffManager->hexDump(fd,3);
+
+
+*/
+
+
+
 
 	/* //Directory page testing!!
 	cout<<"*******Started*******"<<endl;
