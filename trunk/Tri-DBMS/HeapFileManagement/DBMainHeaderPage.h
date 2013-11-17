@@ -37,15 +37,15 @@ public:
 private:
 	typedef struct{
 		GenPageHeaderStruct genPageHeader_;
-		int dbName_;
+		char dbName_[MAX_FILE_NAME_LENGTH];
 		int pageSize_;
 		int noOfTables_;
 		int noOfPages_;
 		int noOfPagesUsed_;
+		int freeStructurePageNumber_;
 		int sysTablesHeaderPageNumber_;
 		int sysColumnsHeaderPageNumber_;
 		int indexCatalogHeaderPageNumber_;
-		int freeStructurePageNumber_;
 	}DBMainHeaderStruct;
 	DBMainHeaderStruct dbMainHeader_;
 	BufferManager *buffManager_;

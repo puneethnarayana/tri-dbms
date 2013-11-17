@@ -89,7 +89,7 @@ bool FreePageManager::isPageFree(int pageNumber){
 int FreePageManager::getFreePage(){
 	int i;
 	if(freePageManager_.noOfFreePages_!=0){
-		cout << "max no of pages is: " << (int)freePageManager_.maxNoOfPages_<< endl;
+		//cout << "max no of pages is: " << (int)freePageManager_.maxNoOfPages_<< endl;
 		for(i=0;i<freePageManager_.maxNoOfPages_;i++){
 			if(isPageFree(i) == true){
 				setPage(i);
