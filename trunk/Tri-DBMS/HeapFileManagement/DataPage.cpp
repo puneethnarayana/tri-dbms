@@ -5,18 +5,26 @@
  *      Author: ravin
  */
 
+
+#include <iostream>
+#include <istream>
+#include <stdlib.h>
+#include <unistd.h>
+#include <cstring>
+
 #include "DataPage.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
 #include "../BufferManagement/BufferManager.h"
 #include <stdio.h>
 #include <string.h>
-
+using namespace std;
 DataPage::DataPage(int fd,int pageNumber) {
 	// TODO Auto-generated constructor stub
 	fd_=fd;
 	pageNumber_=pageNumber;
 	buffManager_=BufferManager::getInstance();
+	pageData_=new char[DEFAULT_PAGE_SIZE];
 	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&dataPageHeader_,pageData_,sizeof(DataPageHeaderStruct));
@@ -37,14 +45,138 @@ int DataPage::createDataPageHeaderStruct(int pageNumber,char *pageData){
 	dataPageHeader_.genPageHeader_.pageType=DATA_PAGE;
 	dataPageHeader_.genPageHeader_.nextPageNumber=-1;
 	dataPageHeader_.noOfRecords_=0;
+	dataPageHeader_.headerOffset_=sizeof(DataPageHeaderStruct);
+	dataPageHeader_.continuousFreeSpaceOffset_=dataPageHeader_.headerOffset_;
+	dataPageHeader_.continuousFreeSpaceAvailable_=DEFAULT_PAGE_SIZE-dataPageHeader_.headerOffset_;
 	memcpy(pageData,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	isDataPageChanged_=true;
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	return SUCCESS;
 }
 
 
+int DataPage::insertRecord(char *record,int recordLength){
+	int slotNumberForInsert_;
+	int offsetForInsert_;
+	SlotDirectoryEntry slotDirectoryEntry_;
+	slotNumberForInsert_=getSlotNoForRecord(recordLength);
+	if(slotNumberForInsert_==-1){
+		slotNumberForInsert_=getNoOfRecords();
+		addSlotDirectoyEntry(recordLength);
 
+	}
+	else{
+		updateSlotDirectoryEntry(slotNumberForInsert_,recordLength);
+	}
+	//cout <<"========slot number for insert=========" <<slotNumberForInsert_ << "================="<< endl;
+	slotDirectoryEntry_=getSlotDirectoryEntry(slotNumberForInsert_);
+	//cout << slotDirectoryEntry_.recordOffset << "=" << slotDirectoryEntry_.recordLength << endl;
+	offsetForInsert_=slotDirectoryEntry_.recordOffset;
+	//cout <<"========offset for insert=========" <<offsetForInsert_ << "================="<< endl;
+	memcpy(&pageData_[offsetForInsert_],record,recordLength);
+
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+	return SUCCESS;
+}
+int DataPage::getOffsetForRecord(int recordLength){
+	SlotDirectoryEntry slotDirectoryEntry_;
+	slotDirectoryEntry_=getSlotDirectoryEntry(getSlotNoForRecord(recordLength));
+
+	return slotDirectoryEntry_.recordOffset;
+}
+int DataPage::getSlotNoForOffset(int offset){
+	int i;
+	int slotEntryOffset_;
+	SlotDirectoryEntry slotDirectoryEntry_;
+	for(i=0;i<dataPageHeader_.noOfRecords_;i++){
+		slotEntryOffset_=DEFAULT_PAGE_SIZE-((i+1)*sizeof(SlotDirectoryEntry));
+		memcpy(&slotDirectoryEntry_,&pageData_[slotEntryOffset_],sizeof(SlotDirectoryEntry));
+		if(slotDirectoryEntry_.recordOffset == offset){
+			return i;
+		}
+	}
+	return -1;
+}
+int DataPage::getSlotNoForRecord(int recordLength){
+	int i;
+	int slotEntryOffset_;
+	SlotDirectoryEntry slotDirectoryEntry_;
+	for(i=0;i<dataPageHeader_.noOfRecords_;i++){
+		slotEntryOffset_=DEFAULT_PAGE_SIZE-((i+1)*sizeof(SlotDirectoryEntry));
+		memcpy(&slotDirectoryEntry_,&pageData_[slotEntryOffset_],sizeof(SlotDirectoryEntry));
+		if(slotDirectoryEntry_.recordLength < 0 && (-slotDirectoryEntry_.recordLength) >= recordLength){
+			return i;
+		}
+	}
+	return -1;
+}
+int DataPage::addSlotDirectoyEntry(int recordLength){
+	int slotEntryOffset_=DEFAULT_PAGE_SIZE-((dataPageHeader_.noOfRecords_+1)*sizeof(SlotDirectoryEntry));
+	int prevContinuousFreeSpaceOffset=getContinuousFreeSpaceOffset();
+	SlotDirectoryEntry slotDirectoryEntry_= {
+			getContinuousFreeSpaceOffset() ,
+			recordLength
+		};
+	setContinuousFreeSpaceOffset(getContinuousFreeSpaceOffset()+recordLength);
+	setContinuousFreeSpaceAvailable(getContinuousFreeSpaceAvailable()-recordLength-sizeof(SlotDirectoryEntry));
+	setNoOfRecords(getNoOfRecords()+1);
+	memcpy(&pageData_[slotEntryOffset_],&slotDirectoryEntry_,sizeof(SlotDirectoryEntry));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+	//return prevContinuousFreeSpaceOffset;
+	return slotEntryOffset_;
+}
+int DataPage::addSlotDirectoyEntry(int offset,int recordLength){
+	int slotEntryOffset_=DEFAULT_PAGE_SIZE-((dataPageHeader_.noOfRecords_+1)*sizeof(SlotDirectoryEntry));
+		int prevContinuousFreeSpaceOffset=offset;
+		SlotDirectoryEntry slotDirectoryEntry_= {
+				offset ,
+				recordLength
+			};
+		setNoOfRecords(getNoOfRecords()+1);
+		memcpy(&pageData_[slotEntryOffset_],&slotDirectoryEntry_,sizeof(SlotDirectoryEntry));
+		buffManager_->writePage(fd_,pageNumber_,pageData_);
+		isDataPageChanged_=true;
+		//return prevContinuousFreeSpaceOffset;
+		return slotEntryOffset_;
+}
+int DataPage::updateSlotDirectoryEntry(int slotNumber,int recordLength){
+	int newOffset,newFreeSpace;
+	int slotEntryOffset_=DEFAULT_PAGE_SIZE-((slotNumber+1)*sizeof(SlotDirectoryEntry));
+	SlotDirectoryEntry slotDirectoryEntry_;
+	memcpy(&slotDirectoryEntry_,&pageData_[slotEntryOffset_],sizeof(SlotDirectoryEntry));
+//	cout << "==================================" << slotDirectoryEntry_.recordOffset << endl;
+//	cout << "==================================" << slotDirectoryEntry_.recordLength << endl;
+	newOffset=slotDirectoryEntry_.recordOffset+recordLength;
+	newFreeSpace=slotDirectoryEntry_.recordLength+recordLength;
+	slotDirectoryEntry_.recordLength=recordLength;
+//	cout << "==================================" << slotDirectoryEntry_.recordLength << endl;
+//	cout << "====================================" << slotEntryOffset_ << endl;
+	addSlotDirectoyEntry(newOffset,newFreeSpace);
+	memcpy(&pageData_[slotEntryOffset_],&slotDirectoryEntry_,sizeof(SlotDirectoryEntry));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+	return SUCCESS;
+}
+DataPage::SlotDirectoryEntry DataPage::getSlotDirectoryEntry(int slotNumber){
+	SlotDirectoryEntry slotEntry_;
+	int slotEntryOffset=DEFAULT_PAGE_SIZE-((slotNumber+1)*sizeof(SlotDirectoryEntry));
+	memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
+	return slotEntry_;
+}
+int DataPage::freeSlotDirectoryEntry(int slotNumber){
+	SlotDirectoryEntry slotEntry_=getSlotDirectoryEntry(slotNumber);
+	int slotEntryOffset_=DEFAULT_PAGE_SIZE-((slotNumber+1)*sizeof(SlotDirectoryEntry));
+	SlotDirectoryEntry slotDirectoryEntry_;
+	memcpy(&slotDirectoryEntry_,&pageData_[slotEntryOffset_],sizeof(SlotDirectoryEntry));
+	slotDirectoryEntry_.recordLength=-slotDirectoryEntry_.recordLength;
+	memcpy(&pageData_[slotEntryOffset_],&slotDirectoryEntry_,sizeof(SlotDirectoryEntry));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+	return SUCCESS;
+}
 int DataPage::getPageNumber(){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	return dataPageHeader_.genPageHeader_.pageNumber;
@@ -65,29 +197,63 @@ int DataPage::getDataPageSize(){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	return sizeof(DataPageHeaderStruct);
 }
+int DataPage::getHeaderOffset(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return dataPageHeader_.headerOffset_;
+}
+int DataPage::getContinuousFreeSpaceOffset(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return dataPageHeader_.continuousFreeSpaceOffset_;
+}
+int DataPage::getContinuousFreeSpaceAvailable(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return dataPageHeader_.continuousFreeSpaceAvailable_;
+}
 
 void DataPage::setPageNumber(int pageNumber){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	dataPageHeader_.genPageHeader_.pageNumber=pageNumber;
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
 }
 void DataPage::setPageType(int pageType){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	dataPageHeader_.genPageHeader_.pageType=pageType;
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
 }
 void DataPage::setNextPageNumber(int nextPageNumber){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	dataPageHeader_.genPageHeader_.nextPageNumber=nextPageNumber;
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
 }
 void DataPage::setNoOfRecords(int noOfRecords){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	dataPageHeader_.noOfRecords_=noOfRecords;
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
 }
+
+
+void DataPage::setContinuousFreeSpaceOffset(int offset){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	dataPageHeader_.continuousFreeSpaceOffset_=offset;
+	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+}
+
+void DataPage::setContinuousFreeSpaceAvailable(int freeSpace){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	dataPageHeader_.continuousFreeSpaceAvailable_=freeSpace;
+	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+}
+
 
