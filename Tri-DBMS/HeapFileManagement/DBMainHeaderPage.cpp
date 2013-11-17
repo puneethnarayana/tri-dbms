@@ -16,6 +16,7 @@ DBMainHeaderPage::DBMainHeaderPage(int fd,int pageNumber) {
 	fd_=fd;
 	pageNumber_=pageNumber;
 	buffManager_=BufferManager::getInstance();
+	pageData_=new char[DEFAULT_PAGE_SIZE];
 	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&dbMainHeader_,pageData_,sizeof(DBMainHeaderStruct));
@@ -37,17 +38,18 @@ int DBMainHeaderPage::createDBMainHeaderStruct(char *databaseName,int noOfPages,
 	dbMainHeader_.genPageHeader_.pageNumber=0;
 	dbMainHeader_.genPageHeader_.pageType=DB_MAIN_HEADER_PAGE;
 	dbMainHeader_.genPageHeader_.nextPageNumber=-1;
-	memcpy(&dbMainHeader_.dbName_,databaseName,sizeof(databaseName));
+	memcpy(&dbMainHeader_.dbName_,databaseName,strlen(databaseName)+1);
 	dbMainHeader_.pageSize_=pageSize;
 	dbMainHeader_.noOfTables_=0;
 	dbMainHeader_.noOfPages_=noOfPages;
-	dbMainHeader_.noOfPagesUsed_= 1;
+	dbMainHeader_.noOfPagesUsed_= 2;
 	dbMainHeader_.sysTablesHeaderPageNumber_= -1;
 	dbMainHeader_.sysColumnsHeaderPageNumber_= -1;
 	dbMainHeader_.indexCatalogHeaderPageNumber_= -1;
-	dbMainHeader_.freeStructurePageNumber_= -1;
-	memcpy(pageData,&dbMainHeader_,sizeof(dbMainHeader_));
-	memcpy(pageData_,&dbMainHeader_,sizeof(dbMainHeader_));
+	dbMainHeader_.freeStructurePageNumber_= 1;
+	memcpy(pageData,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 	return SUCCESS;
 }
@@ -94,49 +96,57 @@ void DBMainHeaderPage::setPageNumber(int pageNumber){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	dbMainHeader_.genPageHeader_.pageNumber=pageNumber;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 void DBMainHeaderPage::setPageType(int pageType){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	dbMainHeader_.genPageHeader_.pageType=pageType;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 void DBMainHeaderPage::setNextPageNumber(int nextPageNumber){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	dbMainHeader_.genPageHeader_.nextPageNumber=nextPageNumber;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 
 void DBMainHeaderPage::setNoOfPagesUsed(int noOfPagesUsed){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
-	dbMainHeader_.genPageHeader_.pageNumber=noOfPagesUsed;
+	dbMainHeader_.noOfPagesUsed_=noOfPagesUsed;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 void DBMainHeaderPage::setSysTablesHeaderPageNumber(int sysTableHeaderPageNumber){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
-	dbMainHeader_.genPageHeader_.pageNumber=sysTableHeaderPageNumber;
+	dbMainHeader_.sysTablesHeaderPageNumber_=sysTableHeaderPageNumber;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 void DBMainHeaderPage::setSysColumnHeaderPageNumber(int sysColumnsHeaderPageNumber){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
-	dbMainHeader_.genPageHeader_.pageNumber=sysColumnsHeaderPageNumber;
+	dbMainHeader_.sysColumnsHeaderPageNumber_=sysColumnsHeaderPageNumber;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 void DBMainHeaderPage::setIndexCatalogHeaderPageNumber(int indexCatalogHeaderPageNumber){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
-	dbMainHeader_.genPageHeader_.pageNumber=indexCatalogHeaderPageNumber;
+	dbMainHeader_.indexCatalogHeaderPageNumber_=indexCatalogHeaderPageNumber;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 void DBMainHeaderPage::setFreeStructurePageNumber(int freeStructurePageNumber){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
-	dbMainHeader_.genPageHeader_.pageNumber=freeStructurePageNumber;
+	dbMainHeader_.freeStructurePageNumber_=freeStructurePageNumber;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
 }
 
