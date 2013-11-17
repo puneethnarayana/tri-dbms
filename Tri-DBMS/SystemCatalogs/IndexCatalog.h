@@ -12,6 +12,7 @@ class IndexCatalog {
 public:
 	IndexCatalog();
 	virtual ~IndexCatalog();
+	int createIndexCatalogPage(int pageNumber,char *pageData);
 };
 
 #endif /* INDEXCATALOG_H_ */
