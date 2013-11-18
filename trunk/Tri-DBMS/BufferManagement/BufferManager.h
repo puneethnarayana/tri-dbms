@@ -44,6 +44,11 @@ public:
 	int getFreeFrame();
 	float getHitRate();
 	int hexDump(int fd,int pageNumber);
+
+	bool isInitCache() const;
+
+	void setInitCache(bool initCache);
+
 	LRUPageReplacement *LRUReplacement;
 	int pageSize_;
 	int bufferSizeInMB_;
