@@ -71,6 +71,11 @@ int DBMainHeaderPage::getNoOfPagesUsed(){
 		return dbMainHeader_.noOfPagesUsed_;
 }
 
+int DBMainHeaderPage::getNoOfTables(){
+	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
+		return dbMainHeader_.noOfTables_;
+}
+
 int DBMainHeaderPage::getSysTablesHeaderPageNumber(){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	return dbMainHeader_.sysTablesHeaderPageNumber_;
@@ -117,6 +122,13 @@ void DBMainHeaderPage::setNextPageNumber(int nextPageNumber){
 void DBMainHeaderPage::setNoOfPagesUsed(int noOfPagesUsed){
 	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
 	dbMainHeader_.noOfPagesUsed_=noOfPagesUsed;
+	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDBMainHeaderChanged_=true;
+}
+void DBMainHeaderPage::setNoOfTables(int noOfTables){
+	//memcpy(&dbMainHeader_, pageData_, sizeof(DBMainHeaderStruct));
+	dbMainHeader_.noOfTables_=noOfTables;
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
