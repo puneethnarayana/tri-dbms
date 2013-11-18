@@ -24,6 +24,7 @@
 #include "../SystemCatalogs/IndexCatalog.h"
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
+#include "../Utils/CommonUtil.h"
 #include "../BufferManagement/BufferManager.h"
 using namespace std;
 DatabaseOperations::DatabaseOperations() {
@@ -104,11 +105,34 @@ int DatabaseOperations::closeDatabase(int fd){
 	return SUCCESS;
 }
 
-int DatabaseOperations::createTable(char *tableName){
+int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList){
+	int i,colPos;
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
 	int dirHeaderPageNumber_=freePageManager_->getFreePage();
-	DirectoryHeaderPage *dirHeaderPage= new DirectoryHeaderPage(fd_,dirHeaderPageNumber_);
-	dirHeaderPage->createDirectoryHeaderPageHeaderStruct(dirHeaderPageNumber_,pageData_);
+	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dirHeaderPageNumber_);
+	dirHeaderPage_->createDirectoryHeaderPageHeaderStruct(dirHeaderPageNumber_,pageData_);
+	int directoryPageNumber_=freePageManager_->getFreePage();
+	DirectoryPage *dirPage_=new DirectoryPage(fd_,directoryPageNumber_);
+	dirPage_->createDirectoryPage(dirHeaderPageNumber_,pageData_);
+	dirHeaderPage_->setNoOfDirectoryPages(1);
+	dirHeaderPage_->setNextPageNumber(directoryPageNumber_);
+	dbMainHeader_->setNoOfPagesUsed(dbMainHeader_->getNoOfPagesUsed()+2);
+	dbMainHeader_->setNoOfTables(dbMainHeader_->getNoOfTables()+1);
+
+	SysTablesCatalog *sysTableCatalog=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+	//TODO:max record size needs to be computed from the column types
+	sysTableCatalog->insertSysTableEntry(tableName,DEFAULT_PAGE_SIZE,
+			columnList.size(),dirHeaderPage_->getPageNumber(),pageData_);
+
+	SysColumnsCatalog *sysColumnCatalog=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
+	for(unsigned i=0;i<columnList.size();i++){
+		colPos=CommonUtil::string_to_int(columnTypeList[i].c_str());
+		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos,pageData_);
+	}
+
+	buffManager_->commitCache();
+
 	return SUCCESS;
 }
 
