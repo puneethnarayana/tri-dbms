@@ -149,10 +149,8 @@ int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
 	directoryPageHeader_.maxNoOfDirectoryEntries_=(DEFAULT_PAGE_SIZE-
 			sizeof(DirectoryPageHeaderStruct))/DirectoryEntry::getDirectoryEntrySize();
 	//Directory Entry = page number + free space
-	cout<<"before copying"<<endl;
 	memcpy(pageData,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
 	memcpy(pageData_,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
-	cout<<pageData_<<endl;
 
 	isDirectoryPageChanged_=true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);

@@ -15,13 +15,14 @@
 
 DirectoryHeaderPage::DirectoryHeaderPage(int fd,int pageNumber) {
 	// TODO Auto-generated constructor stub
-		fd_=fd;
-		pageNumber_=pageNumber;
-		buffManager_=BufferManager::getInstance();
-		memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
-		buffManager_->readPage(fd,pageNumber,pageData_);
-		memcpy(&directoryHeaderPageHeader_,pageData_,sizeof(DirectoryHeaderPageHeaderStruct));
-		isDirectoryHeaderChanged_=false;
+	fd_=fd;
+	pageNumber_=pageNumber;
+	pageData_=new char[DEFAULT_PAGE_SIZE];
+	buffManager_=BufferManager::getInstance();
+	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	buffManager_->readPage(fd,pageNumber,pageData_);
+	memcpy(&directoryHeaderPageHeader_,pageData_,sizeof(DirectoryHeaderPageHeaderStruct));
+	isDirectoryHeaderChanged_=false;
 }
 
 DirectoryHeaderPage::~DirectoryHeaderPage() {
@@ -42,6 +43,7 @@ int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber,ch
 	directoryHeaderPageHeader_.maxDirectoryEntriesPerDP=(DEFAULT_PAGE_SIZE-sizeof(DirectoryPage::getDirectoryPageSize()))/8;
 	memcpy(pageData,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDirectoryHeaderChanged_=true;
 	return SUCCESS;
 }
@@ -78,30 +80,34 @@ int DirectoryHeaderPage::getMaxDirectoryEntriesPerDP(){
 
 void DirectoryHeaderPage::setPageNumber(int pageNumber){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
-		directoryHeaderPageHeader_.genPageHeader_.pageNumber=pageNumber;
-		memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
-		isDirectoryHeaderChanged_=true;
+	directoryHeaderPageHeader_.genPageHeader_.pageNumber=pageNumber;
+	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDirectoryHeaderChanged_=true;
 
 }
 
 void DirectoryHeaderPage::setPageType(int pageType){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
-			directoryHeaderPageHeader_.genPageHeader_.pageType=pageType;
-			memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
-			isDirectoryHeaderChanged_=true;
+	directoryHeaderPageHeader_.genPageHeader_.pageType=pageType;
+	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDirectoryHeaderChanged_=true;
 }
 
 void DirectoryHeaderPage::setNextPageNumber(int nextPageNumber){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
-			directoryHeaderPageHeader_.genPageHeader_.nextPageNumber = nextPageNumber;
-			memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
-			isDirectoryHeaderChanged_=true;
+	directoryHeaderPageHeader_.genPageHeader_.nextPageNumber = nextPageNumber;
+	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDirectoryHeaderChanged_=true;
 }
 
 void DirectoryHeaderPage::setNoOfRecordsInTable(int noOfRecordsInTable){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
 	directoryHeaderPageHeader_.noOfRecordsInTable = noOfRecordsInTable;
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDirectoryHeaderChanged_=true;
 }
 
@@ -109,6 +115,7 @@ void DirectoryHeaderPage::setNoOfDirectoryPages(int noOfDirectoryPages){
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
 	directoryHeaderPageHeader_.noOfDirectoryPages = noOfDirectoryPages;
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDirectoryHeaderChanged_=true;
 }
 
@@ -116,6 +123,7 @@ void DirectoryHeaderPage::setMaxDirectoryEntriesPerDP(int maxDirectoryEntriesPer
 	//memcpy(&directoryHeaderPageHeader_, pageData_, sizeof(DirectoryHeaderPageHeaderStruct));
 	directoryHeaderPageHeader_.maxDirectoryEntriesPerDP = maxDirectoryEntriesPerDP;
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(DirectoryHeaderPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDirectoryHeaderChanged_=true;
 
 }

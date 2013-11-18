@@ -20,6 +20,7 @@ public:
 	int getPageType();
 	int getNextPageNumber();
 	int getNoOfPagesUsed();
+	int getNoOfTables();
 	int getSysTablesHeaderPageNumber();
 	int getSysColumnHeaderPageNumber();
 	int getIndexCatalogHeaderPageNumber();
@@ -29,6 +30,7 @@ public:
 	void setPageType(int pageType);
 	void setNextPageNumber(int nextPageNumber);
 	void setNoOfPagesUsed(int noOfPagesUsed);
+	void setNoOfTables(int noOfTables);
 	void setSysTablesHeaderPageNumber(int sysTableHeaderPageNumber);
 	void setSysColumnHeaderPageNumber(int sysColumnsHeaderPageNumber);
 	void setIndexCatalogHeaderPageNumber(int indexCatalogHeaderPageNumber);
