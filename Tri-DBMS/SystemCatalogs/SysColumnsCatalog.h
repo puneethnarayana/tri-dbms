@@ -20,13 +20,13 @@ public:
 
 private:
 
-	typedef struct{
-			char* columnName_;
-			char* tableName_;
-			int columnPosition_;
-			int columnType_;
-
-		}SysColumnEntryStruct;
+//	typedef struct{
+//			char* columnName_;
+//			char* tableName_;
+//			int columnPosition_;
+//			int columnType_;
+//
+//		}SysColumnEntryStruct;
 
 
 	char *pageData_;
