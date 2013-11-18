@@ -24,18 +24,29 @@ Record::~Record() {
 	// TODO Auto-generated destructor stub
 }
 
-char* Record::getRecordString(vector<string> values,char *record_,int *recLen){
+void Record::getRecordString(vector<string> values,char *record_,int *recLen){
 	vector<string> values_=values;
-	int i,offset=sizeof(int)*values_.size();
+	int offset=sizeof(int)*values_.size();
 	const char *val=new char[MAX_FILE_NAME_LENGTH];
 	//record_=new char[DEFAULT_PAGE_SIZE];
 	for(unsigned i=0;i<values_.size();i++){
 		val=values_[i].c_str();
-		cout << "in loop " << val << endl;
 		memcpy(&record_[offset],val,strlen(val)+1);
 		memcpy(&record_[i*sizeof(int)],&offset,sizeof(int));
 		offset=offset+strlen(val)+1;
 	}
 	*recLen=offset;
-	return record_;
+}
+
+
+
+vector<string> Record::getvectorFromRecord(char *record,int noOfColumns){
+	vector<string> values_;
+	int i,offset;
+	for(i=0;i<noOfColumns;i++){
+		memcpy(&offset,&record[i*sizeof(int)],sizeof(int));
+		values_.push_back(&record[offset]);
+	}
+
+	return values_;
 }

@@ -14,7 +14,9 @@ class Record {
 public:
 	Record();
 	virtual ~Record();
-	char* getRecordString(vector<string> values,char *record,int *recLen);
+	void getRecordString(vector<string> values,char *record,int *recLen);
+	vector<string> getvectorFromRecord(char *record,int noOfColumns);
+
 private:
 	//char *record_;
 };
