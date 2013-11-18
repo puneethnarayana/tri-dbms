@@ -114,7 +114,7 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	dirHeaderPage_->createDirectoryHeaderPageHeaderStruct(dirHeaderPageNumber_,pageData_);
 	int directoryPageNumber_=freePageManager_->getFreePage();
 	DirectoryPage *dirPage_=new DirectoryPage(fd_,directoryPageNumber_);
-	dirPage_->createDirectoryPage(dirHeaderPageNumber_,pageData_);
+	dirPage_->createDirectoryPage(directoryPageNumber_,pageData_);
 	dirHeaderPage_->setNoOfDirectoryPages(1);
 	dirHeaderPage_->setNextPageNumber(directoryPageNumber_);
 	dbMainHeader_->setNoOfPagesUsed(dbMainHeader_->getNoOfPagesUsed()+2);
