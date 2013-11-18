@@ -15,6 +15,7 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
+#include "Utils/CommonUtil.h"
 
 #include "diskManagement/BasicDiskOperations.h"
 #include "BufferManagement/BufferManager.h"
@@ -26,6 +27,7 @@
 #include "Global/globalDefines.h"
 #include "Global/globalStructures.h"
 #include "DatabaseManagement/DatabaseOperations.h"
+#include "Utils/Record.h"
 //#include <boost/serialization/vector.hpp>
 using namespace std;
 
@@ -62,13 +64,43 @@ int main(){
 	dbOps->createDatabase(dbname,1);
 
 	fd=dbOps->openDatabase(dbname);
+//	buffManager->hexDump(fd,0);
+//	buffManager->hexDump(fd,1);
+//	buffManager->hexDump(fd,2);
+//	buffManager->hexDump(fd,3);
+	vector<string> colNames;
+	colNames.push_back("c1");
+	colNames.push_back("co2");
+	colNames.push_back("col3");
+	vector<string> colTypes;
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
+	dbOps->createTable("table1",colNames,colTypes);
 	buffManager->commitCache();
 	buffManager->hexDump(fd,0);
-	buffManager->commitCache();
 	buffManager->hexDump(fd,1);
-	buffManager->commitCache();
 	buffManager->hexDump(fd,2);
+	buffManager->hexDump(fd,3);
 
+
+/*
+	vector<string> values_;
+	values_.push_back("hello");
+	values_.push_back("hey wassup");
+	values_.push_back("dude");
+
+	Record *newRecord = new Record();
+	char *record= newRecord->getRecordString(values_);
+
+	buffManager->createDatabase("test",DEFAULT_PAGE_SIZE,10);
+	fd=buffManager->openDatabase("test");
+	buffManager->hexDump(fd,3);
+	buffManager->writePage(fd,3,record);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,3);
+
+	*/
 /*	//Vector testing!!
 
 	vector<string> SS;
