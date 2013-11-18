@@ -9,7 +9,9 @@
 #define DATAPAGE_H_
 #include "../Global/globalStructures.h"
 #include "../BufferManagement/BufferManager.h"
-
+#include <vector>
+#include <string>
+using namespace std;
 class DataPage {
 public:
 	DataPage(int fd,int pageNumber);
@@ -34,6 +36,8 @@ public:
 	void setContinuousFreeSpaceAvailable(int freeSpace);
 
 	int insertRecord(char *record,int recordLength);
+	vector<string> getAllRecords();
+
 	int getOffsetForRecord(int recordLength); 	/*checks for the slot directory which can hold record of "recordLength".
 	 	 	 	 	 	 	 	 	 	 	 	 * Returns -1 if there isn't any such slot.
 	 	 	 	 	 	 	 	 	 	 	 	 */
