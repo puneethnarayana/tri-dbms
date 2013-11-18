@@ -54,9 +54,58 @@ int main(){
 	strcpy(dbname,"test");
 
 	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10);
+	fd=buffManager->openDatabase(dbname);
+	//get all records from datapage Testing!!
+	vector<string> colNames,colCopy;
+	int recSize=0,ii;
+	char *recordcolNames=new char[DEFAULT_PAGE_SIZE];
+	colNames.push_back("c1");
+	colNames.push_back("co2");
+	colNames.push_back("col3");
+	Record *rec=new Record();
+	rec->getRecordString(colNames,recordcolNames,&recSize);
+	DataPage *dp=new DataPage(fd,1);
+	dp->createDataPageHeaderStruct(1,pageContent);
+	dp->insertRecord(recordcolNames,recSize);
+	colCopy=dp->getAllRecords();
+	buffManager->commitCache();
+	buffManager->hexDump(fd,1);
+	for(ii=0; ii < colCopy.size(); ii++)
+	{
+		cout << colCopy[ii] ;
 
 
-	//Create Database Testing!!!
+	}
+	stringstream ss;
+	copy( colCopy.begin(), colCopy.end(), ostream_iterator<string>(ss, "\0"));
+	string s = ss.str();
+	cout << "pring this please! " << s<< endl;
+	vector<char> SS2;
+	std::copy(s.begin(), s.end(),back_inserter(SS2));
+
+	cout << "ss2 size is :" << SS2.size() << endl;
+	for(ii=0; ii < SS2.size(); ii++)
+	{
+		cout << SS2[ii] ;
+	}
+
+
+/*	// Testing getvectorFromRecord!!
+	vector<string> colNames,colCopy;
+	int recSize=0,ii;
+	char *recordcolNames=new char[DEFAULT_PAGE_SIZE];
+	colNames.push_back("c1");
+	colNames.push_back("co2");
+	colNames.push_back("col3");
+	Record *rec=new Record();
+	rec->getRecordString(colNames,recordcolNames,&recSize);
+	colCopy=rec->getvectorFromRecord(recordcolNames,3);
+	for(ii=0; ii < colCopy.size(); ii++)
+	{
+		cout << colCopy[ii] ;
+	}
+*/
+/*	//Create Database Testing!!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test1");
 	DatabaseOperations *dbOps=new DatabaseOperations();
@@ -82,7 +131,10 @@ int main(){
 	buffManager->hexDump(fd,1);
 	buffManager->hexDump(fd,2);
 	buffManager->hexDump(fd,3);
-
+	buffManager->hexDump(fd,4);
+	buffManager->hexDump(fd,5);
+	buffManager->hexDump(fd,6);
+*/
 
 /*
 	vector<string> values_;
