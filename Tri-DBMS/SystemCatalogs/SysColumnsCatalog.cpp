@@ -10,8 +10,10 @@
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
 #include "../HeapFileManagement/DataPage.h"
-
-
+#include "../Utils/Record.h"
+#include "../Utils/CommonUtil.h"
+#include <vector>
+#include <cstdlib>
 SysColumnsCatalog::SysColumnsCatalog(int fd, int pageNumber) {
 	// TODO Auto-generated constructor stub
 	fd_=fd;
@@ -46,7 +48,17 @@ int SysColumnsCatalog::createSysColumnsPage(int pageNumber,char *pageData){
 int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType, char *pageData){
 
 // Code needs to be written here!!!
-
+	vector<string> values;
+	int sysColumnRecLength_=0;
+	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	Record *record=new Record();
+	values.push_back(columnName);
+	values.push_back(tableName);
+	values.push_back(CommonUtil::int_to_string(columnPosition));
+	values.push_back(CommonUtil::int_to_string(columnType));
+	record->getRecordString(values,recordString,&sysColumnRecLength_);
+	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
+	sysColumnPage->insertRecord(recordString,sysColumnRecLength_);
 	isSysColumnChanged_=true;
 	return SUCCESS;
 }

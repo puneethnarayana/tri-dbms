@@ -38,10 +38,10 @@ int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int 
 	sysTableEntry_.recordSize_=maxRecordSize;
 	sysTableEntry_.noOfColumns_=noOfColumns;
 	sysTableEntry_.dpChainHeaderAddress_=dpChainHeader;
-	strcpy(sysTableEntry_.tableName_,tableName);
+	memcpy(sysTableEntry_.tableName_,tableName,strlen(tableName)+1);
 	memcpy(pageData_,&sysTableEntry_,sysTableEntrySize_);
 	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
-	sysTablePage->insertRecord(pageData_,sizeof(sysTableEntry_)+strlen(tableName)+1);
+	sysTablePage->insertRecord(pageData_,sysTableEntrySize_);
 	return SUCCESS;
 }
 
