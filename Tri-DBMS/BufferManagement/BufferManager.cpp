@@ -35,6 +35,14 @@ BufferManager::BufferManager() {
 
 }
 
+bool BufferManager::isInitCache() const {
+	return initCache_;
+}
+
+void BufferManager::setInitCache(bool initCache) {
+	initCache_ = initCache;
+}
+
 BufferManager* BufferManager::BufferManagerInstance_= NULL;
 
 BufferManager* BufferManager::getInstance() {
