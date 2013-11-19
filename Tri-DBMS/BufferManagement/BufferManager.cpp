@@ -25,10 +25,11 @@ BufferManager::BufferManager() {
 	pageSize_=DEFAULT_PAGE_SIZE;
 	bufferSizeInMB_=100;
 	initCache_=false;
+	noOfDBsOpened_=0;
 	numberOfFrames_=bufferSizeInMB_*1024*1024/pageSize_;
 	LRUReplacement = new LRUPageReplacement();
 	diskManager_ = new BasicDiskOperations();
-	fd_=-1;
+	//fd_=-1;
 	openedFileName_=new char[MAX_FILE_NAME_LENGTH];
 	initializeCache(numberOfFrames_);
 
@@ -77,16 +78,30 @@ int BufferManager::createDatabase(char *fileName, int pageSize, int noOfPages){
 }
 int BufferManager::openDatabase(char *fileName){
 	openedFileName_=fileName;
-	fd_=diskManager_->openDiskFile(fileName);
-	return fd_;
+	long int fd;
+	fd=diskManager_->openDiskFile(fileName);
+	if(fd!=-1){
+		cacheIndex[noOfDBsOpened_].fd_=fd;
+		strcpy(cacheIndex[noOfDBsOpened_].fileName_,fileName);
+		noOfDBsOpened_++;
+		return noOfDBsOpened_-1;
+	}
+	return -1;
 }
-int BufferManager::readPage(int fd, int pageNumber, char*& pageContent){
+int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 	totalNumberOfRequests_++;
+	pageContent=new char[DEFAULT_PAGE_SIZE];
 	int retVal=-1,frameNo=-1;
-	//long int fd = -1;
-	if (fd==-1||fd!=fd_)
+	long int fd = -1;
+	if (cd < 0||cd >=noOfDBsOpened_)
 		goto ret;
 	//fd=BufferPool_[frameNumber]->fd_;
+	fd=cacheIndex[cd].fd_;
+
+	cout << "fd is :" << fd <<endl;
+	if(fd<0){
+		goto ret;
+	}
 	//code to get file descriptor for given cd, from cache index.
 	if(initCache_==false){
 		retVal=diskManager_->readDiskFile(fd,pageNumber,pageSize_,pageContent);
@@ -96,7 +111,7 @@ int BufferManager::readPage(int fd, int pageNumber, char*& pageContent){
 		/*Check if the page is in the buffer.
 		 * if not, get it into buffer, replace the frame if needed.
 		 */
-		frameNo=getFrameNumber(pageNumber);
+		frameNo=getFrameNumber(fd,pageNumber);
 		if(frameNo==-1){
 			//cout << "in frame number == -1" << endl;
 			//page is not present in the buffer; diskAccess.
@@ -115,20 +130,29 @@ int BufferManager::readPage(int fd, int pageNumber, char*& pageContent){
 		memcpy(pageContent,BufferPool_[frameNo]->pageData_,DEFAULT_PAGE_SIZE);
 		BufferPool_[frameNo]->pageNumber_=pageNumber;
 		t = std::time(0);
+		BufferPool_[frameNo]->fd_=fd;
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
 		BufferPool_[frameNo]->pinCount_ = 0;
 		//cout << "page content at end of read page(read page): "<< pageContent << endl;
 	}
+	retVal=SUCCESS;
 	ret: return retVal;
 }
-int BufferManager::writePage(int fd, int pageNumber, char *newPageContent){
+int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 	totalNumberOfRequests_++;
+	//cout << "content to be written is " << newPageContent << endl;
 	int retVal=-1,frameNo=-1;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
-	//long int fd = -1;
-	if (fd==-1||fd!=fd_)
+	long int fd = -1;
+	if (cd < 0||cd >=noOfDBsOpened_)
 		goto ret;
 	//fd=BufferPool_[frameNumber]->fd_;
+	fd=cacheIndex[cd].fd_;
+	cout << "fd is :" << fd <<endl;
+	if(fd<0){
+		goto ret;
+	}
+	//cout << "opened db's cd, fd :"<< cd << fd <<endl;
 	//code to get file descriptor for given cd, from cache index.
 	if(initCache_==false){
 		retVal=diskManager_->writeDiskFile(fd,pageNumber,pageSize_,newPageContent);
@@ -138,7 +162,7 @@ int BufferManager::writePage(int fd, int pageNumber, char *newPageContent){
 		/*Check if the page is in the buffer.
 		 * if not, get it into buffer, replace the frame if needed.
 		 */
-		frameNo=getFrameNumber(pageNumber);
+		frameNo=getFrameNumber(fd,pageNumber);
 		if(frameNo==-1){
 			//cout << "in frame number == -1" << endl;
 			//page is not present in the buffer; diskAccess.
@@ -156,6 +180,7 @@ int BufferManager::writePage(int fd, int pageNumber, char *newPageContent){
 		memcpy(BufferPool_[frameNo]->pageData_,newPageContent,DEFAULT_PAGE_SIZE);
 		BufferPool_[frameNo]->pageNumber_=pageNumber;
 		t = std::time(0);
+		BufferPool_[frameNo]->fd_=fd;
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
 		BufferPool_[frameNo]->pinCount_ = 0;
 		BufferPool_[frameNo]->dirtyFlag_=true;
@@ -167,6 +192,10 @@ int BufferManager::writePage(int fd, int pageNumber, char *newPageContent){
 
 int BufferManager::pinAndGetPage(int fd,int pageNumber,char*& pageContent){
 	int freeFrame=getFreeFrame();
+
+//	long int fd;
+//	fd=cacheIndex[cd].fd_;
+	//cout << "please print this line "<<fd<< endl;
 	diskManager_->readDiskFile(fd,pageNumber,pageSize_,pageContent);
 	//cout <<" ******************* *********" << pageContent << "********** *******************" << endl;
 	if(freeFrame!=-1){
@@ -187,6 +216,9 @@ int BufferManager::pinAndGetPage(int fd,int pageNumber,char*& pageContent){
 
 
 void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNumber){
+//	long int fd;
+//
+//	fd=cacheIndex[cd].fd_;
 	char *newPageContent=new char[DEFAULT_PAGE_SIZE];
 	diskManager_->readDiskFile(fd,newPageNumber,pageSize_,newPageContent); //read the page content into newPageContent using newPageNumber.
 	replaceFrameWithAnother(fd,frameNumber,newPageNumber,newPageContent);
@@ -205,6 +237,9 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 	 * 		}
 	 * 	}
 	 */
+//	long int fd;
+//
+//	fd=cacheIndex[cd].fd_;
 	numberOfDiskAccesses_++; // page needs to be replaced.
 	if (BufferPool_[frameNumber]->dirtyFlag_ == true) {
 
@@ -221,6 +256,7 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 		 */
 	}
 	t = std::time(0);
+	BufferPool_[frameNumber]->fd_=fd;
 	BufferPool_[frameNumber]->priority_ = t; //LRUReplacement->getMaximumPriority()+ 1;// use time-stamp
 	BufferPool_[frameNumber]->pageNumber_ = newPageNumber;
 	memcpy(BufferPool_[frameNumber]->pageData_,newPageContent,DEFAULT_PAGE_SIZE);
@@ -228,15 +264,18 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 	BufferPool_[frameNumber]->dirtyFlag_=false;
 
 }
-int BufferManager::closeDatabase(int fd){
-	if(fd!=fd_){
+int BufferManager::closeDatabase(int cd){
+	if(cd<0 || cd>=noOfDBsOpened_){
 		cout << "DATABASE_NOT_OPEN" << endl;
 		return -1;
 	}
+	long int fd;
+	fd=cacheIndex[cd].fd_;
 	commitCache();
 	if(diskManager_->closeDiskFile(fd)==-1){
 		return -1;
 	}
+	cacheIndex[cd].fd_=-1;
 	return SUCCESS;
 }
 int BufferManager::dropDatabase(){
@@ -259,29 +298,48 @@ int BufferManager::resetCache(){
 
 void BufferManager::flushAllPagesToDisk(){
 	for(int i=0;i<numberOfFrames_;i++){
-			flushPageToDisk(BufferPool_[i]->pageNumber_);
+			flushPageToDisk(BufferPool_[i]->fd_,BufferPool_[i]->pageNumber_);
 	}
 }
-void BufferManager::flushPageToDisk(int pageNumber){
-	int frameNumber=getFrameNumber(pageNumber);
-
+void BufferManager::flushPageToDisk(int fd,int pageNumber){
+	int frameNumber=getFrameNumber(fd,pageNumber);
 	if(BufferPool_[frameNumber]->dirtyFlag_==true){
 		//cout << "in flush page to disk, page number: " << pageNumber << endl;
-		diskManager_->writeDiskFile(fd_,pageNumber,pageSize_,BufferPool_[frameNumber]->pageData_);
+		diskManager_->writeDiskFile(fd,pageNumber,pageSize_,BufferPool_[frameNumber]->pageData_);
 		BufferPool_[frameNumber]->dirtyFlag_=false;
 	}
 }
-int BufferManager::getFrameNumber(int pageNumber){
+int BufferManager::getFrameNumber(int fd,int pageNumber){
 	for(int i=0;i<numberOfFrames_;i++){
-		if(BufferPool_[i]->pageNumber_==pageNumber){
+		if(BufferPool_[i]->pageNumber_==pageNumber && BufferPool_[i]->fd_==fd){
 			return i;
 		}
 	}
 	return -1;
 }
+
+int BufferManager::getFd(int pageNumber){
+	for(int i=0;i<numberOfFrames_;i++){
+		if(BufferPool_[i]->pageNumber_==pageNumber){
+			return BufferPool_[i]->fd_;
+		}
+	}
+	return -1;
+}
+int BufferManager::getCd(int fd){
+	for(int i=0;i<noOfDBsOpened_;i++){
+		if(cacheIndex[i].fd_==fd){
+			return i;
+		}
+	}
+	return -1;
+}
+
 int BufferManager::getFreeFrame(){
 	for(int i=0;i<numberOfFrames_;i++){
+		//cout << "===============" <<BufferPool_[i]->pinCount_<<endl;
 		if(BufferPool_[i]->pinCount_==-1){
+
 			return i;
 		}
 	}
@@ -290,11 +348,12 @@ int BufferManager::getFreeFrame(){
 
 int BufferManager::displayBufferList(){
 	cout << "\n=======================================================================================================" << endl;
-	cout << "||Frame No.||   File Name   ||   Page No.   ||   Dirty Flag  ||    Priority Type  || Priority Value  ||" << endl;
+	cout << "||Frame No.||      cd    ||   File Name   ||   Page No.   ||   Dirty Flag  ||    Priority Type  || Priority Value  ||" << endl;
 	for(int i=0;i<numberOfFrames_;i++){
 		if(BufferPool_[i]->pinCount_!=-1){
 			cout << "||    " <<i <<"    ||";
-			cout << "      "<<openedFileName_<< "   ||" ;
+			cout << "      " << getCd(BufferPool_[i]->fd_) << "    ||";
+			cout << "      "<<cacheIndex[getCd(BufferPool_[i]->fd_)].fileName_<< "   ||" ;
 			cout <<"        " <<BufferPool_[i]->pageNumber_ <<"     ||";
 			cout <<"         "<<BufferPool_[i]->dirtyFlag_ <<"     ||";
 			cout <<"       "<<BufferPool_[i]->priorityType_ <<"   ||";
@@ -311,7 +370,7 @@ int BufferManager::viewFrameBuffer(int frameNumber){
 		return -1;
 	}
 	cout << "\n=========================== FRAME - " << frameNumber << " ===================================" << endl;
-	cout << "File Name is: " << openedFileName_<< endl;
+	cout << "File Name is: " << cacheIndex[getCd(BufferPool_[frameNumber]->fd_)].fileName_<< endl;
 	cout << "page Number is: " << BufferPool_[frameNumber]->pageNumber_ << endl;
 	cout << "dirty flag is: " << BufferPool_[frameNumber]->dirtyFlag_ << endl;
 	cout << "priority type is: " << BufferPool_[frameNumber]->priorityType_ << endl;
@@ -328,13 +387,72 @@ float BufferManager::getHitRate(){
 	cout <<"Total Requests			: "<<totalNumberOfRequests_ << endl;
 	cout <<"Number of hits			: "<<numberOfHits_ <<endl;
 	cout <<"Number of disk accesses	: "<<numberOfDiskAccesses_<<endl;
+	cout << "hit rate:";
 	if(totalNumberOfRequests_!=0)
 		return (float)numberOfHits_/totalNumberOfRequests_;
 	else
 		return 0;
 }
+int BufferManager::hexDump(char *pageContent){
+	cout <<"\n";
+	cout <<
+			"Address               Hexadecimal values                    Printable\n";
+	cout <<
+			"--------  -----------------------------------------------  -------------\n";
+	cout << "\n";
+	unsigned long address = 0;
+	//char c;
+	int ptr=0;
 
-int BufferManager::hexDump(int fd,int pageNumber){
+	cout << hex << setfill('0');
+	while(ptr<DEFAULT_PAGE_SIZE)
+	{
+		int nread=0;
+		char *buf=new char[16];
+
+		for( nread = 0; nread < 16 ; nread++,ptr++ ){
+			buf[nread]=pageContent[ptr];
+		}
+		if( nread == 0){
+			break;
+		}
+
+		// Show the address
+		cout << setw(8) << address;
+
+		// Show the hex codes
+		for( int i = 0; i < nread; i++ )
+		{
+			if( i % 8 == 0 ) cout << ' ';
+			if( i < 16 )
+				cout << ' ' << setw(2) << (unsigned)buf[i];
+			else
+				cout << "   ";
+		}
+
+		// Show printable characters
+		cout << "  ";
+		for( int i = 0; i < nread; i++)
+		{
+			if( buf[i] < 32 ) cout << '.';
+			else cout << buf[i];
+		}
+
+		cout << "\n";
+		address += 16;
+
+	}
+	return SUCCESS;
+}
+
+int BufferManager::hexDump(int cd,int pageNumber){
+
+	if(cd<0 || cd>=noOfDBsOpened_){
+		cout << "DATABASE_NOT_OPEN" << endl;
+		return -1;
+	}
+	long int fd;
+	fd=cacheIndex[cd].fd_;
 	cout <<"\n";
 	cout <<
 			"Address               Hexadecimal values                    Printable\n";

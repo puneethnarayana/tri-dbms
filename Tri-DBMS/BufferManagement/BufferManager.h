@@ -39,12 +39,14 @@ public:
 	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber);
 	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber, char *newPageContent);
 	void flushAllPagesToDisk();
-	void flushPageToDisk(int pageNumber);
-	int getFrameNumber(int pageNumber);
+	void flushPageToDisk(int fd,int pageNumber);
+	int getFrameNumber(int fd,int pageNumber);
+	int getFd(int frameNumber);
+	int getCd(int fd);
 	int getFreeFrame();
 	float getHitRate();
 	int hexDump(int fd,int pageNumber);
-
+	int hexDump(char *pageContent);
 	bool isInitCache() const;
 
 	void setInitCache(bool initCache);
@@ -58,6 +60,7 @@ public:
 		int fd_;
 		char fileName_[MAX_FILE_NAME_LENGTH+1];
 	}Cache_Index;
+
 	Cache_Index cacheIndex[MAX_DATABASES];
 
 
@@ -65,7 +68,8 @@ public:
 private:
 	BufferManager();
 	std::time_t t;
-	int fd_;
+	//int fd_;
+	int noOfDBsOpened_;
 	char *openedFileName_;
 	int totalNumberOfRequests_;
 	int numberOfHits_;
