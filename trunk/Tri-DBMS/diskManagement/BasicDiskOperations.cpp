@@ -62,7 +62,7 @@ int BasicDiskOperations::openDiskFile(char *fileName){
 int BasicDiskOperations::readDiskFile(int fd,int pageNumber,int pageSize,char *pageContent){
 	lseek(fd,pageNumber*pageSize,SEEK_SET);
 	int readSize=read(fd,pageContent,pageSize);
-	cout <<"\n";
+
 	if(readSize==-1){
 		cout << strerror(errno);
 	}
