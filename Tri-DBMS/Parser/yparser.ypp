@@ -1,0 +1,459 @@
+%error-verbose
+%{
+#include <cstdio>
+#include <iostream>
+#include <stdio.h>
+using namespace std;
+
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
+extern void yyerror(const char *s);
+%}
+
+%union YYSTYPE{
+	int ival;
+	float fval;
+	char *sval;
+	int subtok;
+}
+
+%token <ival> INT
+%token STRING NAME INTNUM APPROXNUM BOOL
+
+%token ALL AMMSC AND ANY AS ASC AUTHORIZATION BETWEEN BY
+%token CHARACTER CHECK CLOSE COMMIT CONTINUE CREATE CURRENT
+%token CURSOR DATABASE DECIMAL DECLARE DEFAULT DELETE DESC DESCRIBE DISTINCT DOUBLE DROP
+%token ESCAPE EXISTS FETCH FLOAT FOR FOREIGN FOUND FROM 
+%token GRANT GROUP HAVING IN INDEX INDICATOR INSERT INTEGER INTO
+%token IS KEY LANGUAGE LIKE MODULE NOT NULLX NUMERIC OF ON OR
+%token OPEN OPTION ORDER PRECISION PRIMARY PRIVILEGES PROCEDURE
+%token PUBLIC REAL REFERENCES ROLLBACK SCHEMA SELECT SET SHOW
+%token SMALLINT SOME SQLCODE SQLERROR TABLE TABLES TO UNION
+%token UNIQUE UPDATE USER VALUES VARCHAR VIEW WHENEVER WHERE WITH WORK
+%token C DATABASES USE QUERY
+
+	/* operators */
+
+%left OR
+%left AND
+%left NOT
+%left <strval> COMPARISON /* = <> < > <= >= */
+%left '+' '-'
+%left '*' '/'
+%left '='
+%nonassoc UMINUS
+
+%type<sval> STRING
+%type<sval> CREATE
+%type<sval> TABLE
+%type<sval> INSERT
+%type<sval> INTO
+%type<sval> VALUES
+%type<sval> NAME
+%type<sval> APPROXNUM
+%type<sval> column
+%type<sval> data_type
+%type<sval> column_def_opt
+%type<sval> table
+%type<sval> INTEGER 
+%type<sval> CHARACTER
+%type<sval> FLOAT
+%type<sval> REAL
+%type<sval> INTNUM
+%type<sval> index_name
+%type<sval> db_name
+%type<sval> OR
+%type<sval> AND
+%type<sval> NOT
+%type<sval> VARCHAR
+%type<sval> NULLX
+%type<sval> PRIMARY
+%type<sval> KEY
+%type<sval> column_ref
+
+%start list
+%%
+
+list:
+
+	|list query ';'
+	;
+
+query:
+	query_list  
+	;
+	
+query_list:
+		create_statement
+	|	insert_statement 
+	|	select_statement
+	|	update_statement
+	|	delete_statement
+	|	drop_statement
+	|	describe_statement
+	|	createdb_statement
+	|	show_databases
+	|	show_tables
+	|	use_db
+	|	create_index
+	;
+
+	
+
+create_statement:
+		CREATE TABLE table '(' base_table_element_commalist ')' {cout<<"CREATE TABLE"<<endl<<endl;}
+	;
+
+base_table_element_commalist:
+		base_table_element 
+	|	base_table_element_commalist ',' base_table_element 
+	;
+
+base_table_element:
+		column_def 
+	|	table_constraint_def
+	;
+
+column_def:
+		column data_type column_def_opt_list
+	;
+
+column_def_opt_list:
+		/* empty */
+	|	column_def_opt_list column_def_opt
+	;
+
+column_def_opt:
+		NOT NULLX
+	|	NOT NULLX UNIQUE
+	|	NOT NULLX PRIMARY KEY
+	|	DEFAULT literal
+	|	DEFAULT NULLX
+	|	DEFAULT USER
+	|	CHECK '(' search_condition ')'
+	|	REFERENCES table
+	|	REFERENCES table '(' column_commalist ')'
+	;
+
+table_constraint_def:
+		UNIQUE '(' column_commalist ')'
+	|	PRIMARY KEY '(' column_commalist ')'
+	|	FOREIGN KEY '(' column_commalist ')'
+			REFERENCES table 
+	|	FOREIGN KEY '(' column_commalist ')'
+			REFERENCES table '(' column_commalist ')'
+	|	CHECK '(' search_condition ')'
+	;
+
+column_commalist:
+		column
+	|	column_commalist ',' column
+	;
+
+table:
+		NAME { cout<<"table name = "<< $1 <<endl ;}
+	;
+
+column:		NAME  { cout<<"column name = "<< $1 <<endl ;}
+	;
+
+data_type:	
+		CHARACTER { cout<<"datatype = char" <<endl ; }
+	|	CHARACTER '(' INTNUM ')' { cout<<"char size = "<< $3 <<endl ; }
+	|	VARCHAR '(' INTNUM ')' { cout<<"varchar size = "<< $3 <<endl ; }
+	|	NUMERIC  { cout<<"datatype = numeric" <<endl ; }
+	|	NUMERIC '(' INTNUM ')'
+	|	DECIMAL { cout<<"datatype = decimal" <<endl ; }
+	|	DECIMAL '(' INTNUM ')'
+	|	FLOAT { cout<<"datatype = float" <<endl ; }
+	|	FLOAT '(' INTNUM ')'
+	|	INTEGER { cout<<"datatype = integer" <<endl ; }
+	|	BOOL { cout<<"datatype = bool" <<endl ; }
+	|	REAL { cout<<"datatype = real" <<endl ; }
+	;
+
+		
+
+createdb_statement:
+		CREATE DATABASE db_name	
+	;
+
+create_index:
+		CREATE INDEX index_name ON table opt_column_commalist {cout<<"CREATE INDEX "<<endl<<endl;}
+	;
+
+index_name:
+		NAME { cout<<"index name = "<< $1 <<endl ;}
+	;
+		
+
+insert_statement:
+		INSERT INTO table opt_column_commalist values_or_query_spec {cout<<"INSERT INTO "<<endl<<endl;}
+	;
+
+opt_column_commalist:
+							/*Empty*/
+	|	'(' column_commalist ')' 
+	;
+
+column_commalist:
+		column 
+	|	column_commalist ',' column 
+	;
+
+values_or_query_spec:
+		VALUES '(' insert_atom_commalist ')'	
+	;
+	
+insert_atom_commalist:
+		insert_atom 
+	|	insert_atom_commalist ',' insert_atom 
+	;
+
+insert_atom:
+		atom	
+	;
+
+atom:
+		parameter_ref 
+	|	literal 
+	;
+	
+parameter_ref:
+		parameter 
+	|	parameter parameter 
+	;
+	
+parameter:
+							/*Empty*/
+	| ':' NAME 
+	;
+
+literal:
+		STRING  { cout<<"literal string = "<<$1<<endl ;}
+	|	INTNUM  { cout<<"literal intnum = "<<$1<<endl ;}
+	|	APPROXNUM  { cout<<"literal approxnum = "<<$1<<endl ;}
+	|	NAME  { cout<<"literal name = "<<$1<<endl ;}
+	;
+
+		
+
+delete_statement:
+	DELETE FROM table opt_where_clause {cout<<"DELETE FROM"<<endl<<endl;} 
+	;
+
+opt_where_clause:
+		/* empty */
+	|	where_clause
+	;
+
+where_clause:
+		WHERE search_condition
+	;
+
+/* search conditions */
+
+search_condition:
+	|	search_condition OR search_condition
+	|	search_condition AND search_condition
+	|	NOT search_condition
+	|	'(' search_condition ')'
+	|	predicate
+	;
+
+predicate:
+		comparison_predicate
+	|	between_predicate
+	|	like_predicate
+	|	in_predicate
+	;
+
+comparison_predicate:
+		scalar_exp COMPARISON scalar_exp
+	|	scalar_exp COMPARISON subquery
+	;
+
+between_predicate:
+		scalar_exp NOT BETWEEN scalar_exp AND scalar_exp
+	|	scalar_exp BETWEEN scalar_exp AND scalar_exp
+	;
+
+like_predicate:
+		scalar_exp NOT LIKE atom opt_escape
+	|	scalar_exp LIKE atom opt_escape
+	;
+
+opt_escape:
+		/* empty */
+	|	ESCAPE atom
+	;
+
+in_predicate:
+		scalar_exp NOT IN '(' subquery ')'
+	|	scalar_exp IN '(' subquery ')'
+	|	scalar_exp NOT IN '(' atom_commalist ')'
+	|	scalar_exp IN '(' atom_commalist ')'
+	;
+
+atom_commalist:
+		atom
+	|	atom_commalist ',' atom
+	;
+
+subquery:
+		'(' SELECT opt_all_distinct selection table_exp ')'
+	;
+
+
+	/* scalar expressions */
+
+scalar_exp:
+		scalar_exp '+' scalar_exp
+	|	scalar_exp '-' scalar_exp
+	|	scalar_exp '*' scalar_exp
+	|	scalar_exp '/' scalar_exp
+	|	'+' scalar_exp %prec UMINUS
+	|	'-' scalar_exp %prec UMINUS
+	|	atom
+	|	column_ref
+	|	'(' scalar_exp ')'
+	;
+
+scalar_exp_commalist:
+		scalar_exp
+	|	scalar_exp_commalist ',' scalar_exp
+	;
+
+
+		
+
+update_statement:
+		UPDATE table SET assignment_commalist opt_where_clause {cout<<"UPDATE TABLE"<<endl<<endl;}
+	;
+
+assignment_commalist:
+	|	assignment
+	|	assignment_commalist ',' assignment
+	;
+
+assignment:
+		column '=' scalar_exp
+	|	column '=' NULLX
+	;
+
+column:		NAME
+	;
+
+	
+
+select_statement:
+		SELECT opt_all_distinct selection table_exp
+	;
+
+opt_all_distinct:
+							/*Empty*/
+	|	ALL
+	|	DISTINCT
+	;
+
+selection:
+		scalar_exp_commalist
+	|	'*'
+	;
+
+table_exp:
+		from_clause
+		opt_where_clause
+		opt_group_by_clause
+		opt_having_clause
+	;
+
+from_clause:
+		FROM table_ref_commalist
+	;
+
+table_ref_commalist:
+		table_ref
+	|	table_ref_commalist ',' table_ref
+	;
+
+table_ref:
+		table 
+	|	table range_variable
+	;
+
+range_variable:
+		NAME
+	;
+
+opt_group_by_clause:
+		/* empty */
+	|	GROUP BY column_ref_commalist
+	;
+
+column_ref_commalist:
+		column_ref
+	|	column_ref_commalist ',' column_ref
+	;
+
+opt_having_clause:
+		/* empty */
+	|	HAVING search_condition
+	;
+
+column_ref:
+		NAME
+	|	NAME '.' NAME
+	|	NAME '.' NAME '.' NAME
+	;
+
+drop_statement:																	
+		DROP db_struct	
+	;
+		
+db_struct:
+		DATABASE db_name {cout<<"DROP DB "<<endl<<endl;}
+	|	TABLE table {cout<<"DROP TABLE "<<endl<<endl;}
+
+db_name:
+		NAME
+	;
+
+		
+describe_statement:
+		DESC table
+	|	DESCRIBE table {cout<<"DESCRIBE TABLE "<<endl<<endl;}
+	;
+
+show_databases:
+	SHOW DATABASES {cout<<"SHOW DATABASES "<<endl<<endl;}
+	;
+
+show_tables:
+	SHOW TABLES {cout<<"SHOW TABLES "<<endl<<endl;}
+	;
+
+use_db:
+	USE db_name {cout<<"USE DB "<<endl<<endl;}
+	;
+
+%%
+
+main() {
+	FILE *myfile = fopen("input.txt", "r");
+	if (!myfile) {
+		cout << "I can't open file!" << endl;
+		return -1;
+	}
+	yyin = myfile;
+	do {
+		yyparse();
+	} while (!feof(yyin));
+	
+}
+
+void yyerror(const char *s) {
+	cout << "\nERROR  MSG: " << s << endl;
+	exit(-1);
+}
