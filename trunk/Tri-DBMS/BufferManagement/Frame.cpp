@@ -15,7 +15,7 @@
 #include "../Global/globalVariables.h"
 Frame::Frame(int frameSize) {
 	// TODO Auto-generated constructor stub
-	//fd_=-1;
+	fd_=-1;
 	pageNumber_=-1;
 	dirtyFlag_=false;
 	pinCount_=-1;
