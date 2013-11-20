@@ -98,7 +98,7 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 	//fd=BufferPool_[frameNumber]->fd_;
 	fd=cacheIndex[cd].fd_;
 
-	cout << "fd is :" << fd <<endl;
+	//cout << "fd is :" << fd <<endl;
 	if(fd<0){
 		goto ret;
 	}
@@ -148,7 +148,7 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 		goto ret;
 	//fd=BufferPool_[frameNumber]->fd_;
 	fd=cacheIndex[cd].fd_;
-	cout << "fd is :" << fd <<endl;
+	//cout << "fd is :" << fd <<endl;
 	if(fd<0){
 		goto ret;
 	}
