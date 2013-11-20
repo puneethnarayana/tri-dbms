@@ -28,6 +28,7 @@
 #include "Global/globalStructures.h"
 #include "DatabaseManagement/DatabaseOperations.h"
 #include "Utils/Record.h"
+
 //#include <boost/serialization/vector.hpp>
 using namespace std;
 
@@ -49,6 +50,15 @@ int main(){
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
 
 
+//	stringstream mystream;
+//	mystream<<"hey";
+//	mystream<<"wassup";
+//	cout << mystream.str() << endl;
+
+
+
+
+/*//getAllRecords testing
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -88,9 +98,9 @@ int main(){
 	{
 		cout << SS2[ii] ;
 	}
-
-
-/*	// Testing getvectorFromRecord!!
+*/
+/*
+	// Testing getvectorFromRecord!!
 	vector<string> colNames,colCopy;
 	int recSize=0,ii;
 	char *recordcolNames=new char[DEFAULT_PAGE_SIZE];
@@ -105,9 +115,13 @@ int main(){
 		cout << colCopy[ii] ;
 	}
 */
-/*	//Create Database Testing!!!
+
+
+	//Create Database Testing!!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test1");
+	char *tablename=new char[MAX_FILE_NAME_LENGTH];
+		strcpy(tablename,"test1");
 	DatabaseOperations *dbOps=new DatabaseOperations();
 
 	dbOps->createDatabase(dbname,1);
@@ -117,7 +131,7 @@ int main(){
 //	buffManager->hexDump(fd,1);
 //	buffManager->hexDump(fd,2);
 //	buffManager->hexDump(fd,3);
-	vector<string> colNames;
+	vector<string> colNames,insertValues_;
 	colNames.push_back("c1");
 	colNames.push_back("co2");
 	colNames.push_back("col3");
@@ -125,16 +139,28 @@ int main(){
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
-	dbOps->createTable("table1",colNames,colTypes);
+	dbOps->createTable(tablename,colNames,colTypes);
+	insertValues_.push_back(CommonUtil::int_to_string(34));
+	insertValues_.push_back("Ravindra");
+	insertValues_.push_back(CommonUtil::int_to_string(true));
+
+
+	dbOps->insertIntoTable(tablename,insertValues_);
+
 	buffManager->commitCache();
-	buffManager->hexDump(fd,0);
-	buffManager->hexDump(fd,1);
-	buffManager->hexDump(fd,2);
-	buffManager->hexDump(fd,3);
-	buffManager->hexDump(fd,4);
-	buffManager->hexDump(fd,5);
+//	buffManager->hexDump(fd,0);
+//	buffManager->hexDump(fd,1);
+//	buffManager->hexDump(fd,2);
+//	buffManager->hexDump(fd,3);
+//	buffManager->hexDump(fd,4);
+//	buffManager->hexDump(fd,5);
 	buffManager->hexDump(fd,6);
-*/
+	buffManager->hexDump(fd,7);
+	//Testing getSchema in sysColumnCatalog
+
+
+
+
 
 /*
 	vector<string> values_;
@@ -415,8 +441,8 @@ int main(){
 				continue;
 			}
 			cout << endl << command;
-			cout << endl << fd;
-			cout << "fd is :"<< buffManager->openDatabase(dbname);
+			cout << endl << fd << endl;
+			cout << "cd is :"<< buffManager->openDatabase(dbname);
 		}
 		else if(strcasecmp(command,"closedb")==0){
 			temp=strtok(NULL," ");
@@ -442,8 +468,13 @@ int main(){
 			}
 			pageNo=atoi(temp);
 			readPage=new char[DEFAULT_PAGE_SIZE];
-			buffManager->readPage(fd,pageNo,readPage);
-			cout << "page read is :" << readPage;
+			if(buffManager->readPage(fd,pageNo,readPage)!=-1){
+				buffManager->hexDump(readPage);
+			}
+			else{
+				cout << "ERROR READING PAGE" <<endl;
+			}
+			//cout << "page read is :" << readPage;
 		}
 		else if(strcasecmp(command,"writepage")==0){
 			temp=strtok(NULL," ");
@@ -469,7 +500,10 @@ int main(){
 				cout << "Wrong Number of Aurguments for " << command << endl;
 				continue;
 			}
-			buffManager->writePage(fd,pageNo,pageContent);
+			if(buffManager->writePage(fd,pageNo,pageContent)==-1){
+				cout << "ERROR WRITING TO PAGE" << endl;
+			}
+
 		}
 		else if(strcasecmp(command,"hexdump")==0){
 			temp=strtok(NULL," ");
