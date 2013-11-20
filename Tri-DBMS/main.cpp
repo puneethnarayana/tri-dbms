@@ -357,11 +357,11 @@ int main(){
 */
 
 
-/*
+
 	//Create Database, Insert into table, Select from Table Testing!!!
 
-	//buffManager->setInitCache(true);
-	buffManager->setInitCache(false);
+	buffManager->setInitCache(true);
+	//buffManager->setInitCache(false);
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test1");
 	char *tablename=new char[MAX_FILE_NAME_LENGTH];
@@ -452,7 +452,7 @@ int main(){
 	for(int i=0;i<100;i++){
 		dbOps->insertIntoTable(tablename,insertValues_);
 	}
-	for(int i=0;i<10;i++){
+	for(int i=0;i<30;i++){
 		dbOps->createTable(tablename,colNames,colTypes);
 		}
 
@@ -469,7 +469,7 @@ int main(){
 //	dbOps->selectAllFromTable(tablename);
 //	cout << endl <<double( clock() - startTime1 ) << " micro seconds." << endl;
 
-*/
+
 
 
 	while(1){
