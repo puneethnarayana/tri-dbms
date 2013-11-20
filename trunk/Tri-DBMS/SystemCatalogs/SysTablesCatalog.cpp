@@ -80,12 +80,12 @@ vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
 	Record *record=new Record();
 	vector<string> recordVector,nullVector;
 	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
-	cout <<sysTablePage->getNoOfRecords();
+	//cout <<sysTablePage->getNoOfRecords();
 	for(int i=0;i< sysTablePage->getNoOfRecords();i++){
 		recordString=new char[DEFAULT_PAGE_SIZE];
 		sysTablePage->getRecord(i,recordString,&recordLen);
 		recordVector=record->getvectorFromRecord(recordString,4);
-		cout << recordVector[1].c_str() << " " << tableName << endl;
+		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[0].c_str(),tableName)==0){
 			return recordVector;
 		}

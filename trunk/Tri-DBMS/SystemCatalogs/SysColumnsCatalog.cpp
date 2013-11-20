@@ -71,7 +71,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 	Record *record=new Record();
 	vector<string> recordVector;
 	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
-	cout <<sysColumnPage->getNoOfRecords();
+	//cout <<sysColumnPage->getNoOfRecords();
 	for(int i=0;i< sysColumnPage->getNoOfRecords();i++){
 		recordString=new char[DEFAULT_PAGE_SIZE];
 		sysColumnPage->getRecord(i,recordString,&recordLen);
@@ -79,14 +79,13 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 //		cout << "record length :" << recordLen << endl;
 		recordVector=record->getvectorFromRecord(recordString,4);
 		//cout << "print me" <<endl;
-		cout << recordVector[1].c_str() << " " << tableName << endl;
+		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[1].c_str(),tableName)==0){
 			schema.columnNames.push_back(recordVector[0].c_str());
 			schema.fieldPosition.push_back(CommonUtil::string_to_int(recordVector[2].c_str()));
 			schema.fieldTypes.push_back(CommonUtil::string_to_int(recordVector[3].c_str()));
 			//schema.fieldLengths.push_back();
 		}
-		cout << "-----";
 	}
 
 	return SUCCESS;
