@@ -10,6 +10,7 @@
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
 #include "../BufferManagement/BufferManager.h"
+#include "../HeapFileManagement/Schema.h"
 
 class SysColumnsCatalog {
 public:
@@ -17,7 +18,7 @@ public:
 	virtual ~SysColumnsCatalog();
 	int createSysColumnsPage(int pageNumber,char *pageData);
 	int insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType, char *pageData);
-
+	int getTableSchema(char *tableName,Schema& schema);
 private:
 
 //	typedef struct{

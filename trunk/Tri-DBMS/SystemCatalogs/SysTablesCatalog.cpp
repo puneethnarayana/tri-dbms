@@ -13,6 +13,7 @@
 #include "../Utils/CommonUtil.h"
 #include "../Utils/Record.h"
 #include <vector>
+#include <string>
 using namespace std;
 SysTablesCatalog::SysTablesCatalog(int fd,int pageNumber) {
 	// TODO Auto-generated constructor stub
@@ -72,4 +73,46 @@ SysTablesCatalog::~SysTablesCatalog() {
 	delete []pageData_;
 
 }
+
+vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
+	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	int recordLen=0;
+	Record *record=new Record();
+	vector<string> recordVector,nullVector;
+	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
+	cout <<sysTablePage->getNoOfRecords();
+	for(int i=0;i< sysTablePage->getNoOfRecords();i++){
+		recordString=new char[DEFAULT_PAGE_SIZE];
+		sysTablePage->getRecord(i,recordString,&recordLen);
+		recordVector=record->getvectorFromRecord(recordString,4);
+		cout << recordVector[1].c_str() << " " << tableName << endl;
+		if(strcmp(recordVector[0].c_str(),tableName)==0){
+			return recordVector;
+		}
+	}
+	return nullVector;
+
+}
+
+int SysTablesCatalog::getNoOfColumns(char *tableName){
+	vector<string> recordVector=getSysTableRecordAsVector(tableName);
+	return CommonUtil::string_to_int(recordVector[2].c_str());
+
+}
+
+int SysTablesCatalog::getDPChainHeaderPageNumber(char *tableName){
+	vector<string> recordVector=getSysTableRecordAsVector(tableName);
+	return CommonUtil::string_to_int(recordVector[3].c_str());
+
+}
+
+
+int SysTablesCatalog::getMaxRecordSize(char *tableName){
+	vector<string> recordVector=getSysTableRecordAsVector(tableName);
+	return CommonUtil::string_to_int(recordVector[1].c_str());
+
+}
+
+
+
 
