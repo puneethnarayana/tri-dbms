@@ -28,6 +28,8 @@
 #include "../Utils/Record.h"
 #include "../BufferManagement/BufferManager.h"
 #include "../HeapFileManagement/Schema.h"
+#include "../HeapFileManagement/DirectoryEntry.h"
+
 using namespace std;
 DatabaseOperations::DatabaseOperations() {
 	// TODO Auto-generated constructor stub
@@ -144,6 +146,7 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 }
 
 int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertValues){
+	//we need schema to convert "insert into .." statement to insertvalues vector;
 	int dirPageNumber_=-1;
 	int recordLength;
 	char *pageData=new char[DEFAULT_PAGE_SIZE];
@@ -151,28 +154,87 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
-	//we need this schema in select.. and also to convert "insert into .." statement to insertvalues vector;
-//	Schema schema;
-//	sysColumnCatalog_->getTableSchema(tableName,schema);
-//	cout << "No of coulumns is: "<< schema.columnNames.size() << endl;
-//	for(int i=0;i<schema.columnNames.size();i++){
-//		cout << schema.columnNames[i].c_str() << endl;
-//		cout << schema.fieldPosition[i] << endl;
-//		cout << schema.fieldTypes[i] << endl;
-//		cout << endl << endl;
-//	}
+
+
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 	DirectoryPage *dirPage_=new DirectoryPage(fd_,dirHeaderPage_->getNextPageNumber());
 	Record *record=new Record();
 	record->getRecordString(insertValues,recordString,&recordLength);
 
-	dataPageNumber=dirPage_->insertSlotEntry(recordLength);
-	cout <<"-----------------"<<dataPageNumber<< endl;
-	DataPage *dataPage=new DataPage(fd_,dataPageNumber);
-	dataPage->createDataPageHeaderStruct(dataPageNumber,pageData);
+	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength);
+	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
+	DataPage *dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
+
+	if(dirSlotEntry.freeSpace_==DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength){
+		//cout << "=================you will see this================="<<endl;
+		dataPage->createDataPageHeaderStruct(dirSlotEntry.pageNumber_,pageData);
+	}
+	//cout << "print this also " << recordLength<< endl;
 	dataPage->insertRecord(recordString,recordLength);
+	//cout << "print this also2" << endl;
 	return SUCCESS;
 }
 
 
+vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
+		Schema schema;
 
+
+		//string record;
+		vector<string> recordVector;
+		vector<string> recordsVector;
+		int dirPageNumber_=-1;
+		int recordLength;
+		char *pageData=new char[DEFAULT_PAGE_SIZE];
+		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
+		char *recordString=new char[DEFAULT_PAGE_SIZE];
+		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+
+		sysColumnCatalog_->getTableSchema(tableName,schema);
+
+		//cout << "No of columns is: "<< schema.columnNames.size() << endl;
+		for(int i=0;i<schema.columnNames.size();i++){
+//			cout << schema.columnNames[i].c_str() << endl;
+//			cout << schema.fieldPosition[i] << endl;
+//			cout << schema.fieldTypes[i] << endl;
+//			cout << endl << endl;
+		}
+		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+
+		//loop the following for all the directory pages of table;
+
+		DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+		DirectoryEntry::DirectoryEntryStruct dirEntry_;
+		Record *record=new Record();
+		noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
+
+		for(int i=0;i<noOfDirEntries;i++){
+			dirEntry_=dirPage_->getDirectorySlot(i);
+			if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
+				dataPageNumber=dirEntry_.pageNumber_;
+				DataPage *dataPage=new DataPage(fd_,dataPageNumber);
+				noOfRecordsInDataPage=dataPage->getNoOfRecords();
+				for(int j=0;j<noOfRecordsInDataPage;j++){
+					recordString=new char[DEFAULT_PAGE_SIZE];
+					dataPage->getRecord(j,recordString,&recordLength);
+					//buffManager_->hexDump(recordString);
+					recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+					stringstream recordStream;
+					for(int k=0;k<noOfColumns_;k++){
+						recordStream<<" '"<<recordVector[k].c_str()<<"' ";
+					}
+					recordsVector.push_back(recordStream.str());
+				}
+
+
+
+			}
+		}
+		for(int l=0;l<recordsVector.size();l++){
+			cout << recordsVector[l].c_str() << endl;
+		}
+
+		return recordsVector;
+}
