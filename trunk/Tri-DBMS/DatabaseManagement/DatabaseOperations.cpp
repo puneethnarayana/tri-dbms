@@ -86,7 +86,7 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	dbMainHeader_->setIndexCatalogHeaderPageNumber(indexCatalogPageNumber_);
 	dbMainHeader_->setNoOfPagesUsed(dbMainHeader_->getNoOfPagesUsed()+3);
 
-	buffManager_->commitCache();
+	//buffManager_->commitCache();
 	buffManager_->closeDatabase(fd_);
 	return fd_;
 }
@@ -140,7 +140,7 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	}
 
 
-	buffManager_->commitCache();
+	//buffManager_->commitCache();
 
 	return SUCCESS;
 }
@@ -172,6 +172,8 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	//cout << "print this also " << recordLength<< endl;
 	dataPage->insertRecord(recordString,recordLength);
 	//cout << "print this also2" << endl;
+
+	//buffManager_->commitCache();
 	return SUCCESS;
 }
 
