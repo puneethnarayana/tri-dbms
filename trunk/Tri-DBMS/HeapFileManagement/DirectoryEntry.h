@@ -11,7 +11,6 @@
 
 class DirectoryEntry {
 public:
-	DirectoryEntry(int fd, int pageNumber);
 	DirectoryEntry();
 	virtual ~DirectoryEntry();
 

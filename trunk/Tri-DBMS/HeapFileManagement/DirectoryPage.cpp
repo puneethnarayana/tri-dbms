@@ -41,6 +41,121 @@ DirectoryPage::~DirectoryPage() {
 	delete []pageData_;
 }
 
+int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
+	directoryPageHeader_.genPageHeader_.pageNumber=pageNumber;
+	directoryPageHeader_.genPageHeader_.nextPageNumber=-1;
+	directoryPageHeader_.genPageHeader_.pageType=DIRECTORY_PAGE;
+	directoryPageHeader_.maxFreeSpace_=DEFAULT_PAGE_SIZE-DataPage::getDataPageSize();
+	directoryPageHeader_.headerOffset_=sizeof(DirectoryPageHeaderStruct);
+	directoryPageHeader_.noOfDirectoryEntries_=0;
+	directoryPageHeader_.maxNoOfDirectoryEntries_=(DEFAULT_PAGE_SIZE-
+			sizeof(DirectoryPageHeaderStruct))/DirectoryEntry::getDirectoryEntrySize();
+	//Directory Entry = page number + free space
+	memcpy(pageData,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
+	memcpy(pageData_,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
+
+	isDirectoryPageChanged_=true;
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	return SUCCESS;
+}
+
+int DirectoryPage::insertSlotEntry(int sizeRequired){
+	int slotEntryNumber= searchForSlotEntry(sizeRequired);
+	cout << "slot entry number" << slotEntryNumber << endl;
+	updateMaxFreeSpace();
+	int offset =directoryPageHeader_.headerOffset_+
+			slotEntryNumber*DirectoryEntry::getDirectoryEntrySize();
+	DirectoryEntry *singleEntry=new DirectoryEntry();
+	memcpy(&singleEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+	return singleEntry->directoryEntry_.pageNumber_;
+}
+int DirectoryPage::searchForSlotEntry(int sizeRequired){
+	int i, offset;
+	DirectoryEntry *dirEntry=new DirectoryEntry();
+	for(i=0;i<directoryPageHeader_.noOfDirectoryEntries_;i++){
+		offset= directoryPageHeader_.headerOffset_+
+				(i*DirectoryEntry::getDirectoryEntrySize());
+		memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+		if(dirEntry->directoryEntry_.freeSpace_>sizeRequired){
+
+			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired);
+			return i;
+		}
+	}
+	// new DirectoryEntry slot required
+	return addSlotEntry(sizeRequired);
+}
+
+int DirectoryPage::addSlotEntry(int sizeRequired){
+	if(directoryPageHeader_.noOfDirectoryEntries_==directoryPageHeader_.maxNoOfDirectoryEntries_){
+		return -1;
+	}
+
+	FreePageManager *page= new FreePageManager(fd_,1);
+			char *trialData= new char[DEFAULT_PAGE_SIZE];
+			//page->createFreePageManagerPage(1,trialData);
+
+
+	int offset =directoryPageHeader_.headerOffset_+
+			directoryPageHeader_.noOfDirectoryEntries_*DirectoryEntry::getDirectoryEntrySize();
+	DirectoryEntry *dirEntry= new DirectoryEntry();
+	dirEntry->directoryEntry_={
+			page->getFreePage(),
+			DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-sizeRequired
+	};
+
+	memcpy(&pageData_[offset],&dirEntry->directoryEntry_,DirectoryEntry::getDirectoryEntrySize());
+
+	setNoOfDirectoryEntries(getNoOfDirectoryEntries()+1);
+	isDirectoryPageChanged_=true;
+		buffManager_->writePage(fd_,pageNumber_,pageData_);
+	return getNoOfDirectoryEntries()-1;
+}
+
+
+
+int DirectoryPage::updateSlotEntry(int slotNumber,int freeSpace){
+	int offset =directoryPageHeader_.headerOffset_+
+					slotNumber*DirectoryEntry::getDirectoryEntrySize();
+	DirectoryEntry *dirEntry=new DirectoryEntry();
+	memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+	dirEntry->directoryEntry_.freeSpace_=freeSpace;
+	memcpy(&pageData_[offset],&dirEntry->directoryEntry_,DirectoryEntry::getDirectoryEntrySize());
+	isDirectoryPageChanged_=true;
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	return SUCCESS;
+}
+
+int DirectoryPage::getFreeSpace(int slotNumber){
+	int offset =directoryPageHeader_.headerOffset_+
+			slotNumber*DirectoryEntry::getDirectoryEntrySize();
+	DirectoryEntry singleEntry;
+	memcpy(&singleEntry,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+	return singleEntry.getFreeSpace();
+}
+
+void DirectoryPage::updateMaxFreeSpace(){
+	int i, offset;
+	DirectoryEntry *dirEntry=new DirectoryEntry();
+	if(getMaxNoOfDirectoryEntries()>getNoOfDirectoryEntries()){
+		directoryPageHeader_.maxFreeSpace_=DEFAULT_PAGE_SIZE-DataPage::getDataPageSize();
+	}
+	else{
+		directoryPageHeader_.maxFreeSpace_=0;
+		for(i=0;i<directoryPageHeader_.noOfDirectoryEntries_;i++){
+			offset= directoryPageHeader_.headerOffset_+
+					(i*DirectoryEntry::getDirectoryEntrySize());
+			memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+			if(directoryPageHeader_.maxFreeSpace_<dirEntry->directoryEntry_.freeSpace_){
+				directoryPageHeader_.maxFreeSpace_=dirEntry->directoryEntry_.freeSpace_;
+			}
+		}
+	}
+	memcpy(pageData_,&directoryPageHeader_,sizeof(DirectoryPageHeaderStruct));
+	isDirectoryPageChanged_=true;
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+}
+
 
 int DirectoryPage::getNoOfDirectoryEntries(){
 	//memcpy(&directoryPageHeader_,pageData_,sizeof(DirectoryPageHeaderStruct));
@@ -134,120 +249,6 @@ void DirectoryPage::setPageType(int pageType){
 void DirectoryPage::setNextPageNumber(int nextPageNumber){
 	//memcpy(&directoryPageHeader_,pageData_,sizeof(DirectoryPageHeaderStruct));
 	directoryPageHeader_.genPageHeader_.nextPageNumber=nextPageNumber;
-	memcpy(pageData_,&directoryPageHeader_,sizeof(DirectoryPageHeaderStruct));
-	isDirectoryPageChanged_=true;
-	buffManager_->writePage(fd_,pageNumber_,pageData_);
-}
-
-int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
-	directoryPageHeader_.genPageHeader_.pageNumber=pageNumber;
-	directoryPageHeader_.genPageHeader_.nextPageNumber=-1;
-	directoryPageHeader_.genPageHeader_.pageType=DIRECTORY_PAGE;
-	directoryPageHeader_.maxFreeSpace_=DEFAULT_PAGE_SIZE-DataPage::getDataPageSize();
-	directoryPageHeader_.headerOffset_=sizeof(DirectoryPageHeaderStruct);
-	directoryPageHeader_.noOfDirectoryEntries_=0;
-	directoryPageHeader_.maxNoOfDirectoryEntries_=(DEFAULT_PAGE_SIZE-
-			sizeof(DirectoryPageHeaderStruct))/DirectoryEntry::getDirectoryEntrySize();
-	//Directory Entry = page number + free space
-	memcpy(pageData,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
-	memcpy(pageData_,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
-
-	isDirectoryPageChanged_=true;
-	buffManager_->writePage(fd_,pageNumber_,pageData_);
-	return SUCCESS;
-}
-
-
-int DirectoryPage::searchForSlotEntry(int sizeRequired){
-	int i, offset;
-	DirectoryEntry *dirEntry=new DirectoryEntry(fd_,pageNumber_);
-	for(i=0;i<directoryPageHeader_.noOfDirectoryEntries_;i++){
-		offset= directoryPageHeader_.headerOffset_+
-				(i*DirectoryEntry::getDirectoryEntrySize());
-		memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-		if(dirEntry->directoryEntry_.freeSpace_>sizeRequired){
-
-			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired);
-			return i;
-		}
-	}
-	// new DirectoryEntry slot required
-	return addSlotEntry(sizeRequired);
-}
-
-int DirectoryPage::addSlotEntry(int sizeRequired){
-	if(directoryPageHeader_.noOfDirectoryEntries_==directoryPageHeader_.maxNoOfDirectoryEntries_){
-		return -1;
-	}
-
-	FreePageManager *page= new FreePageManager(fd_,1);
-			char *trialData= new char[DEFAULT_PAGE_SIZE];
-			//page->createFreePageManagerPage(1,trialData);
-
-
-	int offset =directoryPageHeader_.headerOffset_+
-			directoryPageHeader_.noOfDirectoryEntries_*DirectoryEntry::getDirectoryEntrySize();
-	DirectoryEntry *dirEntry= new DirectoryEntry(fd_,pageNumber_);
-	dirEntry->directoryEntry_={
-			page->getFreePage(),
-			DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-sizeRequired
-	};
-
-	memcpy(&pageData_[offset],&dirEntry->directoryEntry_,DirectoryEntry::getDirectoryEntrySize());
-
-	setNoOfDirectoryEntries(getNoOfDirectoryEntries()+1);
-	isDirectoryPageChanged_=true;
-		buffManager_->writePage(fd_,pageNumber_,pageData_);
-	return getNoOfDirectoryEntries();
-}
-
-int DirectoryPage::insertSlotEntry(int sizeRequired){
-	int slotEntryNumber= searchForSlotEntry(sizeRequired);
-	updateMaxFreeSpace();
-	int offset =directoryPageHeader_.headerOffset_+
-			slotEntryNumber*DirectoryEntry::getDirectoryEntrySize();
-	DirectoryEntry singleEntry;
-	memcpy(&singleEntry,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-	return singleEntry.getPageNumber();
-}
-
-int DirectoryPage::updateSlotEntry(int slotNumber,int freeSpace){
-	int offset =directoryPageHeader_.headerOffset_+
-					slotNumber*DirectoryEntry::getDirectoryEntrySize();
-	DirectoryEntry *dirEntry=new DirectoryEntry(fd_,pageNumber_);
-	memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-	dirEntry->directoryEntry_.freeSpace_=freeSpace;
-	memcpy(&pageData_[offset],&dirEntry->directoryEntry_,DirectoryEntry::getDirectoryEntrySize());
-	isDirectoryPageChanged_=true;
-	buffManager_->writePage(fd_,pageNumber_,pageData_);
-	return SUCCESS;
-}
-
-int DirectoryPage::getFreeSpace(int slotNumber){
-	int offset =directoryPageHeader_.headerOffset_+
-			slotNumber*DirectoryEntry::getDirectoryEntrySize();
-	DirectoryEntry singleEntry;
-	memcpy(&singleEntry,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-	return singleEntry.getFreeSpace();
-}
-
-void DirectoryPage::updateMaxFreeSpace(){
-	int i, offset;
-	DirectoryEntry *dirEntry=new DirectoryEntry(fd_,pageNumber_);
-	if(getMaxNoOfDirectoryEntries()>getNoOfDirectoryEntries()){
-		directoryPageHeader_.maxFreeSpace_=DEFAULT_PAGE_SIZE-DataPage::getDataPageSize();
-	}
-	else{
-		directoryPageHeader_.maxFreeSpace_=0;
-		for(i=0;i<directoryPageHeader_.noOfDirectoryEntries_;i++){
-			offset= directoryPageHeader_.headerOffset_+
-					(i*DirectoryEntry::getDirectoryEntrySize());
-			memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-			if(directoryPageHeader_.maxFreeSpace_<dirEntry->directoryEntry_.freeSpace_){
-				directoryPageHeader_.maxFreeSpace_=dirEntry->directoryEntry_.freeSpace_;
-			}
-		}
-	}
 	memcpy(pageData_,&directoryPageHeader_,sizeof(DirectoryPageHeaderStruct));
 	isDirectoryPageChanged_=true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
