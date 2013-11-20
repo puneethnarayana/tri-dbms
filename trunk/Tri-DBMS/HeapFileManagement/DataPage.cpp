@@ -70,9 +70,12 @@ int DataPage::insertRecord(char *record,int recordLength){
 		updateSlotDirectoryEntry(slotNumberForInsert_,recordLength);
 	}
 	slotDirectoryEntry_=getSlotDirectoryEntry(slotNumberForInsert_);
+	//cout << "page Number "<<pageNumber_;
+	//cout << "slot number for insert " << slotNumberForInsert_<<endl;
 	offsetForInsert_=slotDirectoryEntry_.recordOffset;
 	memcpy(&pageData_[offsetForInsert_],record,recordLength);
-
+	//cout << "offset for insert is " << offsetForInsert_<<endl;
+	//cout << "record length is " << recordLength<<endl;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
 	return SUCCESS;

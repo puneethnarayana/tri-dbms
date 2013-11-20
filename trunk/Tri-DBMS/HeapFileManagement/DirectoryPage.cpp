@@ -59,15 +59,22 @@ int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
 	return SUCCESS;
 }
 
-int DirectoryPage::insertSlotEntry(int sizeRequired){
+DirectoryEntry::DirectoryEntryStruct DirectoryPage::getDirectorySlot(int slotEntryNumber){
+	DirectoryEntry *singleEntry=new DirectoryEntry();
+	int offset =directoryPageHeader_.headerOffset_+ slotEntryNumber*DirectoryEntry::getDirectoryEntrySize();
+	memcpy(&singleEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+	return singleEntry->directoryEntry_;
+}
+
+DirectoryEntry::DirectoryEntryStruct DirectoryPage::insertSlotEntry(int sizeRequired){
 	int slotEntryNumber= searchForSlotEntry(sizeRequired);
-	cout << "slot entry number" << slotEntryNumber << endl;
+	//cout << "slot entry number" << slotEntryNumber << endl;
 	updateMaxFreeSpace();
 	int offset =directoryPageHeader_.headerOffset_+
 			slotEntryNumber*DirectoryEntry::getDirectoryEntrySize();
 	DirectoryEntry *singleEntry=new DirectoryEntry();
 	memcpy(&singleEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-	return singleEntry->directoryEntry_.pageNumber_;
+	return singleEntry->directoryEntry_;
 }
 int DirectoryPage::searchForSlotEntry(int sizeRequired){
 	int i, offset;
