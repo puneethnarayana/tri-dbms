@@ -25,7 +25,9 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../Utils/CommonUtil.h"
+#include "../Utils/Record.h"
 #include "../BufferManagement/BufferManager.h"
+#include "../HeapFileManagement/Schema.h"
 using namespace std;
 DatabaseOperations::DatabaseOperations() {
 	// TODO Auto-generated constructor stub
@@ -91,6 +93,10 @@ int DatabaseOperations::openDatabase(char *databaseName){
 	strcpy(openDatabaseName_,databaseName);
 	isDatabaseOpen_=true;
 	fd_=buffManager_->openDatabase(databaseName);
+	dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	freePageManager_=new FreePageManager(fd_,1);
+	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	return fd_;
 }
 int DatabaseOperations::closeDatabase(int fd){
@@ -131,8 +137,42 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos,pageData_);
 	}
 
+
 	buffManager_->commitCache();
 
 	return SUCCESS;
 }
+
+int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertValues){
+	int dirPageNumber_=-1;
+	int recordLength;
+	char *pageData=new char[DEFAULT_PAGE_SIZE];
+	int dataPageNumber;
+	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+	//we need this schema in select.. and also to convert "insert into .." statement to insertvalues vector;
+//	Schema schema;
+//	sysColumnCatalog_->getTableSchema(tableName,schema);
+//	cout << "No of coulumns is: "<< schema.columnNames.size() << endl;
+//	for(int i=0;i<schema.columnNames.size();i++){
+//		cout << schema.columnNames[i].c_str() << endl;
+//		cout << schema.fieldPosition[i] << endl;
+//		cout << schema.fieldTypes[i] << endl;
+//		cout << endl << endl;
+//	}
+	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+	DirectoryPage *dirPage_=new DirectoryPage(fd_,dirHeaderPage_->getNextPageNumber());
+	Record *record=new Record();
+	record->getRecordString(insertValues,recordString,&recordLength);
+
+	dataPageNumber=dirPage_->insertSlotEntry(recordLength);
+	cout <<"-----------------"<<dataPageNumber<< endl;
+	DataPage *dataPage=new DataPage(fd_,dataPageNumber);
+	dataPage->createDataPageHeaderStruct(dataPageNumber,pageData);
+	dataPage->insertRecord(recordString,recordLength);
+	return SUCCESS;
+}
+
+
 
