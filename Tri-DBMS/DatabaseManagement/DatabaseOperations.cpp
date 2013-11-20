@@ -180,8 +180,6 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
 		Schema schema;
-
-
 		//string record;
 		vector<string> recordVector;
 		vector<string> recordsVector;
