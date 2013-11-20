@@ -10,19 +10,16 @@
 #include "../Global/globalDefines.h"
 #include "../BufferManagement/BufferManager.h"
 
-DirectoryEntry::DirectoryEntry(){
-}
-
-DirectoryEntry::DirectoryEntry(int fd, int pageNumber) {
+DirectoryEntry::DirectoryEntry() {
 	// TODO Auto-generated constructor stub
-	fd_=fd;
-	pageNumber_=pageNumber;
-	pageData_=new char[DEFAULT_PAGE_SIZE];
-	buffManager_=BufferManager::getInstance();
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
-	buffManager_->readPage(fd,pageNumber,pageData_);
-	//memcpy(&directoryEntry_,pageData_,sizeof(DirectoryEntryStruct));
-	isDirectoryEntryChanged_=false;
+//	fd_=fd;
+//	pageNumber_=pageNumber;
+//	pageData_=new char[DEFAULT_PAGE_SIZE];
+//	buffManager_=BufferManager::getInstance();
+//	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+//	buffManager_->readPage(fd,pageNumber,pageData_);
+//	//memcpy(&directoryEntry_,pageData_,sizeof(DirectoryEntryStruct));
+//	isDirectoryEntryChanged_=false;
 }
 
 DirectoryEntry::~DirectoryEntry() {

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <cstring>
-
+#include <sstream>
 #include "DataPage.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
@@ -78,23 +78,36 @@ int DataPage::insertRecord(char *record,int recordLength){
 	return SUCCESS;
 }
 
-vector<string> DataPage::getAllRecords(){
-	vector<string> records_;
-	char *record=new char[DEFAULT_PAGE_SIZE];
+int DataPage::getRecord(int slotEntryNumber,char *&record,int *recordLen){
+	//stringstream recordstream;
 	SlotDirectoryEntry slotEntry_;
-	int slotEntryOffset=DEFAULT_PAGE_SIZE-sizeof(SlotDirectoryEntry);
-	memcpy(&dataPageHeader_,pageData_,sizeof(DataPageHeaderStruct));
-	for(unsigned i=0;i<dataPageHeader_.noOfRecords_;i++){
-		memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
-		memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
-		records_.push_back(record);
-		slotEntryOffset=slotEntryOffset-sizeof(SlotDirectoryEntry);
-	}
-
-
-	return records_;
+	record=new char[DEFAULT_PAGE_SIZE];
+	int slotEntryOffset=DEFAULT_PAGE_SIZE-(slotEntryNumber+1)*sizeof(SlotDirectoryEntry);
+	memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
+	memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
+	*recordLen=slotEntry_.recordLength;
+	return SUCCESS;
 }
 
+
+//
+//vector<string> DataPage::getAllRecords(){
+//	vector<string> records_;
+//	stringstream recordstream;
+//	char *record=new char[DEFAULT_PAGE_SIZE];
+//	SlotDirectoryEntry slotEntry_;
+//	int slotEntryOffset=DEFAULT_PAGE_SIZE-sizeof(SlotDirectoryEntry);
+//	memcpy(&dataPageHeader_,pageData_,sizeof(DataPageHeaderStruct));
+//	for(unsigned i=0;i<dataPageHeader_.noOfRecords_;i++){
+//		memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
+//		memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
+//		records_.push_back(record);
+//		slotEntryOffset=slotEntryOffset-sizeof(SlotDirectoryEntry);
+//	}
+//
+//
+//	return records_;
+//}
 
 int DataPage::getOffsetForRecord(int recordLength){
 	SlotDirectoryEntry slotDirectoryEntry_;

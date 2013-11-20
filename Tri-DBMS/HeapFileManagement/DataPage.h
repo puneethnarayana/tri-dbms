@@ -37,7 +37,7 @@ public:
 
 	int insertRecord(char *record,int recordLength);
 	vector<string> getAllRecords();
-
+	int getRecord(int slotEntryNumber,char *&record,int *recordLen);
 	int getOffsetForRecord(int recordLength); 	/*checks for the slot directory which can hold record of "recordLength".
 	 	 	 	 	 	 	 	 	 	 	 	 * Returns -1 if there isn't any such slot.
 	 	 	 	 	 	 	 	 	 	 	 	 */
