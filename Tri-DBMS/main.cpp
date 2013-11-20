@@ -139,6 +139,7 @@ int main(){
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
+
 	dbOps->createTable(tablename,colNames,colTypes);
 	insertValues_.push_back(CommonUtil::int_to_string(34));
 	insertValues_.push_back("Ravindra");
