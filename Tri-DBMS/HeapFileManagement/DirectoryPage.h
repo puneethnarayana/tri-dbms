@@ -36,11 +36,11 @@ public:
 	int createDirectoryPage(int pageNumber, char *pageData);
 	int searchForSlotEntry(int sizeRequired);
 	int addSlotEntry(int sizeRequired);
-	int insertSlotEntry(int sizeRequired);
+	DirectoryEntry::DirectoryEntryStruct insertSlotEntry(int sizeRequired);
 	int updateSlotEntry(int slotNumber,int freeSpace);
 	int getFreeSpace(int slotNumber);
 	void updateMaxFreeSpace();
-
+	DirectoryEntry::DirectoryEntryStruct getDirectorySlot(int slotEntryNumber);
 
 private:
 	typedef struct{
