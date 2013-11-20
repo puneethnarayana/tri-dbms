@@ -105,6 +105,7 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 	//code to get file descriptor for given cd, from cache index.
 	if(initCache_==false){
 		retVal=diskManager_->readDiskFile(fd,pageNumber,pageSize_,pageContent);
+		numberOfDiskAccesses_++;
 		goto ret;
 	}
 	else{
@@ -156,6 +157,7 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 	//code to get file descriptor for given cd, from cache index.
 	if(initCache_==false){
 		retVal=diskManager_->writeDiskFile(fd,pageNumber,pageSize_,newPageContent);
+		numberOfDiskAccesses_++;
 		goto ret;
 	}
 	else{
@@ -347,7 +349,7 @@ int BufferManager::getFreeFrame(){
 }
 
 int BufferManager::displayBufferList(){
-	cout << "\n=======================================================================================================" << endl;
+	cout << "\n=======================================================================================================================" << endl;
 	cout << "||Frame No.||      cd    ||   File Name   ||   Page No.   ||   Dirty Flag  ||    Priority Type  || Priority Value  ||" << endl;
 	for(int i=0;i<numberOfFrames_;i++){
 		if(BufferPool_[i]->pinCount_!=-1){
@@ -361,7 +363,7 @@ int BufferManager::displayBufferList(){
 			cout << endl;
 		}
 	}
-	cout << "\n=======================================================================================================" << endl;
+	cout << "\n=======================================================================================================================" << endl;
 	return SUCCESS;
 }
 int BufferManager::viewFrameBuffer(int frameNumber){
