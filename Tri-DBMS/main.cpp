@@ -15,6 +15,7 @@
 #include <string>
 #include <algorithm>
 #include <iterator>
+#include <time.h>
 #include "Utils/CommonUtil.h"
 
 #include "diskManagement/BasicDiskOperations.h"
@@ -363,12 +364,12 @@ int main(){
 	buffManager->setInitCache(true);
 	//buffManager->setInitCache(false);
 	dbname=new char[MAX_FILE_NAME_LENGTH];
-	strcpy(dbname,"test1");
+	strcpy(dbname,"db1");
 	char *tablename=new char[MAX_FILE_NAME_LENGTH];
-	strcpy(tablename,"test1");
+	strcpy(tablename,"table1");
 
-	clock_t startTime,startTime1;
-	startTime= clock();
+	time_t startTime,endTime,startTime1;
+
 	DatabaseOperations *dbOps=new DatabaseOperations();
 
 	dbOps->createDatabase(dbname,1);
@@ -435,6 +436,12 @@ int main(){
 	insertValues_.push_back(CommonUtil::int_to_string(false));
 	dbOps->insertIntoTable(tablename,insertValues_);
 
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(1));
+	insertValues_.push_back("A");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
 
 //	buffManager->hexDump(fd,0);
 //	buffManager->hexDump(fd,1);
@@ -447,17 +454,31 @@ int main(){
 	//Testing getSchema in sysColumnCatalog
 	//strcpy(tablename,"table2");
 
-
-
-	for(int i=0;i<100;i++){
-		dbOps->insertIntoTable(tablename,insertValues_);
-	}
-	for(int i=0;i<30;i++){
-		dbOps->createTable(tablename,colNames,colTypes);
+	startTime= clock();
+		for(int i=0;i<120;i++){
+			dbOps->insertIntoTable(tablename,insertValues_);
 		}
+	//strcpy(tablename,"table2");
+	//dbOps->createTable(tablename,colNames,colTypes);
+//	for(int i=0;i<150;i++){
+//		dbOps->insertIntoTable(tablename,insertValues_);
+//	}
 
-	dbOps->selectAllFromTable(tablename);
-	cout << endl <<double( clock() - startTime ) << " micro seconds." << endl;
+
+		dbOps->selectAllFromTable(tablename);
+		endTime=clock();
+	cout << endl <<double( endTime - startTime )  << " microseconds." << endl;
+	//strcpy(tablename,"table1");
+
+//	buffManager->commitCache();
+//	buffManager->hexDump(fd,0);
+//	buffManager->hexDump(fd,1);
+//	buffManager->hexDump(fd,2);
+//	buffManager->hexDump(fd,3);
+//	buffManager->hexDump(fd,4);
+//	buffManager->hexDump(fd,5);
+//	buffManager->hexDump(fd,6);
+//	buffManager->hexDump(fd,7);
 
 //
 //
