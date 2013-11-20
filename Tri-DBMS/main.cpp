@@ -117,52 +117,6 @@ int main(){
 */
 
 
-	//Create Database Testing!!!
-	dbname=new char[MAX_FILE_NAME_LENGTH];
-	strcpy(dbname,"test1");
-	char *tablename=new char[MAX_FILE_NAME_LENGTH];
-		strcpy(tablename,"test1");
-	DatabaseOperations *dbOps=new DatabaseOperations();
-
-	dbOps->createDatabase(dbname,1);
-
-	fd=dbOps->openDatabase(dbname);
-//	buffManager->hexDump(fd,0);
-//	buffManager->hexDump(fd,1);
-//	buffManager->hexDump(fd,2);
-//	buffManager->hexDump(fd,3);
-	vector<string> colNames,insertValues_;
-	colNames.push_back("c1");
-	colNames.push_back("co2");
-	colNames.push_back("col3");
-	vector<string> colTypes;
-	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
-	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
-	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
-
-	dbOps->createTable(tablename,colNames,colTypes);
-	insertValues_.push_back(CommonUtil::int_to_string(34));
-	insertValues_.push_back("Ravindra");
-	insertValues_.push_back(CommonUtil::int_to_string(true));
-
-
-	dbOps->insertIntoTable(tablename,insertValues_);
-
-	buffManager->commitCache();
-//	buffManager->hexDump(fd,0);
-//	buffManager->hexDump(fd,1);
-//	buffManager->hexDump(fd,2);
-//	buffManager->hexDump(fd,3);
-//	buffManager->hexDump(fd,4);
-//	buffManager->hexDump(fd,5);
-	buffManager->hexDump(fd,6);
-	buffManager->hexDump(fd,7);
-	//Testing getSchema in sysColumnCatalog
-
-
-
-
-
 /*
 	vector<string> values_;
 	values_.push_back("hello");
@@ -401,16 +355,141 @@ int main(){
 	cout << pageContent << endl;
 
 */
+
+
 /*
+	//Create Database, Insert into table, Select from Table Testing!!!
+
+	//buffManager->setInitCache(true);
+	buffManager->setInitCache(false);
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"test1");
+	char *tablename=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(tablename,"test1");
+
+	clock_t startTime,startTime1;
+	startTime= clock();
+	DatabaseOperations *dbOps=new DatabaseOperations();
+
+	dbOps->createDatabase(dbname,1);
+
+	fd=dbOps->openDatabase(dbname);
+//	buffManager->hexDump(fd,0);
+//	buffManager->hexDump(fd,1);
+//	buffManager->hexDump(fd,2);
+//	buffManager->hexDump(fd,3);
+	vector<string> colNames,insertValues_,insertValues1_,insertValues2_;
+	colNames.push_back("c1");
+	colNames.push_back("co2");
+	colNames.push_back("col3");
+	vector<string> colTypes;
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
+
+	dbOps->createTable(tablename,colNames,colTypes);
+	insertValues_.push_back(CommonUtil::int_to_string(34));
+	insertValues_.push_back("Ravindra");
+	insertValues_.push_back(CommonUtil::int_to_string(true));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(12));
+	insertValues_.push_back("Alka");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(83));
+	insertValues_.push_back("puneeth");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(48));
+	insertValues_.push_back("sreeraag");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(36));
+	insertValues_.push_back("vikranth");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(66));
+	insertValues_.push_back("pridhvi");
+	insertValues_.push_back(CommonUtil::int_to_string(true));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(60));
+	insertValues_.push_back("sriram");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(45));
+	insertValues_.push_back("don't know");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
+
+
+//	buffManager->hexDump(fd,0);
+//	buffManager->hexDump(fd,1);
+//	buffManager->hexDump(fd,2);
+//	buffManager->hexDump(fd,3);
+//	buffManager->hexDump(fd,4);
+//	buffManager->hexDump(fd,5);
+	//buffManager->hexDump(fd,6);
+	//buffManager->hexDump(fd,7);
+	//Testing getSchema in sysColumnCatalog
+	//strcpy(tablename,"table2");
+
+
+
+	for(int i=0;i<100;i++){
+		dbOps->insertIntoTable(tablename,insertValues_);
+	}
+	for(int i=0;i<10;i++){
+		dbOps->createTable(tablename,colNames,colTypes);
+		}
+
+	dbOps->selectAllFromTable(tablename);
+	cout << endl <<double( clock() - startTime ) << " micro seconds." << endl;
+
+//
+//
+//	buffManager->setInitCache(false);
+//	startTime1 = clock();
+//	for(int i=0;i<100;i++){
+//		dbOps->insertIntoTable(tablename,insertValues_);
+//	}
+//	dbOps->selectAllFromTable(tablename);
+//	cout << endl <<double( clock() - startTime1 ) << " micro seconds." << endl;
+
+*/
+
+
 	while(1){
 		cout << endl << endl <<"Cache-Console>>";
 		query_string=new char[100];
 		//cin >> command;
 		cin.getline(query_string,MAX_QUERY_LENGTH);
-		cout << query_string << endl;
+		//cout << query_string << endl;
 		command=strtok(query_string," ");
-		cout << command << endl;
-		if(strcasecmp(command,"createdb")==0){
+		//cout << command << endl;
+
+
+		if(strcasecmp(command,"cacheon")==0){
+			buffManager->setInitCache(true);
+		}
+		else if(strcasecmp(command,"cacheoff")==0){
+			buffManager->setInitCache(false);
+		}
+
+		else if(strcasecmp(command,"createdb")==0){
 			dbname=new char[MAX_FILE_NAME_LENGTH];
 			dbname=strtok(NULL," ");
 			if(dbname==NULL){
@@ -424,7 +503,7 @@ int main(){
 				continue;
 			}
 			noOfPages=atoi(temp);
-			cout << endl << command;
+			//cout << endl << command;
 			cout << endl << dbname;
 			cout << endl << noOfPages;
 			cout << endl;
@@ -441,8 +520,8 @@ int main(){
 				cout << "Wrong Number of Aurguments for " << command << endl;
 				continue;
 			}
-			cout << endl << command;
-			cout << endl << fd << endl;
+//			cout << endl << command;
+//			cout << endl << fd << endl;
 			cout << "cd is :"<< buffManager->openDatabase(dbname);
 		}
 		else if(strcasecmp(command,"closedb")==0){
@@ -456,6 +535,7 @@ int main(){
 			buffManager->closeDatabase(fd);
 		}
 		else if(strcasecmp(command,"readpage")==0){
+			clock_t startTime = clock();
 			temp=strtok(NULL," ");
 			if(temp==NULL){
 				cout << "Wrong Number of Aurguments for " << command << endl;
@@ -475,9 +555,11 @@ int main(){
 			else{
 				cout << "ERROR READING PAGE" <<endl;
 			}
+			//cout << endl <<double( clock() - startTime ) << " micro seconds." << endl;
 			//cout << "page read is :" << readPage;
 		}
 		else if(strcasecmp(command,"writepage")==0){
+			clock_t startTime = clock();
 			temp=strtok(NULL," ");
 			if(temp==NULL){
 				cout << "Wrong Number of Aurguments for " << command << endl;
@@ -505,6 +587,9 @@ int main(){
 				cout << "ERROR WRITING TO PAGE" << endl;
 			}
 
+
+			//cout << endl <<double( clock() - startTime ) << " micro seconds." << endl;
+
 		}
 		else if(strcasecmp(command,"hexdump")==0){
 			temp=strtok(NULL," ");
@@ -522,7 +607,7 @@ int main(){
 			buffManager->hexDump(fd,pageNo);
 		}
 		else if(strcasecmp(command,"bufferlist")==0){
-			cout << endl << command;
+			//cout << endl << command;
 			buffManager->displayBufferList();
 		}
 		else if(strcasecmp(command,"viewbuffer")==0){
@@ -543,31 +628,33 @@ int main(){
 				continue;
 			}
 			noOfFrames=atoi(temp);
-			cout << endl << command;
+			//cout << endl << command;
 			buffManager->initializeCache(noOfFrames);
 		}
 		else if(strcasecmp(command,"commitcache")==0){
-			cout << endl << command;
+			//cout << endl << command;
 			buffManager->commitCache();
 		}
 		else if(strcasecmp(command,"resetcache")==0){
-			cout << endl << command;
+			//cout << endl << command;
 			buffManager->resetCache();
 		}
 		else if(strcasecmp(command,"hitrate")==0){
-			cout << endl << command;
+			//cout << endl << command;
 			cout << buffManager->getHitRate();
 		}
 		else if(strcmp(command,"exit")==0){
-			cout << endl << command;
+			cout << endl << "Bye!";
 			break;
 		}
 		else{
 			cout << "WRONG COMMAND " << command << " Please try again :)";
 		}
+
+
 	}
 
-*/
+
 
 	/*
 	cout << "Enter the database name:";
