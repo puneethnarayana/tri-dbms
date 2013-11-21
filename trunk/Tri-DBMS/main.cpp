@@ -358,11 +358,11 @@ int main(){
 */
 
 
-/*
+
 	//Create Database, Insert into table, Select from Table Testing!!!
 
 	buffManager->setInitCache(true);
-	//buffManager->setInitCache(false);
+	buffManager->setInitCache(false);
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"db1");
 	char *tablename=new char[MAX_FILE_NAME_LENGTH];
@@ -455,14 +455,21 @@ int main(){
 	//strcpy(tablename,"table2");
 
 	startTime= clock();
-		for(int i=0;i<300;i++){
+		for(int i=0;i<30000;i++){
 			dbOps->insertIntoTable(tablename,insertValues_);
 		}
 		buffManager->commitCache();
+//		buffManager->hexDump(fd,0);
+//		buffManager->hexDump(fd,1);
+//		buffManager->hexDump(fd,2);
 		//buffManager->hexDump(fd,6);
-		//buffManager->hexDump(fd,7);
-		//buffManager->hexDump(fd,8);
-
+//		buffManager->hexDump(fd,7);
+//		buffManager->hexDump(fd,8);
+//		buffManager->hexDump(fd,200);
+//		buffManager->hexDump(fd,18);
+//		buffManager->hexDump(fd,25);
+		//buffManager->hexDump(fd,24);
+		//buffManager->hexDump(fd,25);
 
 		dbOps->selectAllFromTable(tablename);
 		endTime=clock();
@@ -494,10 +501,10 @@ int main(){
 //	cout << endl <<double( clock() - startTime1 ) << " micro seconds." << endl;
 
 
-*/
 
 
 /*
+
 	while(1){
 		cout << endl << endl <<"Cache-Console>>";
 		query_string=new char[100];
@@ -679,8 +686,8 @@ int main(){
 
 
 	}
-*/
 
+*/
 
 	/*
 	cout << "Enter the database name:";
