@@ -42,6 +42,9 @@ DatabaseOperations::DatabaseOperations() {
 
 DatabaseOperations::~DatabaseOperations() {
 	// TODO Auto-generated destructor stub
+	delete buffManager_;
+	delete [] pageData_;
+	delete [] openDatabaseName_;
 }
 
 int DatabaseOperations::createDatabase(char *databaseName){
@@ -57,28 +60,26 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	buffManager_->createDatabase(databaseName,DEFAULT_PAGE_SIZE,noOfPages);
 	fd_=buffManager_->openDatabase(databaseName);
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
-	pageData_=new char[DEFAULT_PAGE_SIZE];
 
-	dbMainHeader_->createDBMainHeaderStruct(databaseName,noOfPages,DEFAULT_PAGE_SIZE,pageData_);
-	pageData_=new char[DEFAULT_PAGE_SIZE];
+
+	dbMainHeader_->createDBMainHeaderStruct(databaseName,noOfPages,DEFAULT_PAGE_SIZE);
+
 	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
-	freePageManager_->createFreePageManagerPage(1,pageData_);
-	pageData_=new char[DEFAULT_PAGE_SIZE];
+	freePageManager_->createFreePageManagerPage(1);
+
 
 	sysTablePageNumber_=freePageManager_->getFreePage();
 	SysTablesCatalog *sysTablePage_=new SysTablesCatalog(fd_,sysTablePageNumber_);
-	sysTablePage_->createSysTablePage(sysTablePageNumber_,pageData_);
+	sysTablePage_->createSysTablePage(sysTablePageNumber_);
 
 
-	pageData_=new char[DEFAULT_PAGE_SIZE];
 	sysColumnPageNumber_=freePageManager_->getFreePage();
 	SysColumnsCatalog *sysColumnPage_=new SysColumnsCatalog(fd_,sysColumnPageNumber_);
-	sysColumnPage_->createSysColumnsPage(sysColumnPageNumber_,pageData_);
+	sysColumnPage_->createSysColumnsPage(sysColumnPageNumber_);
 
-	pageData_=new char[DEFAULT_PAGE_SIZE];
 	indexCatalogPageNumber_=freePageManager_->getFreePage();
 	IndexCatalog *indexCatalogPage_=new IndexCatalog();
-	indexCatalogPage_->createIndexCatalogPage(indexCatalogPageNumber_,pageData_);
+	indexCatalogPage_->createIndexCatalogPage(indexCatalogPageNumber_);
 
 	dbMainHeader_->setFreeStructurePageNumber(1);
 	dbMainHeader_->setSysTablesHeaderPageNumber(sysTablePageNumber_);
@@ -88,6 +89,11 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 
 	//buffManager_->commitCache();
 	buffManager_->closeDatabase(fd_);
+	delete dbMainHeader_;
+	delete freePageManager_;
+	delete sysTablePage_;
+	delete sysColumnPage_;
+	delete indexCatalogPage_;
 	return fd_;
 }
 int DatabaseOperations::openDatabase(char *databaseName){
@@ -119,10 +125,10 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
 	int dirHeaderPageNumber_=freePageManager_->getFreePage();
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dirHeaderPageNumber_);
-	dirHeaderPage_->createDirectoryHeaderPageHeaderStruct(dirHeaderPageNumber_,pageData_);
+	dirHeaderPage_->createDirectoryHeaderPageHeaderStruct(dirHeaderPageNumber_);
 	int directoryPageNumber_=freePageManager_->getFreePage();
 	DirectoryPage *dirPage_=new DirectoryPage(fd_,directoryPageNumber_);
-	dirPage_->createDirectoryPage(directoryPageNumber_,pageData_);
+	dirPage_->createDirectoryPage(directoryPageNumber_);
 	dirHeaderPage_->setNoOfDirectoryPages(1);
 	dirHeaderPage_->setNextPageNumber(directoryPageNumber_);
 	dbMainHeader_->setNoOfPagesUsed(dbMainHeader_->getNoOfPagesUsed()+2);
@@ -131,17 +137,22 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	SysTablesCatalog *sysTableCatalog=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	//TODO:max record size needs to be computed from the column types
 	sysTableCatalog->insertSysTableEntry(tableName,DEFAULT_PAGE_SIZE,
-			columnList.size(),dirHeaderPage_->getPageNumber(),pageData_);
+			columnList.size(),dirHeaderPage_->getPageNumber());
 
 	SysColumnsCatalog *sysColumnCatalog=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	for(unsigned i=0;i<columnList.size();i++){
 		colPos=CommonUtil::string_to_int(columnTypeList[i].c_str());
-		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos,pageData_);
+		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos);
 	}
 
 
 	//buffManager_->commitCache();
-
+	delete dbMainHeader_;
+	delete freePageManager_;
+	delete dirHeaderPage_;
+	delete sysTableCatalog;
+	delete sysColumnCatalog;
+	delete dirPage_;
 	return SUCCESS;
 }
 
@@ -149,7 +160,6 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	//we need schema to convert "insert into .." statement to insertvalues vector;
 	int dirPageNumber_=-1;
 	int recordLength;
-	char *pageData=new char[DEFAULT_PAGE_SIZE];
 	int dataPageNumber;
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
@@ -181,25 +191,29 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
-		dataPage->createDataPageHeaderStruct(dirSlotEntry.pageNumber_,pageData);
+		dataPage->createDataPageHeaderStruct(dirSlotEntry.pageNumber_);
 	}
 	//cout << "print this also " << recordLength<< endl;
 	dataPage->insertRecord(recordString,recordLength);
 	//cout << "print this also2" << endl;
 
 	//buffManager_->commitCache();
+
+	delete []recordString;
+	delete dirHeaderPage_;
+	delete dirPage_;
+	delete record;
+	delete dataPage;
 	return SUCCESS;
 }
 
-
-vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
+int DatabaseOperations::selectAllFromTable(char *tableName){
 		Schema schema;
 		//string record;
 		vector<string> recordVector;
-		vector<string> recordsVector;
+		//vector<string> recordsVector;
 		int dirPageNumber_=-1;
 		int recordLength;
-		char *pageData=new char[DEFAULT_PAGE_SIZE];
 		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
 		char *recordString=new char[DEFAULT_PAGE_SIZE];
 		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
@@ -237,13 +251,14 @@ vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
 						dataPage->getRecord(j,recordString,&recordLength);
 						//buffManager_->hexDump(recordString);
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+						delete[] recordString;
 						stringstream recordStream;
 						for(int k=0;k<noOfColumns_;k++){
 							recordStream<<" '"<<recordVector[k].c_str()<<"' ";
 						}
 						//cout << j << endl;
 						cout << recordStream.str() << endl;
-						recordsVector.push_back(recordStream.str());
+						//recordsVector.push_back(recordStream.str());
 					}
 
 					//cout << "come here" << endl;
@@ -258,5 +273,6 @@ vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
 //			//cout << recordsVector[l].c_str() << endl;
 //		}
 
-		return recordsVector;
+		//return recordsVector;
+		return SUCCESS;
 }
