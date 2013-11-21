@@ -23,7 +23,7 @@ using namespace std;
 BufferManager::BufferManager() {
 	// TODO Auto-generated constructor stub
 	pageSize_=DEFAULT_PAGE_SIZE;
-	bufferSizeInMB_=100;
+	bufferSizeInMB_=10;
 	initCache_=false;
 	noOfDBsOpened_=0;
 	numberOfFrames_=bufferSizeInMB_*1024*1024/pageSize_;
@@ -56,6 +56,9 @@ BufferManager* BufferManager::getInstance() {
 
 BufferManager::~BufferManager() {
 	// TODO Auto-generated destructor stub
+	delete LRUReplacement;
+	delete diskManager_;
+	delete openedFileName_;
 	delete[] BufferPool_;
 }
 int BufferManager::initializeCache(int noOfPages){
@@ -90,7 +93,7 @@ int BufferManager::openDatabase(char *fileName){
 }
 int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 	totalNumberOfRequests_++;
-	pageContent=new char[DEFAULT_PAGE_SIZE];
+	//pageContent=new char[DEFAULT_PAGE_SIZE];
 	int retVal=-1,frameNo=-1;
 	long int fd = -1;
 	if (cd < 0||cd >=noOfDBsOpened_)
@@ -117,7 +120,7 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 			//cout << "in frame number == -1" << endl;
 			//page is not present in the buffer; diskAccess.
 			frameNo=pinAndGetPage(fd,pageNumber,pageContent);
-			numberOfDiskAccesses_++;
+			//numberOfDiskAccesses_++;
 			//cout << "page content after pin and get page(read page): "<< pageContent << endl;
 			//cout << "frameNo after pin and get page(read page): "<< frameNo << endl;
 
@@ -169,7 +172,7 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 			//cout << "in frame number == -1" << endl;
 			//page is not present in the buffer; diskAccess.
 			frameNo=pinAndGetPage(fd,pageNumber,pageContent);
-			numberOfDiskAccesses_++;
+			//numberOfDiskAccesses_++;
 			//cout << "page content after pin and get page: "<< pageContent << endl;
 			//cout << "frameNo after pin and get page: "<< frameNo << endl;
 
@@ -189,6 +192,7 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 
 		retVal = SUCCESS;// change to status code which says success or buffer used.
 	}
+	delete[] pageContent;
 	ret: return retVal;
 }
 
@@ -226,6 +230,7 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 	numberOfDiskAccesses_++;
 	diskManager_->readDiskFile(fd,newPageNumber,pageSize_,newPageContent); //read the page content into newPageContent using newPageNumber.
 	replaceFrameWithAnother(fd,frameNumber,newPageNumber,newPageContent);
+	delete[] newPageContent;
 }
 
 void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNumber,char *newPageContent){
@@ -512,7 +517,8 @@ int BufferManager::hexDump(int cd,int pageNumber){
 
 		cout << "\n";
 		address += 16;
-
+		delete[] buf;
 	}
+	delete[] pageContent;
 	return SUCCESS;
 }
