@@ -474,6 +474,7 @@ int main(){
 		dbOps->selectAllFromTable(tablename);
 		endTime=clock();
 	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
+	buffManager->getHitRate();
 	//strcpy(tablename,"table1");
 
 //	buffManager->commitCache();
