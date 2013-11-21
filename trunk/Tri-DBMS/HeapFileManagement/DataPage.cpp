@@ -38,9 +38,10 @@ DataPage::~DataPage() {
 		buffManager_->writePage(fd_,pageNumber_,pageData_);
 	}
 	delete []pageData_;
+
 }
 
-int DataPage::createDataPageHeaderStruct(int pageNumber,char *pageData){
+int DataPage::createDataPageHeaderStruct(int pageNumber){
 	dataPageHeader_.genPageHeader_.pageNumber=pageNumber;
 	dataPageHeader_.genPageHeader_.pageType=DATA_PAGE;
 	dataPageHeader_.genPageHeader_.nextPageNumber=-1;
@@ -48,7 +49,7 @@ int DataPage::createDataPageHeaderStruct(int pageNumber,char *pageData){
 	dataPageHeader_.headerOffset_=sizeof(DataPageHeaderStruct);
 	dataPageHeader_.continuousFreeSpaceOffset_=dataPageHeader_.headerOffset_;
 	dataPageHeader_.continuousFreeSpaceAvailable_=DEFAULT_PAGE_SIZE-dataPageHeader_.headerOffset_;
-	memcpy(pageData,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	//memcpy(pageData,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	isDataPageChanged_=true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
@@ -84,7 +85,7 @@ int DataPage::insertRecord(char *record,int recordLength){
 int DataPage::getRecord(int slotEntryNumber,char *&record,int *recordLen){
 	//stringstream recordstream;
 	SlotDirectoryEntry slotEntry_;
-	record=new char[DEFAULT_PAGE_SIZE];
+	//record=new char[DEFAULT_PAGE_SIZE];
 	int slotEntryOffset=DEFAULT_PAGE_SIZE-(slotEntryNumber+1)*sizeof(SlotDirectoryEntry);
 	memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
 	memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
@@ -196,7 +197,7 @@ DataPage::SlotDirectoryEntry DataPage::getSlotDirectoryEntry(int slotNumber){
 	return slotEntry_;
 }
 int DataPage::freeSlotDirectoryEntry(int slotNumber){
-	SlotDirectoryEntry slotEntry_=getSlotDirectoryEntry(slotNumber);
+
 	int slotEntryOffset_=DEFAULT_PAGE_SIZE-((slotNumber+1)*sizeof(SlotDirectoryEntry));
 	SlotDirectoryEntry slotDirectoryEntry_;
 	memcpy(&slotDirectoryEntry_,&pageData_[slotEntryOffset_],sizeof(SlotDirectoryEntry));

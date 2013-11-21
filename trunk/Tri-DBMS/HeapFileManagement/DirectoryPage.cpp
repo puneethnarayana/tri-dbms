@@ -41,7 +41,7 @@ DirectoryPage::~DirectoryPage() {
 	delete []pageData_;
 }
 
-int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
+int DirectoryPage::createDirectoryPage(int pageNumber){
 	directoryPageHeader_.genPageHeader_.pageNumber=pageNumber;
 	directoryPageHeader_.genPageHeader_.nextPageNumber=-1;
 	directoryPageHeader_.genPageHeader_.pageType=DIRECTORY_PAGE;
@@ -51,7 +51,7 @@ int DirectoryPage::createDirectoryPage(int pageNumber, char *pageData){
 	directoryPageHeader_.maxNoOfDirectoryEntries_=(DEFAULT_PAGE_SIZE-
 			sizeof(DirectoryPageHeaderStruct))/DirectoryEntry::getDirectoryEntrySize();
 	//Directory Entry = page number + free space
-	memcpy(pageData,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
+	//memcpy(pageData,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
 	memcpy(pageData_,&directoryPageHeader_,directoryPageHeader_.headerOffset_);
 
 	isDirectoryPageChanged_=true;

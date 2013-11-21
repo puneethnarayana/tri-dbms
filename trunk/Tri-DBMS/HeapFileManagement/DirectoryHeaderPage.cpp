@@ -34,14 +34,14 @@ DirectoryHeaderPage::~DirectoryHeaderPage() {
 	delete []pageData_;
 }
 
-int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber,char *pageData){
+int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber){
 	directoryHeaderPageHeader_.genPageHeader_.pageNumber=pageNumber;
 	directoryHeaderPageHeader_.genPageHeader_.pageType=DIRECTORY_HEADER_PAGE;
 	directoryHeaderPageHeader_.genPageHeader_.nextPageNumber=-1;
 	directoryHeaderPageHeader_.noOfRecordsInTable=0;
 	directoryHeaderPageHeader_.noOfDirectoryPages=0;
 	directoryHeaderPageHeader_.maxDirectoryEntriesPerDP=(DEFAULT_PAGE_SIZE-sizeof(DirectoryPage::getDirectoryPageSize()))/8;
-	memcpy(pageData,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
+	//memcpy(pageData,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDirectoryHeaderChanged_=true;

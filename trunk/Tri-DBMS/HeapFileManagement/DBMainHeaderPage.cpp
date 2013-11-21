@@ -34,7 +34,7 @@ DBMainHeaderPage::~DBMainHeaderPage() {
 	delete []pageData_;
 }
 
-int DBMainHeaderPage::createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize,char *pageData){
+int DBMainHeaderPage::createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize){
 	dbMainHeader_.genPageHeader_.pageNumber=0;
 	dbMainHeader_.genPageHeader_.pageType=DB_MAIN_HEADER_PAGE;
 	dbMainHeader_.genPageHeader_.nextPageNumber=-1;
@@ -47,7 +47,7 @@ int DBMainHeaderPage::createDBMainHeaderStruct(char *databaseName,int noOfPages,
 	dbMainHeader_.sysColumnsHeaderPageNumber_= -1;
 	dbMainHeader_.indexCatalogHeaderPageNumber_= -1;
 	dbMainHeader_.freeStructurePageNumber_= 1;
-	memcpy(pageData,&dbMainHeader_,sizeof(DBMainHeaderStruct));
+	//memcpy(pageData,&dbMainHeader_,sizeof(DBMainHeaderStruct));
 	memcpy(pageData_,&dbMainHeader_,sizeof(DBMainHeaderStruct));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDBMainHeaderChanged_=true;
