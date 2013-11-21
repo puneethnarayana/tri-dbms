@@ -83,9 +83,9 @@ int DirectoryPage::searchForSlotEntry(int sizeRequired){
 		offset= directoryPageHeader_.headerOffset_+
 				(i*DirectoryEntry::getDirectoryEntrySize());
 		memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
-		if(dirEntry->directoryEntry_.freeSpace_>sizeRequired){
+		if(dirEntry->directoryEntry_.freeSpace_>=sizeRequired){
 
-			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired-DataPage::getDataSlotEntrySize());
+			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired);
 			return i;
 		}
 	}
