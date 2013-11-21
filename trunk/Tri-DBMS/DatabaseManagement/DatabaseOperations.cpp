@@ -154,13 +154,27 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
-
-
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
-	DirectoryPage *dirPage_=new DirectoryPage(fd_,dirHeaderPage_->getNextPageNumber());
+	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+	DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+
+
+
 	Record *record=new Record();
 	record->getRecordString(insertValues,recordString,&recordLength);
-
+//	while(dirPage_->getMaxFreeSpace()<recordLength){
+//		dirPageNumber_=dirPage_->getNextPageNumber();
+//		if(dirPageNumber_==-1){
+//			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+//		}
+//		else{
+//			dirPageNumber_=freePageManager_->getFreePage();
+//			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+//			char *pageData=new char[DEFAULT_PAGE_SIZE];
+//			dirPage_->createDirectoryPage(dirPageNumber_,pageData);
+//		}
+//	}
+	//cout << "dirEntry : "<< dirPageNumber_;
 	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength);
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
 	DataPage *dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
@@ -204,32 +218,40 @@ vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
 		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 
 		//loop the following for all the directory pages of table;
+		while(dirPageNumber_!=-1){
+			DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+			DirectoryEntry::DirectoryEntryStruct dirEntry_;
+			Record *record=new Record();
+			noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
 
-		DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
-		DirectoryEntry::DirectoryEntryStruct dirEntry_;
-		Record *record=new Record();
-		noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
-
-		for(int i=0;i<noOfDirEntries;i++){
-			dirEntry_=dirPage_->getDirectorySlot(i);
-			if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
-				dataPageNumber=dirEntry_.pageNumber_;
-				DataPage *dataPage=new DataPage(fd_,dataPageNumber);
-				noOfRecordsInDataPage=dataPage->getNoOfRecords();
-				for(int j=0;j<noOfRecordsInDataPage;j++){
-					recordString=new char[DEFAULT_PAGE_SIZE];
-					dataPage->getRecord(j,recordString,&recordLength);
-					//buffManager_->hexDump(recordString);
-					recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
-					stringstream recordStream;
-					for(int k=0;k<noOfColumns_;k++){
-						recordStream<<" '"<<recordVector[k].c_str()<<"' ";
+			for(int i=0;i<noOfDirEntries;i++){
+				dirEntry_=dirPage_->getDirectorySlot(i);
+				if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-DataPage::getDataSlotEntrySize()){
+					dataPageNumber=dirEntry_.pageNumber_;
+					//cout << dataPageNumber << endl;
+					DataPage *dataPage=new DataPage(fd_,dataPageNumber);
+					noOfRecordsInDataPage=dataPage->getNoOfRecords();
+					//cout << noOfRecordsInDataPage << endl;
+					for(int j=0;j<noOfRecordsInDataPage;j++){
+						recordString=new char[DEFAULT_PAGE_SIZE];
+						dataPage->getRecord(j,recordString,&recordLength);
+						//buffManager_->hexDump(recordString);
+						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+						stringstream recordStream;
+						for(int k=0;k<noOfColumns_;k++){
+							recordStream<<" '"<<recordVector[k].c_str()<<"' ";
+						}
+						//cout << j << endl;
+						//cout << recordStream.str() << endl;
+						recordsVector.push_back(recordStream.str());
 					}
-					recordsVector.push_back(recordStream.str());
+
+					//cout << "come here" << endl;
+
 				}
 
-
-
+				dirPageNumber_=dirPage_->getNextPageNumber();
+				//cout << dirPageNumber_ << endl;
 			}
 		}
 		for(int l=0;l<recordsVector.size();l++){
