@@ -33,7 +33,7 @@ public:
 	int closeDatabase(int fd);
 	int createTable(char *tableName, vector<string> columnList, vector<string> columnTypeList);
 	int insertIntoTable(char *tableName, vector<string> insertValues);
-	vector<string> selectAllFromTable(char *tableName);
+	int selectAllFromTable(char *tableName);
 private:
 	BufferManager *buffManager_;
 	int fd_;
