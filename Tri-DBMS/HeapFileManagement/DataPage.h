@@ -27,7 +27,7 @@ public:
 	int getContinuousFreeSpaceAvailable();
 
 	static int getDataPageSize();
-
+	static int getDataSlotEntrySize();
 	void setPageNumber(int pageNumber);
 	void setPageType(int pageType);
 	void setNextPageNumber(int nextPageNumber);
