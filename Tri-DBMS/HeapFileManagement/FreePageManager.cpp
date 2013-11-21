@@ -35,16 +35,16 @@ FreePageManager::~FreePageManager() {
 	delete []pageData_;
 }
 
-int FreePageManager::createFreePageManagerPage(int pageNumber,char *pageData){
+int FreePageManager::createFreePageManagerPage(int pageNumber){
 	freePageManager_.genPageHeader_.pageNumber=pageNumber;
 	freePageManager_.genPageHeader_.pageType=FREE_PAGE_MANAGER_PAGE;
 	freePageManager_.genPageHeader_.nextPageNumber=-1;
 	freePageManager_.headerOffset_=sizeof(freePageStruct);
 	freePageManager_.maxNoOfPages_=(DEFAULT_PAGE_SIZE-freePageManager_.headerOffset_)*8;
 	freePageManager_.noOfFreePages_=(DEFAULT_PAGE_SIZE-freePageManager_.headerOffset_)*8-2;
-	memcpy(pageData,&freePageManager_,sizeof(freePageStruct));
+	//memcpy(pageData,&freePageManager_,sizeof(freePageStruct));
 	memcpy(pageData_,&freePageManager_,sizeof(freePageStruct));
-	pageData[freePageManager_.headerOffset_]=0x03;
+	//pageData[freePageManager_.headerOffset_]=0x03;
 	pageData_[freePageManager_.headerOffset_]=0x03;
 	isFreePageManagerChanged_= true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);

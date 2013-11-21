@@ -33,7 +33,7 @@ public:
 	void setPageType(int pageType);
 	void setNextPageNumber(int nextPageNumber);
 
-	int createDirectoryPage(int pageNumber, char *pageData);
+	int createDirectoryPage(int pageNumber);
 	int searchForSlotEntry(int sizeRequired);
 	int addSlotEntry(int sizeRequired);
 	DirectoryEntry::DirectoryEntryStruct insertSlotEntry(int sizeRequired);

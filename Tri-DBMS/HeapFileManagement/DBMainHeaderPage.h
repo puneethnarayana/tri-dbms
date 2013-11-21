@@ -14,7 +14,7 @@ class DBMainHeaderPage {
 public:
 	DBMainHeaderPage(int fd,int pageNumber);
 	virtual ~DBMainHeaderPage();
-	int createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize,char *pageData);
+	int createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize);
 
 	int getPageNumber();
 	int getPageType();

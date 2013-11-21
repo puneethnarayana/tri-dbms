@@ -12,7 +12,7 @@ class FreePageManager {
 public:
 	FreePageManager(int fd,int pageNumber);
 	virtual ~FreePageManager();
-	int createFreePageManagerPage(int pageNumber,char *pageData);
+	int createFreePageManagerPage(int pageNumber);
 	int setPage(int pageNumber); // 0 means free, 1 means allocated.
 	int freePage(int pageNumber);
 	bool isPageFree(int pageNumber);

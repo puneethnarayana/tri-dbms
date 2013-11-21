@@ -13,7 +13,7 @@ class DirectoryHeaderPage {
 public:
 	DirectoryHeaderPage(int fd,int pageNumber);
 	virtual ~DirectoryHeaderPage();
-	int createDirectoryHeaderPageHeaderStruct(int pageNumber,char *pageData);
+	int createDirectoryHeaderPageHeaderStruct(int pageNumber);
 	int getPageNumber();
 	int getPageType();
 	int getNextPageNumber();

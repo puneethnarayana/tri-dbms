@@ -16,7 +16,7 @@ class DataPage {
 public:
 	DataPage(int fd,int pageNumber);
 	virtual ~DataPage();
-	int createDataPageHeaderStruct(int pageNumber,char *pageData);
+	int createDataPageHeaderStruct(int pageNumber);
 
 	int getPageNumber();
 	int getPageType();
