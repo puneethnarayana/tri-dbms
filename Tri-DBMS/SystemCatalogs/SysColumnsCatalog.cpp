@@ -39,14 +39,14 @@ SysColumnsCatalog::~SysColumnsCatalog() {
 		delete []pageData_;
 }
 
-int SysColumnsCatalog::createSysColumnsPage(int pageNumber,char *pageData){
+int SysColumnsCatalog::createSysColumnsPage(int pageNumber){
 	DataPage *sysColumnsPage=new DataPage(fd_,pageNumber_);
-	sysColumnsPage->createDataPageHeaderStruct(pageNumber_,pageData);
+	sysColumnsPage->createDataPageHeaderStruct(pageNumber_);
 	sysColumnsPage->setPageType(SYS_COLUMNS_PAGE);
 	return SUCCESS;
 }
 
-int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType, char *pageData){
+int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType){
 
 // Code needs to be written here!!!
 	vector<string> values;

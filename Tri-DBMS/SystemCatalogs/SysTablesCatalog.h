@@ -17,8 +17,8 @@ class SysTablesCatalog {
 public:
         SysTablesCatalog(int fd,int pageNumber);
         virtual ~SysTablesCatalog();
-        int createSysTablePage(int pageNumber,char *pageData);
-        int insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader,char *pageData);
+        int createSysTablePage(int pageNumber);
+        int insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader);
         vector<string> getSysTableRecordAsVector(char *tableName);
         int getDPChainHeaderPageNumber(char *tableName);
         int getNoOfColumns(char *tableName);

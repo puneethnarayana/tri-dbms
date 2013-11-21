@@ -29,13 +29,13 @@ SysTablesCatalog::SysTablesCatalog(int fd,int pageNumber) {
 	isSysTableChanged_=false;
 
 }
-int SysTablesCatalog::createSysTablePage(int pageNumber,char *pageData){
+int SysTablesCatalog::createSysTablePage(int pageNumber){
 	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
-	sysTablePage->createDataPageHeaderStruct(pageNumber_,pageData);
+	sysTablePage->createDataPageHeaderStruct(pageNumber_);
 	sysTablePage->setPageType(SYS_TABLES_PAGE);
 	return SUCCESS;
 }
-int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader,char *pageData){
+int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader){
 
 //	int sysTableEntrySize_= strlen(tableName)+sizeof(int)*3+1;
 //	SysTableEntryStruct sysTableEntry_;

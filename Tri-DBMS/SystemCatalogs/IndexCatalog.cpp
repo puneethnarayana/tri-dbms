@@ -17,7 +17,7 @@ IndexCatalog::~IndexCatalog() {
 }
 
 
-int IndexCatalog::createIndexCatalogPage(int pageNumber,char *pageData){
+int IndexCatalog::createIndexCatalogPage(int pageNumber){
 
 	return SUCCESS;
 }
