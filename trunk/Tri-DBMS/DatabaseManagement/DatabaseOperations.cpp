@@ -175,11 +175,11 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 //		}
 //	}
 	//cout << "dirEntry : "<< dirPageNumber_;
-	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength);
+	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize());
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
 	DataPage *dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
 
-	if(dirSlotEntry.freeSpace_==DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength){
+	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
 		dataPage->createDataPageHeaderStruct(dirSlotEntry.pageNumber_,pageData);
 	}
@@ -242,7 +242,7 @@ vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
 							recordStream<<" '"<<recordVector[k].c_str()<<"' ";
 						}
 						//cout << j << endl;
-						//cout << recordStream.str() << endl;
+						cout << recordStream.str() << endl;
 						recordsVector.push_back(recordStream.str());
 					}
 
@@ -254,9 +254,9 @@ vector<string> DatabaseOperations::selectAllFromTable(char *tableName){
 				//cout << dirPageNumber_ << endl;
 			}
 		}
-		for(int l=0;l<recordsVector.size();l++){
-			cout << recordsVector[l].c_str() << endl;
-		}
+//		for(int l=0;l<recordsVector.size();l++){
+//			//cout << recordsVector[l].c_str() << endl;
+//		}
 
 		return recordsVector;
 }
