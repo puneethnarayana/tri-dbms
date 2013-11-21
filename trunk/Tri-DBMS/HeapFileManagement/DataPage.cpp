@@ -226,6 +226,10 @@ int DataPage::getDataPageSize(){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	return sizeof(DataPageHeaderStruct);
 }
+int DataPage::getDataSlotEntrySize(){
+	return sizeof(SlotDirectoryEntry);
+}
+
 int DataPage::getHeaderOffset(){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	return dataPageHeader_.headerOffset_;

@@ -85,11 +85,12 @@ int DirectoryPage::searchForSlotEntry(int sizeRequired){
 		memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
 		if(dirEntry->directoryEntry_.freeSpace_>sizeRequired){
 
-			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired);
+			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired-DataPage::getDataSlotEntrySize());
 			return i;
 		}
 	}
 	// new DirectoryEntry slot required
+	//cout << "it came here "<< endl;
 	return addSlotEntry(sizeRequired);
 }
 
