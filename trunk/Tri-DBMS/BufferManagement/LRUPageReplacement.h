@@ -30,6 +30,7 @@ public:
 
 private:
 	BufferManager *bufManager_;
+	std::time_t t;
 };
 
 #endif /* LRUPAGEREPLACEMENT_H_ */

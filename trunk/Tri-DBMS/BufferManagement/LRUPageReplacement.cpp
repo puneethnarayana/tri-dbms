@@ -49,15 +49,17 @@ unsigned long LRUPageReplacement::getMaximumPriority(){
 int LRUPageReplacement::getFrameToBeReplaced(){
 	bufManager_=BufferManager::getInstance();
 	int freeFrameIndex=-1;
-	unsigned long minPriority=getMaximumPriority();//initialize this to some number which is greater than all priorities.
-	for(int i=0;i<bufManager_->numberOfFrames_;i++)
+	t = std::time(0);
+
+	unsigned long minPriority=t;//initialize this to some number which is greater than all priorities.
+	for(int i=0;i<bufManager_->numberOfFramesUsed_;i++)
 	{
 		if(bufManager_->BufferPool_[i]->pinCount_==-1){
 			freeFrameIndex=i;
 			break;
 		}
 		else if(bufManager_->BufferPool_[i]->pinCount_==0){
-			if(minPriority>bufManager_->BufferPool_[i]->priority_){
+			if(minPriority>=bufManager_->BufferPool_[i]->priority_){
 				minPriority=bufManager_->BufferPool_[i]->priority_;
 				freeFrameIndex=i;
 			}
