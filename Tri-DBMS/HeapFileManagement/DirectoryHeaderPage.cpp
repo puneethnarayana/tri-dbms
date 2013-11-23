@@ -31,7 +31,7 @@ DirectoryHeaderPage::~DirectoryHeaderPage() {
 		buffManager_=BufferManager::getInstance();
 		buffManager_->writePage(fd_,pageNumber_,pageData_);
 	}
-	delete []pageData_;
+	delete[] pageData_;
 }
 
 int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber){

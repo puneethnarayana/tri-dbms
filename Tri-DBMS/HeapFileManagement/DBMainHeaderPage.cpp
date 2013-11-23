@@ -31,7 +31,7 @@ DBMainHeaderPage::~DBMainHeaderPage() {
 		buffManager_=BufferManager::getInstance();
 		buffManager_->writePage(fd_,pageNumber_,pageData_);
 	}
-	delete []pageData_;
+	delete[] pageData_;
 }
 
 int DBMainHeaderPage::createDBMainHeaderStruct(char *databaseName,int noOfPages,int pageSize){
