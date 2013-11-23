@@ -34,6 +34,11 @@
 using namespace std;
 
 
+//void fun(char *temp){
+//	cout << "in fun"<< endl;
+//	delete[] temp;
+//}
+
 int main(){
 	BufferManager *buffManager=BufferManager::getInstance();
 	//buffMan->getHitRate();
@@ -362,7 +367,7 @@ int main(){
 	//Create Database, Insert into table, Select from Table Testing!!!
 
 	buffManager->setInitCache(true);
-	buffManager->setInitCache(false);
+	//buffManager->setInitCache(false);
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"db1");
 	char *tablename=new char[MAX_FILE_NAME_LENGTH];
@@ -371,10 +376,10 @@ int main(){
 	time_t startTime,endTime,startTime1;
 
 	DatabaseOperations *dbOps=new DatabaseOperations();
-
-	dbOps->createDatabase(dbname,1);
+	dbOps->createDatabase(dbname,10);
 
 	fd=dbOps->openDatabase(dbname);
+
 //	buffManager->hexDump(fd,0);
 //	buffManager->hexDump(fd,1);
 //	buffManager->hexDump(fd,2);
@@ -387,8 +392,8 @@ int main(){
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
-
 	dbOps->createTable(tablename,colNames,colTypes);
+
 	insertValues_.push_back(CommonUtil::int_to_string(34));
 	insertValues_.push_back("Ravindra");
 	insertValues_.push_back(CommonUtil::int_to_string(true));
@@ -455,23 +460,27 @@ int main(){
 	//strcpy(tablename,"table2");
 
 	startTime= clock();
-		for(int i=0;i<30000;i++){
+		for(int i=0;i<1000;i++){
 			dbOps->insertIntoTable(tablename,insertValues_);
 		}
 		buffManager->commitCache();
 //		buffManager->hexDump(fd,0);
 //		buffManager->hexDump(fd,1);
 //		buffManager->hexDump(fd,2);
-		//buffManager->hexDump(fd,6);
+//		buffManager->hexDump(fd,3);
+//		buffManager->hexDump(fd,4);
+//
+//		buffManager->hexDump(fd,5);
+//		buffManager->hexDump(fd,6);
 //		buffManager->hexDump(fd,7);
 //		buffManager->hexDump(fd,8);
-//		buffManager->hexDump(fd,200);
+////		buffManager->hexDump(fd,200);
 //		buffManager->hexDump(fd,18);
 //		buffManager->hexDump(fd,25);
-		//buffManager->hexDump(fd,24);
-		//buffManager->hexDump(fd,25);
-
-		dbOps->selectAllFromTable(tablename);
+//		//buffManager->hexDump(fd,24);
+//		//buffManager->hexDump(fd,25);
+//		buffManager->hexDump(fd,9);
+		//dbOps->selectAllFromTable(tablename);
 		endTime=clock();
 	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
 	buffManager->getHitRate();
@@ -505,7 +514,45 @@ int main(){
 
 
 /*
+// Testing for freeing memory. Problem resolved.
 
+	time_t startTime,endTime;
+	buffManager->createDatabase(dbname,DEFAULT_PAGE_SIZE,10000);
+	fd=buffManager->openDatabase(dbname);
+	int j;
+	buffManager->setInitCache(true);
+	//buffManager->setInitCache(false);
+	startTime=clock();
+	int a,b,c,d;
+	strcpy(pageContent,"hello");
+	char *pageContent2=new char[DEFAULT_PAGE_SIZE];
+	for(int i=0;i<100;i++){
+		for(j=0;j<200;j++){
+			a=1100;
+			b=200;
+			c=300;
+			d=500;
+			buffManager->writePage(fd,i,pageContent);
+		}
+	}
+	for(int i=0;i<100;i++){
+		for(j=0;j<200;j++){
+			a=1100;
+			b=200;
+			c=300;
+			d=500;
+			buffManager->readPage(fd,i,pageContent2);
+			cout << pageContent2 << endl;
+		}
+	}
+
+	buffManager->getHitRate();
+	endTime=clock();
+	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
+*/
+
+
+/*
 	while(1){
 		cout << endl << endl <<"Cache-Console>>";
 		query_string=new char[100];
@@ -675,7 +722,7 @@ int main(){
 		}
 		else if(strcasecmp(command,"hitrate")==0){
 			//cout << endl << command;
-			cout << buffManager->getHitRate();
+			buffManager->getHitRate();
 		}
 		else if(strcmp(command,"exit")==0){
 			cout << endl << "Bye!";
@@ -687,8 +734,8 @@ int main(){
 
 
 	}
-
 */
+
 
 	/*
 	cout << "Enter the database name:";
@@ -748,4 +795,16 @@ int main(){
 	diskOps->closeDiskFile();
 	*/
 
+/* test for delete
+//	char *test=new char[DEFAULT_PAGE_SIZE];
+//	strcpy(test,"hey");
+//	fun(test);
+//	delete[] test;
+//	cout << test << endl;
+ *
+ *
+ */
 }
+
+
+
