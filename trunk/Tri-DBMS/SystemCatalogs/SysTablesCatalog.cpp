@@ -33,6 +33,7 @@ int SysTablesCatalog::createSysTablePage(int pageNumber){
 	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
 	sysTablePage->createDataPageHeaderStruct(pageNumber_);
 	sysTablePage->setPageType(SYS_TABLES_PAGE);
+	delete sysTablePage;
 	return SUCCESS;
 }
 int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader){
@@ -56,9 +57,13 @@ int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int 
 		values.push_back(CommonUtil::int_to_string(noOfColumns));
 		values.push_back(CommonUtil::int_to_string(dpChainHeader));
 		record->getRecordString(values,recordString,&sysTableRecLength_);
+
 		DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
 		sysTablePage->insertRecord(recordString,sysTableRecLength_);
 
+		delete[] recordString;
+		delete record;
+		delete sysTablePage;
 
 	return SUCCESS;
 }
@@ -66,11 +71,11 @@ int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int 
 SysTablesCatalog::~SysTablesCatalog() {
 	// TODO Auto-generated destructor stub
 
-	if(isSysTableChanged_==true){
-		buffManager_=BufferManager::getInstance();
-		buffManager_->writePage(fd_,pageNumber_,pageData_);
-	}
-	delete []pageData_;
+//	if(isSysTableChanged_==true){
+//		buffManager_=BufferManager::getInstance();
+//		buffManager_->writePage(fd_,pageNumber_,pageData_);
+//	}
+	delete[] pageData_;
 
 }
 
@@ -82,34 +87,44 @@ vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
 	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
 	//cout <<sysTablePage->getNoOfRecords();
 	for(int i=0;i< sysTablePage->getNoOfRecords();i++){
-		recordString=new char[DEFAULT_PAGE_SIZE];
+		//recordString=new char[DEFAULT_PAGE_SIZE];
 		sysTablePage->getRecord(i,recordString,&recordLen);
 		recordVector=record->getvectorFromRecord(recordString,4);
+
 		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[0].c_str(),tableName)==0){
+			delete record;
+			delete[] recordString;
+			delete sysTablePage;
 			return recordVector;
 		}
+		recordVector.clear();
 	}
+	delete[] recordString;
+	delete record;
+	delete sysTablePage;
 	return nullVector;
 
 }
 
 int SysTablesCatalog::getNoOfColumns(char *tableName){
-	vector<string> recordVector=getSysTableRecordAsVector(tableName);
-	return CommonUtil::string_to_int(recordVector[2].c_str());
+	//vector<string> recordVector=getSysTableRecordAsVector(tableName);
+	//return 3;
+	return CommonUtil::string_to_int(getSysTableRecordAsVector(tableName)[2].c_str());
 
 }
 
 int SysTablesCatalog::getDPChainHeaderPageNumber(char *tableName){
-	vector<string> recordVector=getSysTableRecordAsVector(tableName);
-	return CommonUtil::string_to_int(recordVector[3].c_str());
+	//vector<string> recordVector=getSysTableRecordAsVector(tableName);
+	//return 5;
+	return CommonUtil::string_to_int(getSysTableRecordAsVector(tableName)[3].c_str());
 
 }
 
 
 int SysTablesCatalog::getMaxRecordSize(char *tableName){
-	vector<string> recordVector=getSysTableRecordAsVector(tableName);
-	return CommonUtil::string_to_int(recordVector[1].c_str());
+	//vector<string> recordVector=getSysTableRecordAsVector(tableName);
+	return CommonUtil::string_to_int(getSysTableRecordAsVector(tableName)[1].c_str());
 
 }
 

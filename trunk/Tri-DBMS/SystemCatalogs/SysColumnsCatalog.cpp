@@ -32,17 +32,18 @@ SysColumnsCatalog::SysColumnsCatalog(int fd, int pageNumber) {
 
 SysColumnsCatalog::~SysColumnsCatalog() {
 	// TODO Auto-generated destructor stub
-	if(isSysColumnChanged_ ==true){
-			buffManager_=BufferManager::getInstance();
-			buffManager_->writePage(fd_,pageNumber_,pageData_);
-		}
-		delete []pageData_;
+//	if(isSysColumnChanged_ ==true){
+//			buffManager_=BufferManager::getInstance();
+//			buffManager_->writePage(fd_,pageNumber_,pageData_);
+//		}
+		delete[] pageData_;
 }
 
 int SysColumnsCatalog::createSysColumnsPage(int pageNumber){
 	DataPage *sysColumnsPage=new DataPage(fd_,pageNumber_);
 	sysColumnsPage->createDataPageHeaderStruct(pageNumber_);
 	sysColumnsPage->setPageType(SYS_COLUMNS_PAGE);
+	delete sysColumnsPage;
 	return SUCCESS;
 }
 
@@ -57,10 +58,17 @@ int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, i
 	values.push_back(tableName);
 	values.push_back(CommonUtil::int_to_string(columnPosition));
 	values.push_back(CommonUtil::int_to_string(columnType));
+
 	record->getRecordString(values,recordString,&sysColumnRecLength_);
 	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
+
 	sysColumnPage->insertRecord(recordString,sysColumnRecLength_);
 	isSysColumnChanged_=true;
+
+	delete[] recordString;
+	delete sysColumnPage;
+	delete record;
+	values.clear();
 	return SUCCESS;
 }
 
@@ -85,10 +93,18 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 			schema.fieldPosition.push_back(CommonUtil::string_to_int(recordVector[2].c_str()));
 			schema.fieldTypes.push_back(CommonUtil::string_to_int(recordVector[3].c_str()));
 			//schema.fieldLengths.push_back();
+			delete[] recordString;
+			delete record;
+			delete sysColumnPage;
+			recordVector.clear();
+			return SUCCESS;
 		}
 	}
-
-	return SUCCESS;
+	delete[] recordString;
+	delete record;
+	delete sysColumnPage;
+	recordVector.clear();
+	return -1;
 }
 
 
