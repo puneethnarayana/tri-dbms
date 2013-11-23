@@ -35,7 +35,8 @@ public:
 	int resetCache();
 	int displayBufferList();
 	int viewFrameBuffer(int frameNumber);
-	int pinAndGetPage(int fd,int pageNumber,char*& pageContent);
+	int pinAndGetPageForRead(int fd,int pageNumber,char*& pageContent);
+	int pinAndGetPageForWrite(int fd,int pageNumber);
 	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber);
 	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber, char *newPageContent);
 	void flushAllPagesToDisk();
@@ -44,7 +45,7 @@ public:
 	int getFd(int frameNumber);
 	int getCd(int fd);
 	int getFreeFrame();
-	float getHitRate();
+	int getHitRate();
 	int hexDump(int fd,int pageNumber);
 	int hexDump(char *pageContent);
 	bool isInitCache() const;
@@ -55,6 +56,7 @@ public:
 	int pageSize_;
 	int bufferSizeInMB_;
 	int numberOfFrames_;
+	int numberOfFramesUsed_;
 
 	typedef struct{
 		int fd_;

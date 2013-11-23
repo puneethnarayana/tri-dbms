@@ -25,10 +25,12 @@ Frame::Frame(int frameSize) {
 								*/
 	strcpy(priorityType_,"DATA_PAGE");
 	pageData_=new char[frameSize];//page size=4KB
+	memset(pageData_,0,frameSize);
 
 }
 
 Frame::~Frame() {
 	// TODO Auto-generated destructor stub
+	//delete[] pageData_;
 }
 
