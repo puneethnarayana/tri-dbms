@@ -42,19 +42,19 @@ DatabaseOperations::DatabaseOperations() {
 
 DatabaseOperations::~DatabaseOperations() {
 	// TODO Auto-generated destructor stub
-	delete buffManager_;
-	delete [] pageData_;
-	delete [] openDatabaseName_;
+	delete[] pageData_;
+	delete[] openDatabaseName_;
 }
 
 int DatabaseOperations::createDatabase(char *databaseName){
 	createDatabase(databaseName,DEFAULT_DB_SIZE);
+	//delete[] databaseName;
 	return SUCCESS;
 }
 
 
 int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
-	int noOfPages=databaseSize*1024*1024/DEFAULT_PAGE_SIZE;
+	int noOfPages=(databaseSize*1024*1024)/DEFAULT_PAGE_SIZE;
 	int sysTablePageNumber_,sysColumnPageNumber_,indexCatalogPageNumber_;
 	buffManager_=BufferManager::getInstance();
 	buffManager_->createDatabase(databaseName,DEFAULT_PAGE_SIZE,noOfPages);
@@ -89,11 +89,13 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 
 	//buffManager_->commitCache();
 	buffManager_->closeDatabase(fd_);
+
 	delete dbMainHeader_;
 	delete freePageManager_;
 	delete sysTablePage_;
 	delete sysColumnPage_;
 	delete indexCatalogPage_;
+
 	return fd_;
 }
 int DatabaseOperations::openDatabase(char *databaseName){
@@ -135,16 +137,18 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	dbMainHeader_->setNoOfTables(dbMainHeader_->getNoOfTables()+1);
 
 	SysTablesCatalog *sysTableCatalog=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+	//cout << " middle of create table"<< endl;
 	//TODO:max record size needs to be computed from the column types
 	sysTableCatalog->insertSysTableEntry(tableName,DEFAULT_PAGE_SIZE,
 			columnList.size(),dirHeaderPage_->getPageNumber());
-
+	//cout << " middle of create table"<< endl;
 	SysColumnsCatalog *sysColumnCatalog=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	for(unsigned i=0;i<columnList.size();i++){
 		colPos=CommonUtil::string_to_int(columnTypeList[i].c_str());
 		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos);
 	}
 
+	//cout << " end of create table"<< endl;
 
 	//buffManager_->commitCache();
 	delete dbMainHeader_;
@@ -162,6 +166,8 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	int recordLength;
 	int dataPageNumber;
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
+//	int dpChainHeader_=5;
+//	int noOfColumns_=3;
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
@@ -188,7 +194,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize());
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
 	DataPage *dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
-
+	//cout << "data page is: " << dirSlotEntry.pageNumber_ << endl;
 	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
 		dataPage->createDataPageHeaderStruct(dirSlotEntry.pageNumber_);
@@ -199,11 +205,12 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 	//buffManager_->commitCache();
 
-	delete []recordString;
+	delete[] recordString;
 	delete dirHeaderPage_;
 	delete dirPage_;
 	delete record;
 	delete dataPage;
+	insertValues.clear();
 	return SUCCESS;
 }
 
@@ -215,7 +222,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 		int dirPageNumber_=-1;
 		int recordLength;
 		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
-		char *recordString=new char[DEFAULT_PAGE_SIZE];
+		char *recordString;
 		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
 
@@ -237,10 +244,11 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 			DirectoryEntry::DirectoryEntryStruct dirEntry_;
 			Record *record=new Record();
 			noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
-
+			//cout <<" no of dir entries :" <<noOfDirEntries << endl;
 			for(int i=0;i<noOfDirEntries;i++){
 				dirEntry_=dirPage_->getDirectorySlot(i);
-				if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-DataPage::getDataSlotEntrySize()){
+				//cout << dirEntry_.pageNumber_  << " " << dirEntry_.freeSpace_<< endl;
+				if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
 					dataPageNumber=dirEntry_.pageNumber_;
 					//cout << dataPageNumber << endl;
 					DataPage *dataPage=new DataPage(fd_,dataPageNumber);
@@ -251,27 +259,32 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 						dataPage->getRecord(j,recordString,&recordLength);
 						//buffManager_->hexDump(recordString);
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
-						delete[] recordString;
+						//delete[] recordString;
 						stringstream recordStream;
 						for(int k=0;k<noOfColumns_;k++){
 							recordStream<<" '"<<recordVector[k].c_str()<<"' ";
 						}
 						//cout << j << endl;
 						cout << recordStream.str() << endl;
+						//recordStream.clear();
 						//recordsVector.push_back(recordStream.str());
 					}
+					//delete dataPage;
 
 					//cout << "come here" << endl;
-
 				}
 
-				dirPageNumber_=dirPage_->getNextPageNumber();
-				//cout << dirPageNumber_ << endl;
+
 			}
+			dirPageNumber_=dirPage_->getNextPageNumber();
+			//delete dirPage_;
+			delete record;
+			//cout << dirPageNumber_ << endl;
 		}
 //		for(int l=0;l<recordsVector.size();l++){
 //			//cout << recordsVector[l].c_str() << endl;
 //		}
+
 
 		//return recordsVector;
 		return SUCCESS;
