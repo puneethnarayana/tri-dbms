@@ -17,25 +17,32 @@
 using namespace std;
 Record::Record() {
 	// TODO Auto-generated constructor stub
-	//record_=new char[DEFAULT_PAGE_SIZE];
+	record_=new char[DEFAULT_PAGE_SIZE];
 }
 
 Record::~Record() {
 	// TODO Auto-generated destructor stub
+	//delete[] record_;
 }
 
-void Record::getRecordString(vector<string> values,char *record_,int *recLen){
+void Record::getRecordString(vector<string> values,char *record,int *recLen){
 	vector<string> values_=values;
 	int offset=sizeof(int)*values_.size();
-	const char *val=new char[MAX_FILE_NAME_LENGTH];
+
+	//char *record_=new char[MAX_FILE_NAME_LENGTH];
 	//record_=new char[DEFAULT_PAGE_SIZE];
 	for(unsigned i=0;i<values_.size();i++){
-		val=values_[i].c_str();
-		memcpy(&record_[offset],val,strlen(val)+1);
-		memcpy(&record_[i*sizeof(int)],&offset,sizeof(int));
-		offset=offset+strlen(val)+1;
+		record_=(char *)values_[i].c_str();
+		memcpy(&record[offset],record_,strlen(record_)+1);
+		memcpy(&record[i*sizeof(int)],&offset,sizeof(int));
+		offset=offset+strlen(record_)+1;
+
 	}
+
+	//values_.clear();
+	//delete[] record_;
 	*recLen=offset;
+
 }
 
 
