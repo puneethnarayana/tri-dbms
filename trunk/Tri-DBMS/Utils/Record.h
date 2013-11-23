@@ -18,7 +18,8 @@ public:
 	vector<string> getvectorFromRecord(char *record,int noOfColumns);
 
 private:
-	//char *record_;
+	char *record_;
+
 };
 
 #endif /* RECORD_H_ */
