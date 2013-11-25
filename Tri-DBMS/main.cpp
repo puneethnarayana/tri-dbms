@@ -460,7 +460,7 @@ int main(){
 	//strcpy(tablename,"table2");
 
 	startTime= clock();
-		for(int i=0;i<1000;i++){
+		for(int i=0;i<1000000;i++){
 			dbOps->insertIntoTable(tablename,insertValues_);
 		}
 		buffManager->commitCache();
@@ -470,8 +470,9 @@ int main(){
 //		buffManager->hexDump(fd,3);
 //		buffManager->hexDump(fd,4);
 //
-//		buffManager->hexDump(fd,5);
-//		buffManager->hexDump(fd,6);
+		buffManager->hexDump(fd,6);
+		buffManager->hexDump(fd,515);
+		buffManager->hexDump(fd,648);
 //		buffManager->hexDump(fd,7);
 //		buffManager->hexDump(fd,8);
 ////		buffManager->hexDump(fd,200);
@@ -503,7 +504,7 @@ int main(){
 //	for(int i=0;i<100;i++){
 //		dbOps->insertIntoTable(tablename,insertValues_);
 //	}
-	//dbOps->selectAllFromTable(tablename);
+	dbOps->selectAllFromTable(tablename);
 
 
 //	endTime=clock();
@@ -526,23 +527,23 @@ int main(){
 	int a,b,c,d;
 	strcpy(pageContent,"hello");
 	char *pageContent2=new char[DEFAULT_PAGE_SIZE];
-	for(int i=0;i<100;i++){
+	for(int i=0;i<1000;i++){
 		for(j=0;j<200;j++){
-			a=1100;
-			b=200;
-			c=300;
-			d=500;
+//			a=1100;
+//			b=200;
+//			c=300;
+//			d=500;
 			buffManager->writePage(fd,i,pageContent);
 		}
 	}
-	for(int i=0;i<100;i++){
+	for(int i=0;i<1000;i++){
 		for(j=0;j<200;j++){
-			a=1100;
-			b=200;
-			c=300;
-			d=500;
+//			a=1100;
+//			b=200;
+//			c=300;
+//			d=500;
 			buffManager->readPage(fd,i,pageContent2);
-			cout << pageContent2 << endl;
+			//cout << pageContent2 << endl;
 		}
 	}
 
@@ -550,7 +551,6 @@ int main(){
 	endTime=clock();
 	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
 */
-
 
 /*
 	while(1){
