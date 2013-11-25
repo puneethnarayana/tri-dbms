@@ -5,6 +5,7 @@
  *      Author: ravin
  */
 
+
 #include "LRUPageReplacement.h"
 #include "BufferManager.h"
 #include "string.h"
@@ -12,8 +13,10 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalVariables.h"
+using namespace std;
 LRUPageReplacement::LRUPageReplacement() {
 	// TODO Auto-generated constructor stub
+	t=std::time(0);
 
 
 }
@@ -21,33 +24,33 @@ LRUPageReplacement::LRUPageReplacement() {
 LRUPageReplacement::~LRUPageReplacement() {
 	// TODO Auto-generated destructor stub
 }
-
-void LRUPageReplacement::initializePriorities(){
-	for(int i=0;i<bufManager_->numberOfFrames_;i++)
-	{
-		bufManager_->BufferPool_[i]->priority_=0;
-	}
-}
-void LRUPageReplacement::increasePriority(int frameNumber){
-	bufManager_->BufferPool_[frameNumber]->priority_++;
-}
-void LRUPageReplacement::decreasePriority(int frameNumber){
-	bufManager_->BufferPool_[frameNumber]->priority_--;
-}
-void LRUPageReplacement::resetPriority(int frameNumber){
-	bufManager_->BufferPool_[frameNumber]->priority_=0;
-}
-unsigned long LRUPageReplacement::getMaximumPriority(){
-	unsigned long maxPriority_=0;
-	for (int i = 0; i < bufManager_->numberOfFrames_; i++) {
-		if (maxPriority_ < bufManager_->BufferPool_[i]->priority_) {
-			maxPriority_ = bufManager_->BufferPool_[i]->priority_;
-		}
-	}
-	return maxPriority_;
-}
+//
+//void LRUPageReplacement::initializePriorities(){
+//	for(int i=0;i<bufManager_->numberOfFrames_;i++)
+//	{
+//		bufManager_->BufferPool_[i]->priority_=0;
+//	}
+//}
+//void LRUPageReplacement::increasePriority(int frameNumber){
+//	bufManager_->BufferPool_[frameNumber]->priority_++;
+//}
+//void LRUPageReplacement::decreasePriority(int frameNumber){
+//	bufManager_->BufferPool_[frameNumber]->priority_--;
+//}
+//void LRUPageReplacement::resetPriority(int frameNumber){
+//	bufManager_->BufferPool_[frameNumber]->priority_=0;
+//}
+//unsigned long LRUPageReplacement::getMaximumPriority(){
+//	unsigned long maxPriority_=0;
+//	for (int i = 0; i < bufManager_->numberOfFrames_; i++) {
+//		if (maxPriority_ < bufManager_->BufferPool_[i]->priority_) {
+//			maxPriority_ = bufManager_->BufferPool_[i]->priority_;
+//		}
+//	}
+//	return maxPriority_;
+//}
 int LRUPageReplacement::getFrameToBeReplaced(){
-	bufManager_=BufferManager::getInstance();
+	BufferManager *bufManager_=BufferManager::getInstance();
 	int freeFrameIndex=-1;
 	t = std::time(0);
 

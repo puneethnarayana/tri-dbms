@@ -8,6 +8,8 @@
 #ifndef LRUPAGEREPLACEMENT_H_
 #define LRUPAGEREPLACEMENT_H_
 
+
+
 #include "BufferManager.h"
 #include "string.h"
 #include "Frame.h"
@@ -15,6 +17,8 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../Global/globalVariables.h"
+#include "../BufferManagement/BufferManager.h"
+
 class BufferManager;
 class LRUPageReplacement {
 public:
@@ -29,7 +33,7 @@ public:
 	unsigned long getMaximumPriority();
 
 private:
-	BufferManager *bufManager_;
+
 	std::time_t t;
 };
 
