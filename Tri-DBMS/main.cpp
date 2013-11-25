@@ -40,6 +40,7 @@ using namespace std;
 //}
 
 int main(){
+
 	BufferManager *buffManager=BufferManager::getInstance();
 	//buffMan->getHitRate();
 	//basicDiskOperations *diskOps=new basicDiskOperations();
@@ -54,8 +55,6 @@ int main(){
 	int DBSizeInMB;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
-
-
 //	stringstream mystream;
 //	mystream<<"hey";
 //	mystream<<"wassup";
@@ -365,7 +364,6 @@ int main(){
 
 
 	//Create Database, Insert into table, Select from Table Testing!!!
-
 	buffManager->setInitCache(true);
 	//buffManager->setInitCache(false);
 	dbname=new char[MAX_FILE_NAME_LENGTH];
@@ -458,7 +456,6 @@ int main(){
 	//buffManager->hexDump(fd,7);
 	//Testing getSchema in sysColumnCatalog
 	//strcpy(tablename,"table2");
-
 	startTime= clock();
 		for(int i=0;i<1000000;i++){
 			dbOps->insertIntoTable(tablename,insertValues_);
@@ -481,7 +478,7 @@ int main(){
 //		//buffManager->hexDump(fd,24);
 //		//buffManager->hexDump(fd,25);
 //		buffManager->hexDump(fd,9);
-		//dbOps->selectAllFromTable(tablename);
+		dbOps->selectAllFromTable(tablename);
 		endTime=clock();
 	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
 	buffManager->getHitRate();
