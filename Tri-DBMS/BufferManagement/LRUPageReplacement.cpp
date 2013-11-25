@@ -59,7 +59,7 @@ int LRUPageReplacement::getFrameToBeReplaced(){
 			break;
 		}
 		else if(bufManager_->BufferPool_[i]->pinCount_==0){
-			if(minPriority>=bufManager_->BufferPool_[i]->priority_){
+			if(minPriority>=bufManager_->BufferPool_[i]->priority_ && strcmp(bufManager_->BufferPool_[i]->priorityType_,"DATA_PAGE")==0){
 				minPriority=bufManager_->BufferPool_[i]->priority_;
 				freeFrameIndex=i;
 			}

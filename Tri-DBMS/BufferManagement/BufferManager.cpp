@@ -23,10 +23,10 @@ using namespace std;
 BufferManager::BufferManager() {
 	// TODO Auto-generated constructor stub
 	pageSize_=DEFAULT_PAGE_SIZE;
-	bufferSizeInMB_=10;
+	//bufferSizeInMB_=1;
 	initCache_=false;
 	noOfDBsOpened_=0;
-	numberOfFrames_=bufferSizeInMB_*(1024*1024/pageSize_);
+	numberOfFrames_=10;
 
 	LRUReplacement = new LRUPageReplacement();
 	diskManager_ = new BasicDiskOperations();
@@ -60,13 +60,13 @@ BufferManager* BufferManager::getInstance() {
 
 BufferManager::~BufferManager() {
 	// TODO Auto-generated destructor stub
-	delete LRUReplacement;
-	//delete diskManager_;
-	delete[] openedFileName_;
-	for (int i = 0; i < numberOfFrames_; i++) {
-				delete[] BufferPool_[i]->pageData_;
-		}
-	delete[] BufferPool_;
+//	delete LRUReplacement;
+//	//delete diskManager_;
+//	delete[] openedFileName_;
+//	for (int i = 0; i < numberOfFrames_; i++) {
+//		delete[] BufferPool_[i]->pageData_;
+//	}
+//	delete[] BufferPool_;
 }
 int BufferManager::initializeCache(int noOfPages){
 
@@ -357,7 +357,9 @@ int BufferManager::commitCache(){
 }
 int BufferManager::resetCache(){
 	flushAllPagesToDisk();
-
+	for (int i = 0; i < numberOfFrames_; i++) {
+		delete[] BufferPool_[i]->pageData_;
+	}
 	delete[] BufferPool_;
 	initializeCache(numberOfFrames_);
 
@@ -561,7 +563,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 		}
 
 		// Show the address
-		cout << setw(8) << address;
+		cout << setw(4) << address;
 
 		// Show the hex codes
 		for( int i = 0; i < nread; i++ )
