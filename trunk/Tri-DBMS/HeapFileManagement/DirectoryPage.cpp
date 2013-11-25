@@ -91,6 +91,7 @@ int DirectoryPage::searchForSlotEntry(int sizeRequired){
 	}
 	// new DirectoryEntry slot required
 	//cout << "it came here "<< endl;
+	delete dirEntry;
 	return addSlotEntry(sizeRequired);
 }
 
@@ -100,7 +101,7 @@ int DirectoryPage::addSlotEntry(int sizeRequired){
 	}
 
 	FreePageManager *page= new FreePageManager(fd_,1);
-			char *trialData= new char[DEFAULT_PAGE_SIZE];
+			//char *trialData= new char[DEFAULT_PAGE_SIZE];
 			//page->createFreePageManagerPage(1,trialData);
 
 
@@ -111,12 +112,17 @@ int DirectoryPage::addSlotEntry(int sizeRequired){
 			page->getFreePage(),
 			DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-sizeRequired
 	};
+//	cout << dirEntry->directoryEntry_.pageNumber_ << endl;
+//	cout << dirEntry->directoryEntry_.freeSpace_ << endl;
 
 	memcpy(&pageData_[offset],&dirEntry->directoryEntry_,DirectoryEntry::getDirectoryEntrySize());
 
 	setNoOfDirectoryEntries(getNoOfDirectoryEntries()+1);
 	isDirectoryPageChanged_=true;
-		buffManager_->writePage(fd_,pageNumber_,pageData_);
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+
+	delete dirEntry;
+	delete page;
 	return getNoOfDirectoryEntries()-1;
 }
 
@@ -131,6 +137,7 @@ int DirectoryPage::updateSlotEntry(int slotNumber,int freeSpace){
 	memcpy(&pageData_[offset],&dirEntry->directoryEntry_,DirectoryEntry::getDirectoryEntrySize());
 	isDirectoryPageChanged_=true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	delete dirEntry;
 	return SUCCESS;
 }
 
@@ -162,6 +169,7 @@ void DirectoryPage::updateMaxFreeSpace(){
 	memcpy(pageData_,&directoryPageHeader_,sizeof(DirectoryPageHeaderStruct));
 	isDirectoryPageChanged_=true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	delete dirEntry;
 }
 
 
