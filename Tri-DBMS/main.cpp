@@ -60,8 +60,87 @@ int main(){
 //	mystream<<"wassup";
 //	cout << mystream.str() << endl;
 
+	buffManager->setInitCache(true);
+		//buffManager->setInitCache(false);
+		dbname=new char[MAX_FILE_NAME_LENGTH];
+		strcpy(dbname,"db1");
+		char *tablename=new char[MAX_FILE_NAME_LENGTH];
+		strcpy(tablename,"table1");
 
+		time_t startTime,endTime,startTime1;
 
+		DatabaseOperations *dbOps=new DatabaseOperations();
+		dbOps->createDatabase(dbname,10);
+
+		fd=dbOps->openDatabase(dbname);
+		vector<string> colNames,insertValues_,insertValues1_,insertValues2_;
+			colNames.push_back("c1");
+			colNames.push_back("co2");
+			colNames.push_back("col3");
+			vector<string> colTypes;
+			colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
+			colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
+			colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
+			dbOps->createTable(tablename,colNames,colTypes);
+			vector<string> whereList;
+			whereList.push_back("c1");
+			whereList.push_back("co2");
+			whereList.push_back("col3");
+			whereList.push_back("col3");
+
+			insertValues_.push_back(CommonUtil::int_to_string(34));
+				insertValues_.push_back("Ravindra");
+				insertValues_.push_back(CommonUtil::int_to_string(true));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(12));
+				insertValues_.push_back("Alka");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(83));
+				insertValues_.push_back("puneeth");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(48));
+				insertValues_.push_back("sreeraag");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(36));
+				insertValues_.push_back("vikranth");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(66));
+				insertValues_.push_back("pridhvi");
+				insertValues_.push_back(CommonUtil::int_to_string(true));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(60));
+				insertValues_.push_back("sriram");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(45));
+				insertValues_.push_back("don't know");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+
+				insertValues_.clear();
+				insertValues_.push_back(CommonUtil::int_to_string(1));
+				insertValues_.push_back("A");
+				insertValues_.push_back(CommonUtil::int_to_string(false));
+				dbOps->insertIntoTable(tablename,insertValues_);
+				dbOps->selectAllFromTable(tablename,whereList);
 
 /*//getAllRecords testing
 
@@ -361,7 +440,7 @@ int main(){
 
 */
 
-
+/*
 
 	//Create Database, Insert into table, Select from Table Testing!!!
 	buffManager->setInitCache(true);
@@ -501,7 +580,7 @@ int main(){
 //	for(int i=0;i<100;i++){
 //		dbOps->insertIntoTable(tablename,insertValues_);
 //	}
-	dbOps->selectAllFromTable(tablename);
+	//dbOps->selectAllFromTable(tablename);
 
 
 //	endTime=clock();
@@ -509,7 +588,7 @@ int main(){
 //	cout << endl <<double( clock() - startTime1 ) << " micro seconds." << endl;
 
 
-
+*/
 
 /*
 // Testing for freeing memory. Problem resolved.
