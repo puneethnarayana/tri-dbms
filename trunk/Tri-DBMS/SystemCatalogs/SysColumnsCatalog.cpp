@@ -74,7 +74,7 @@ int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, i
 
 int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 
-	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	char *recordString;
 	int recordLen=0;
 	Record *record=new Record();
 	vector<string> recordVector;
@@ -93,18 +93,15 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 			schema.fieldPosition.push_back(CommonUtil::string_to_int(recordVector[2].c_str()));
 			schema.fieldTypes.push_back(CommonUtil::string_to_int(recordVector[3].c_str()));
 			//schema.fieldLengths.push_back();
-			delete[] recordString;
-			delete record;
-			delete sysColumnPage;
-			recordVector.clear();
-			return SUCCESS;
+
 		}
+		delete[] recordString;
 	}
-	delete[] recordString;
+
 	delete record;
 	delete sysColumnPage;
 	recordVector.clear();
-	return -1;
+	return SUCCESS;
 }
 
 
