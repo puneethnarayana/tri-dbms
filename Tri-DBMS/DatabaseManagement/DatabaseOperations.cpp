@@ -216,7 +216,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	return SUCCESS;
 }
 
-int DatabaseOperations::selectAllFromTable(char *tableName){
+int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList){
 		Schema schema;
 		vector<string> recordVector;
 		//vector<string> recordsVector;
@@ -234,13 +234,13 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 
 		sysColumnCatalog_->getTableSchema(tableName,schema);
 
-		//cout << "No of columns is: "<< schema.columnNames.size() << endl;
-//		for(int i=0;i<schema.columnNames.size();i++){
-//			cout << schema.columnNames[i].c_str() << endl;
-//			cout << schema.fieldPosition[i] << endl;
-//			cout << schema.fieldTypes[i] << endl;
-//			cout << endl << endl;
-//		}
+/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
+		for(int i=0;i<schema.columnNames.size();i++){
+			cout << schema.columnNames[i].c_str() << endl;
+			cout << schema.fieldPosition[i] << endl;
+			cout << schema.fieldTypes[i] << endl;
+			cout << endl << endl;
+		}*/
 		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 
@@ -267,9 +267,21 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
 						delete[] recordString;
 						stringstream recordStream;
-						for(int k=0;k<noOfColumns_;k++){
-							recordStream<<" '"<<recordVector[k].c_str()<<"' ";
+						int pos;
+
+						for(unsigned c=0;c<columnList.size();c++){
+									pos= schema.getColumnNum(columnList[c].c_str());
+									if(schema.fieldTypes[pos]==TYPE_BOOL) {
+										if(strcmp(recordVector[pos].c_str(),"1")==0)
+											recordStream<< " 'TRUE' ";
+										else
+											recordStream<< " 'FALSE' ";
+									}
+									else
+
+									recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
 						}
+
 						//cout << j << endl;
 						cout << recordStream.str() << endl;
 						//recordStream.clear();
