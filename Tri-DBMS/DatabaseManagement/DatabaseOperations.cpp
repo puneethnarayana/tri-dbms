@@ -218,7 +218,6 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 int DatabaseOperations::selectAllFromTable(char *tableName){
 		Schema schema;
-		//string record;
 		vector<string> recordVector;
 		//vector<string> recordsVector;
 		int dirPageNumber_=-1;
@@ -288,7 +287,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 //			//cout << recordsVector[l].c_str() << endl;
 //		}
 
-
+		delete dirHeaderPage_;
 		//return recordsVector;
 		return SUCCESS;
 }
