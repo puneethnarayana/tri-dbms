@@ -52,8 +52,10 @@ std::string Schema::describeSchema() {
 
 
 int Schema::getColumnNum(std::string columnName){
+
 	for (unsigned i = 0; i < columnNames.size(); i++) {
-		if(columnName==columnNames[i]){
+		if(strcmp(columnName.c_str(),columnNames[i].c_str())==0){
+
 			return i;
 		}
 	}
