@@ -104,7 +104,7 @@ int DatabaseOperations::openDatabase(char *databaseName){
 	isDatabaseOpen_=true;
 	fd_=buffManager_->openDatabase(databaseName);
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
-	freePageManager_=new FreePageManager(fd_,1);
+	//freePageManager_=new FreePageManager(fd_,1);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	return fd_;
@@ -164,36 +164,38 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	//we need schema to convert "insert into .." statement to insertvalues vector;
 	int dirPageNumber_=-1;
 	int recordLength;
-	int dataPageNumber;
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 //	int dpChainHeader_=5;
 //	int noOfColumns_=3;
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
-	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+	//int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 	DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
-
-
-
+	FreePageManager * freePageManager_=new FreePageManager(fd_,1);
+	DataPage *dataPage;
 	Record *record=new Record();
 	record->getRecordString(insertValues,recordString,&recordLength);
-//	while(dirPage_->getMaxFreeSpace()<recordLength){
-//		dirPageNumber_=dirPage_->getNextPageNumber();
-//		if(dirPageNumber_==-1){
-//			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
-//		}
-//		else{
-//			dirPageNumber_=freePageManager_->getFreePage();
-//			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
-//			char *pageData=new char[DEFAULT_PAGE_SIZE];
-//			dirPage_->createDirectoryPage(dirPageNumber_,pageData);
-//		}
-//	}
-	//cout << "dirEntry : "<< dirPageNumber_;
+
+	while(dirPage_->getMaxFreeSpace()<recordLength){
+		dirPageNumber_=dirPage_->getNextPageNumber();
+		if(dirPageNumber_!=-1){
+			delete dirPage_;
+			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+		}
+		else{
+			dirPageNumber_=freePageManager_->getFreePage();
+			dirPage_->setNextPageNumber(dirPageNumber_);
+			delete dirPage_;
+			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+			dirPage_->createDirectoryPage(dirPageNumber_);
+			cout << "dirPageNumber : "<< dirPageNumber_ << endl;
+		}
+	}
+	//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
 	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize());
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
-	DataPage *dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
+	dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
 	//cout << "data page is: " << dirSlotEntry.pageNumber_ << endl;
 	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
@@ -204,13 +206,13 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	//cout << "print this also2" << endl;
 
 	//buffManager_->commitCache();
-
 	delete[] recordString;
+	delete freePageManager_;
 	delete dirHeaderPage_;
 	delete dirPage_;
 	delete record;
 	delete dataPage;
-	insertValues.clear();
+	//insertValues.clear();
 	return SUCCESS;
 }
 
@@ -222,27 +224,32 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 		int dirPageNumber_=-1;
 		int recordLength;
 		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
+		Record *record;
+		DirectoryPage *dirPage_;
 		char *recordString;
+		DataPage *dataPage;
+//		int dpChainHeader_=5;
+//		int noOfColumns_=3;
 		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
 
 		sysColumnCatalog_->getTableSchema(tableName,schema);
 
 		//cout << "No of columns is: "<< schema.columnNames.size() << endl;
-		for(int i=0;i<schema.columnNames.size();i++){
+//		for(int i=0;i<schema.columnNames.size();i++){
 //			cout << schema.columnNames[i].c_str() << endl;
 //			cout << schema.fieldPosition[i] << endl;
 //			cout << schema.fieldTypes[i] << endl;
 //			cout << endl << endl;
-		}
+//		}
 		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 
 		//loop the following for all the directory pages of table;
 		while(dirPageNumber_!=-1){
-			DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
 			DirectoryEntry::DirectoryEntryStruct dirEntry_;
-			Record *record=new Record();
+			record=new Record();
 			noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
 			//cout <<" no of dir entries :" <<noOfDirEntries << endl;
 			for(int i=0;i<noOfDirEntries;i++){
@@ -251,7 +258,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 				if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
 					dataPageNumber=dirEntry_.pageNumber_;
 					//cout << dataPageNumber << endl;
-					DataPage *dataPage=new DataPage(fd_,dataPageNumber);
+					dataPage=new DataPage(fd_,dataPageNumber);
 					noOfRecordsInDataPage=dataPage->getNoOfRecords();
 					//cout << noOfRecordsInDataPage << endl;
 					for(int j=0;j<noOfRecordsInDataPage;j++){
@@ -259,7 +266,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 						dataPage->getRecord(j,recordString,&recordLength);
 						//buffManager_->hexDump(recordString);
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
-						//delete[] recordString;
+						delete[] recordString;
 						stringstream recordStream;
 						for(int k=0;k<noOfColumns_;k++){
 							recordStream<<" '"<<recordVector[k].c_str()<<"' ";
@@ -269,15 +276,11 @@ int DatabaseOperations::selectAllFromTable(char *tableName){
 						//recordStream.clear();
 						//recordsVector.push_back(recordStream.str());
 					}
-					//delete dataPage;
-
-					//cout << "come here" << endl;
+					delete dataPage;
 				}
-
-
 			}
 			dirPageNumber_=dirPage_->getNextPageNumber();
-			//delete dirPage_;
+			delete dirPage_;
 			delete record;
 			//cout << dirPageNumber_ << endl;
 		}

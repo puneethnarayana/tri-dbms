@@ -41,7 +41,7 @@ private:
 	bool isDatabaseOpen_;
 	char *openDatabaseName_;
 	DBMainHeaderPage *dbMainHeader_;
-	FreePageManager *freePageManager_;
+	//FreePageManager *freePageManager_;
 	SysTablesCatalog *sysTableCatalog_;
 	SysColumnsCatalog *sysColumnCatalog_;
 };
