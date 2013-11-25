@@ -26,7 +26,7 @@ BufferManager::BufferManager() {
 	//bufferSizeInMB_=1;
 	initCache_=false;
 	noOfDBsOpened_=0;
-	numberOfFrames_=10;
+	numberOfFrames_=50;
 
 	LRUReplacement = new LRUPageReplacement();
 	diskManager_ = new BasicDiskOperations();
