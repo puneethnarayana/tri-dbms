@@ -21,7 +21,7 @@ SysTablesCatalog::SysTablesCatalog(int fd,int pageNumber) {
 	pageNumber_=pageNumber;
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	buffManager_ = BufferManager::getInstance();
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 //	maxSysTableEntriesPerPage_=(DEFAULT_PAGE_SIZE-sizeof(GenPageHeaderStruct)-sizeof(int))/sizeof(SysTableEntryStruct);
 //	memset(sysTablePage_.sysTableEntries_,0,maxSysTableEntriesPerPage_);
@@ -68,18 +68,7 @@ int SysTablesCatalog::insertSysTableEntry(char *tableName,int maxRecordSize,int 
 	return SUCCESS;
 }
 
-SysTablesCatalog::~SysTablesCatalog() {
-	// TODO Auto-generated destructor stub
-
-//	if(isSysTableChanged_==true){
-//		buffManager_=BufferManager::getInstance();
-//		buffManager_->writePage(fd_,pageNumber_,pageData_);
-//	}
-	delete[] pageData_;
-
-}
-
-vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
+int SysTablesCatalog::deleteSysTableEntry(char *tableName){
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 	int recordLen=0;
 	Record *record=new Record();
@@ -93,12 +82,50 @@ vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
 
 		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[0].c_str(),tableName)==0){
-			delete record;
-			delete[] recordString;
-			delete sysTablePage;
-			return recordVector;
+			sysTablePage->freeSlotDirectoryEntry(i);
 		}
 		recordVector.clear();
+	}
+	delete[] recordString;
+	delete record;
+	delete sysTablePage;
+	return SUCCESS;
+}
+
+SysTablesCatalog::~SysTablesCatalog() {
+	// TODO Auto-generated destructor stub
+
+//	if(isSysTableChanged_==true){
+//		buffManager_=BufferManager::getInstance();
+//		buffManager_->writePage(fd_,pageNumber_,pageData_);
+//	}
+	delete[] pageData_;
+
+}
+
+vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
+	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	int recordLen=0,flag=1;
+	Record *record=new Record();
+	vector<string> recordVector,nullVector;
+	DataPage *sysTablePage=new DataPage(fd_,pageNumber_);
+	//cout <<sysTablePage->getNoOfRecords();
+	for(int i=0;i< sysTablePage->getNoOfRecords();i++){
+		//recordString=new char[DEFAULT_PAGE_SIZE];
+		flag=sysTablePage->getRecord(i,recordString,&recordLen);
+		if(flag!=-1){
+			recordVector=record->getvectorFromRecord(recordString,4);
+
+			//cout << recordVector[1].c_str() << " " << tableName << endl;
+			if(strcmp(recordVector[0].c_str(),tableName)==0){
+				delete record;
+				delete[] recordString;
+				delete sysTablePage;
+				return recordVector;
+			}
+			recordVector.clear();
+		}
+		flag=1;
 	}
 	delete[] recordString;
 	delete record;
