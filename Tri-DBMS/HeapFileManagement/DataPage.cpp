@@ -16,6 +16,7 @@
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
 #include "../BufferManagement/BufferManager.h"
+#include "../HeapFileManagement/FreePageManager.h"
 #include <stdio.h>
 #include <string.h>
 using namespace std;
@@ -25,7 +26,7 @@ DataPage::DataPage(int fd,int pageNumber) {
 	pageNumber_=pageNumber;
 	buffManager_=BufferManager::getInstance();
 	pageData_=new char[DEFAULT_PAGE_SIZE];
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&dataPageHeader_,pageData_,sizeof(DataPageHeaderStruct));
 	isDataPageChanged_=false;
@@ -49,6 +50,8 @@ int DataPage::createDataPageHeaderStruct(int pageNumber){
 	dataPageHeader_.headerOffset_=sizeof(DataPageHeaderStruct);
 	dataPageHeader_.continuousFreeSpaceOffset_=dataPageHeader_.headerOffset_;
 	dataPageHeader_.continuousFreeSpaceAvailable_=DEFAULT_PAGE_SIZE-dataPageHeader_.headerOffset_;
+	dataPageHeader_.directoryPageBackPtr=-1;
+	dataPageHeader_.directoryEntryBackPtr=-1;
 	//memcpy(pageData,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	isDataPageChanged_=true;
@@ -56,7 +59,15 @@ int DataPage::createDataPageHeaderStruct(int pageNumber){
 	return SUCCESS;
 }
 
-
+int DataPage::deleteDataPage(){
+	FreePageManager *freePageManager=new FreePageManager(fd_,1);
+	freePageManager->freePage(pageNumber_);
+	cout << "deleted data pageNo :"<<pageNumber_<<endl;
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	delete freePageManager;
+	return SUCCESS;
+}
 int DataPage::insertRecord(char *record,int recordLength){
 	int slotNumberForInsert_;
 	int offsetForInsert_;
@@ -88,6 +99,10 @@ int DataPage::getRecord(int slotEntryNumber,char *&record,int *recordLen){
 	//record=new char[DEFAULT_PAGE_SIZE];
 	int slotEntryOffset=DEFAULT_PAGE_SIZE-(slotEntryNumber+1)*sizeof(SlotDirectoryEntry);
 	memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
+	if(slotEntry_.recordLength<=0){
+		recordLen=0;
+		return -1;
+	}
 	memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
 	*recordLen=slotEntry_.recordLength;
 	return SUCCESS;
@@ -190,6 +205,7 @@ int DataPage::updateSlotDirectoryEntry(int slotNumber,int recordLength){
 	isDataPageChanged_=true;
 	return SUCCESS;
 }
+
 DataPage::SlotDirectoryEntry DataPage::getSlotDirectoryEntry(int slotNumber){
 	SlotDirectoryEntry slotEntry_;
 	int slotEntryOffset=DEFAULT_PAGE_SIZE-((slotNumber+1)*sizeof(SlotDirectoryEntry));

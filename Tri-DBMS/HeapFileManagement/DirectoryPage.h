@@ -34,10 +34,12 @@ public:
 	void setNextPageNumber(int nextPageNumber);
 
 	int createDirectoryPage(int pageNumber);
+	int deleteDirectoryPage();
 	int searchForSlotEntry(int sizeRequired);
 	int addSlotEntry(int sizeRequired);
 	DirectoryEntry::DirectoryEntryStruct insertSlotEntry(int sizeRequired);
 	int updateSlotEntry(int slotNumber,int freeSpace);
+	int deleteSlotEntry(int slotNumber);
 	int getFreeSpace(int slotNumber);
 	void updateMaxFreeSpace();
 	DirectoryEntry::DirectoryEntryStruct getDirectorySlot(int slotEntryNumber);

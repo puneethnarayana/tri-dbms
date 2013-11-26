@@ -26,7 +26,7 @@ DirectoryPage::DirectoryPage(int fd, int pageNumber) {
 	pageNumber_=pageNumber;
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	buffManager_=BufferManager::getInstance();
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&directoryPageHeader_,pageData_,sizeof(DirectoryPageHeaderStruct));
 	isDirectoryPageChanged_=false;
@@ -138,6 +138,35 @@ int DirectoryPage::updateSlotEntry(int slotNumber,int freeSpace){
 	isDirectoryPageChanged_=true;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	delete dirEntry;
+	return SUCCESS;
+}
+//int DirectoryPage::deleteSlotEntry(int slotNumber){
+//
+//	updateSlotEntry(int slotNumber,
+//	return SUCCESS;
+//}
+//
+
+int DirectoryPage::deleteDirectoryPage(){
+	int offset;
+	DataPage *dataPage;
+
+	DirectoryEntry *dirEntry=new DirectoryEntry();
+	for(unsigned i=0;i<directoryPageHeader_.noOfDirectoryEntries_;i++){
+		offset= directoryPageHeader_.headerOffset_+
+				(i*DirectoryEntry::getDirectoryEntrySize());
+		memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
+		dataPage= new DataPage(fd_,dirEntry->directoryEntry_.pageNumber_);
+		dataPage->deleteDataPage();
+		delete dataPage;
+
+	}
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
+	cout << "deleted dir pageNo :"<<pageNumber_<<endl;
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	FreePageManager *freePageManager=new FreePageManager(fd_,1);
+	freePageManager->freePage(pageNumber_);
+	delete freePageManager;
 	return SUCCESS;
 }
 

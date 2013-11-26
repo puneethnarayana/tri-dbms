@@ -17,6 +17,7 @@ public:
 	DataPage(int fd,int pageNumber);
 	virtual ~DataPage();
 	int createDataPageHeaderStruct(int pageNumber);
+	int deleteDataPage();
 
 	int getPageNumber();
 	int getPageType();
@@ -48,7 +49,6 @@ public:
 	int updateSlotDirectoryEntry(int slotNumber,int recordLength);
 	int freeSlotDirectoryEntry(int slotNumber);
 
-
 private:
 	typedef struct{
 		GenPageHeaderStruct genPageHeader_;
@@ -56,6 +56,8 @@ private:
 		int headerOffset_;
 		int continuousFreeSpaceOffset_;
 		int continuousFreeSpaceAvailable_;
+		int directoryPageBackPtr;
+		int directoryEntryBackPtr;
 	}DataPageHeaderStruct;
 	DataPageHeaderStruct dataPageHeader_;
 
