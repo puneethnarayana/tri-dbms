@@ -19,6 +19,7 @@ public:
         virtual ~SysTablesCatalog();
         int createSysTablePage(int pageNumber);
         int insertSysTableEntry(char *tableName,int maxRecordSize,int noOfColumns,int dpChainHeader);
+        int deleteSysTableEntry(char *tableName);
         vector<string> getSysTableRecordAsVector(char *tableName);
         int getDPChainHeaderPageNumber(char *tableName);
         int getNoOfColumns(char *tableName);

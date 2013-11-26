@@ -19,6 +19,7 @@ public:
 	int createSysColumnsPage(int pageNumber);
 	int insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType);
 	int getTableSchema(char *tableName,Schema& schema);
+	int deleteSysColumnEntryForTable(char *tableName);
 private:
 
 //	typedef struct{

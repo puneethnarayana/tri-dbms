@@ -21,7 +21,7 @@ SysColumnsCatalog::SysColumnsCatalog(int fd, int pageNumber) {
 	pageNumber_=pageNumber;
 	buffManager_=BufferManager::getInstance();
 	pageData_=new char[DEFAULT_PAGE_SIZE];
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 //	maxSysColumnEntriesPerPage_=
 //			(DEFAULT_PAGE_SIZE-sizeof(GenPageHeaderStruct)-sizeof(int))/sizeof(sysColumnPageStruct);
@@ -70,6 +70,32 @@ int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, i
 	delete record;
 	values.clear();
 	return SUCCESS;
+}
+
+
+int SysColumnsCatalog::deleteSysColumnEntryForTable(char *tableName){
+	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	int recordLen=0;
+	Record *record=new Record();
+	vector<string> recordVector,nullVector;
+	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
+	//cout <<sysTablePage->getNoOfRecords();
+	for(int i=0;i< sysColumnPage->getNoOfRecords();i++){
+		//recordString=new char[DEFAULT_PAGE_SIZE];
+		sysColumnPage->getRecord(i,recordString,&recordLen);
+		recordVector=record->getvectorFromRecord(recordString,4);
+
+		//cout << recordVector[1].c_str() << " " << tableName << endl;
+		if(strcmp(recordVector[1].c_str(),tableName)==0){
+			sysColumnPage->freeSlotDirectoryEntry(i);
+		}
+		recordVector.clear();
+	}
+	delete[] recordString;
+	delete record;
+	delete sysColumnPage;
+	return SUCCESS;
+
 }
 
 int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
