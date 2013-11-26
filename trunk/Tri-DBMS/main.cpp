@@ -141,6 +141,28 @@ int main(){
 				insertValues_.push_back(CommonUtil::int_to_string(false));
 				dbOps->insertIntoTable(tablename,insertValues_);
 				dbOps->selectAllFromTable(tablename,whereList);
+				buffManager->commitCache();
+				buffManager->hexDump(fd,2);
+				buffManager->hexDump(fd,3);
+				//dbOps->dropTable(tablename);
+				cout<< "After dropTable" << endl;
+				buffManager->commitCache();
+				buffManager->hexDump(fd,2);
+				buffManager->hexDump(fd,3);
+				dbOps->selectAllFromTable(tablename,whereList);
+				buffManager->hexDump(fd,1);
+				buffManager->hexDump(fd,5);
+				buffManager->hexDump(fd,6);
+				buffManager->hexDump(fd,7);
+				strcpy(tablename,"TABLE");
+				dbOps->createTable(tablename,colNames,colTypes);
+				buffManager->commitCache();
+				buffManager->hexDump(fd,2);
+				buffManager->hexDump(fd,3);
+				cout<< "Please print this DUDE!!";
+
+
+
 
 /*//getAllRecords testing
 
@@ -444,7 +466,7 @@ int main(){
 
 	//Create Database, Insert into table, Select from Table Testing!!!
 	buffManager->setInitCache(true);
-	//buffManager->setInitCache(false);
+	buffManager->setInitCache(false);
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"db1");
 	char *tablename=new char[MAX_FILE_NAME_LENGTH];
@@ -536,9 +558,9 @@ int main(){
 	//Testing getSchema in sysColumnCatalog
 	//strcpy(tablename,"table2");
 	startTime= clock();
-		for(int i=0;i<1000000;i++){
-			dbOps->insertIntoTable(tablename,insertValues_);
-		}
+//		for(int i=0;i<1000000;i++){
+//			dbOps->insertIntoTable(tablename,insertValues_);
+//		}
 		buffManager->commitCache();
 //		buffManager->hexDump(fd,0);
 //		buffManager->hexDump(fd,1);
@@ -546,9 +568,9 @@ int main(){
 //		buffManager->hexDump(fd,3);
 //		buffManager->hexDump(fd,4);
 //
-		buffManager->hexDump(fd,6);
-		buffManager->hexDump(fd,515);
-		buffManager->hexDump(fd,648);
+//		buffManager->hexDump(fd,6);
+//		buffManager->hexDump(fd,515);
+//		buffManager->hexDump(fd,648);
 //		buffManager->hexDump(fd,7);
 //		buffManager->hexDump(fd,8);
 ////		buffManager->hexDump(fd,200);
