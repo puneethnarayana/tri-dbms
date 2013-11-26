@@ -1,7 +1,8 @@
 CC=g++
 CFLAGS=-c -Wall
-flex: lex.yy.c yparser.tab.cpp yparser.tab.hpp
-	g++ yparser.tab.cpp lex.yy.c -lfl -o flex
+
+flex: lex.yy.c yparser.tab.cpp yparser.tab.hpp main.cpp
+	g++ yparser.tab.cpp lex.yy.c main.cpp -o flex
 
 yparser.tab.cpp yparser.tab.hpp: yparser.ypp
 	bison -d yparser.ypp

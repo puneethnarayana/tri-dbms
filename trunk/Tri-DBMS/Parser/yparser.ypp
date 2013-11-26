@@ -1,13 +1,8 @@
 %error-verbose
 %{
-#include <cstdio>
-#include <iostream>
-#include <stdio.h>
-using namespace std;
+#include "heading.h"
 
 extern int yylex();
-extern int yyparse();
-extern FILE *yyin;
 extern void yyerror(const char *s);
 %}
 
@@ -102,7 +97,9 @@ query_list:
 	
 
 create_statement:
-		CREATE TABLE table '(' base_table_element_commalist ')' {cout<<"CREATE TABLE"<<endl<<endl;}
+		CREATE TABLE table '(' base_table_element_commalist ')' 
+		{cout<<"CREATE TABLE"<<endl<<endl;
+		}
 	;
 
 base_table_element_commalist:
@@ -439,19 +436,6 @@ use_db:
 	;
 
 %%
-
-main() {
-	FILE *myfile = fopen("input.txt", "r");
-	if (!myfile) {
-		cout << "I can't open file!" << endl;
-		return -1;
-	}
-	yyin = myfile;
-	do {
-		yyparse();
-	} while (!feof(yyin));
-	
-}
 
 void yyerror(const char *s) {
 	cout << "\nERROR  MSG: " << s << endl;
