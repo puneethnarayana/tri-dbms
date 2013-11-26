@@ -1,13 +1,13 @@
 %{
 #include <iostream>
 using namespace std;
-#include "yparser.tab.hpp" //after compiling bison with -d to understand tokens
+#include "tok.h" //after compiling bison with -d to understand tokens
 #define YY_DECL int yylex()
 void yyerror(char *s);
 int lineno = 1;
 %}
 
-%option noyywrap
+%option noyywrap case-insensitive
 %e 1200
 %%
 

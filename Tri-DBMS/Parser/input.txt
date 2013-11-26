@@ -1,6 +1,6 @@
-CREATE TABLE asd(Name VARCHAR(5), Age INTEGER, Pass BOOL);
+create table asd(Name VARCHAR(5), Age integer, Pass bool);
 INSERT INTO asd VALUES ("Qwerty",34,"True");
 CREATE INDEX new_key ON asd;
 DROP TABLE asd;
-SHOW DATABASES;
-USE qwe;
+show DATABASES;
+use qwe;
