@@ -218,6 +218,11 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList){
 		Schema schema;
+		vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+		if(tableEntry.size()==0){
+			cout << tableName << " does not exist in the current Database!" << endl;
+			return -1;
+		}
 		vector<string> recordVector;
 		//vector<string> recordsVector;
 		int dirPageNumber_=-1;
@@ -298,8 +303,20 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 //		for(int l=0;l<recordsVector.size();l++){
 //			//cout << recordsVector[l].c_str() << endl;
 //		}
-
 		delete dirHeaderPage_;
 		//return recordsVector;
 		return SUCCESS;
+}
+
+
+int DatabaseOperations::dropTable(char *tableName){
+
+	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+	sysTableCatalog_->deleteSysTableEntry(tableName);
+	sysColumnCatalog_->deleteSysColumnEntryForTable(tableName);
+	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+	dirHeaderPage_->deleteDirectoryHeaderPage();
+
+	delete dirHeaderPage_;
+	return SUCCESS;
 }
