@@ -9,17 +9,21 @@
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
 #include "../BufferManagement/BufferManager.h"
+#include "../HeapFileManagement/FreePageManager.h"
 #include "DirectoryPage.h"
 #include <stdio.h>
-#include <string.h>
-
+#include <iostream>
+#include <istream>
+#include <stdlib.h>
+#include <string>
+using namespace std;
 DirectoryHeaderPage::DirectoryHeaderPage(int fd,int pageNumber) {
 	// TODO Auto-generated constructor stub
 	fd_=fd;
 	pageNumber_=pageNumber;
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	buffManager_=BufferManager::getInstance();
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&directoryHeaderPageHeader_,pageData_,sizeof(DirectoryHeaderPageHeaderStruct));
 	isDirectoryHeaderChanged_=false;
@@ -45,6 +49,23 @@ int DirectoryHeaderPage::createDirectoryHeaderPageHeaderStruct(int pageNumber){
 	memcpy(pageData_,&directoryHeaderPageHeader_,sizeof(directoryHeaderPageHeader_));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDirectoryHeaderChanged_=true;
+	return SUCCESS;
+}
+
+int DirectoryHeaderPage::deleteDirectoryHeaderPage(){
+	int dirPageNumber_=getNextPageNumber();
+	while(dirPageNumber_!=-1){
+		DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+		dirPageNumber_=dirPage_->getNextPageNumber();
+		dirPage_->deleteDirectoryPage();
+		delete dirPage_;
+	}
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
+	cout<< "delete dir header page pageNo :" <<pageNumber_<<endl;
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	FreePageManager *freePageManager=new FreePageManager(fd_,1);
+	freePageManager->freePage(pageNumber_);
+	delete freePageManager;
 	return SUCCESS;
 }
 

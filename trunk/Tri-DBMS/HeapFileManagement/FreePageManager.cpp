@@ -20,7 +20,7 @@ FreePageManager::FreePageManager(int fd,int pageNumber) {
 	pageNumber_=pageNumber;
 	buffManager_=BufferManager::getInstance();
 	pageData_=new char[DEFAULT_PAGE_SIZE];
-	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&freePageManager_,pageData_,sizeof(freePageStruct));
 	isFreePageManagerChanged_=false;

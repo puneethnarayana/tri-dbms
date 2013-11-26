@@ -16,7 +16,7 @@ DirectoryEntry::DirectoryEntry() {
 //	pageNumber_=pageNumber;
 //	pageData_=new char[DEFAULT_PAGE_SIZE];
 //	buffManager_=BufferManager::getInstance();
-//	memset(pageData_,0,sizeof(DEFAULT_PAGE_SIZE));
+//	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 //	buffManager_->readPage(fd,pageNumber,pageData_);
 //	//memcpy(&directoryEntry_,pageData_,sizeof(DirectoryEntryStruct));
 //	isDirectoryEntryChanged_=false;

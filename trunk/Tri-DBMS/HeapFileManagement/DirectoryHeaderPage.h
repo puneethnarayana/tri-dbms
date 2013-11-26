@@ -14,6 +14,7 @@ public:
 	DirectoryHeaderPage(int fd,int pageNumber);
 	virtual ~DirectoryHeaderPage();
 	int createDirectoryHeaderPageHeaderStruct(int pageNumber);
+	int deleteDirectoryHeaderPage();
 	int getPageNumber();
 	int getPageType();
 	int getNextPageNumber();
