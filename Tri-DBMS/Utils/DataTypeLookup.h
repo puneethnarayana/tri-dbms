@@ -15,7 +15,7 @@ public:
 		if (strcmp(dataTypeString, "INTEGER") == 0) {
 			return TYPE_INT;
 		}else if (strcmp(dataTypeString, "VARCHAR") == 0) {
-			return TYPE_CHAR;
+			return TYPE_VARCHAR;
 		}
 		return -1;
 	}
@@ -24,7 +24,7 @@ public:
 		switch (dataType) {
 		case TYPE_INT:
 			return "INTEGER";
-		case TYPE_CHAR:
+		case TYPE_VARCHAR:
 			return "VARCHAR";
 		default:
 			break;
