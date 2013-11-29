@@ -73,7 +73,7 @@ int main(){
 		dbOps->createDatabase(dbname,10);
 
 		fd=dbOps->openDatabase(dbname);
-		vector<string> colNames,insertValues_,insertValues1_,insertValues2_;
+		vector<string> colNames,insertValues_,colSizes,insertValues2_;
 			colNames.push_back("c1");
 			colNames.push_back("co2");
 			colNames.push_back("col3");
@@ -81,7 +81,11 @@ int main(){
 			colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
 			colTypes.push_back(CommonUtil::int_to_string(TYPE_VARCHAR));
 			colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
-			dbOps->createTable(tablename,colNames,colTypes);
+			colSizes.push_back(CommonUtil::int_to_string(4));
+			colSizes.push_back(CommonUtil::int_to_string(16));
+			colSizes.push_back(CommonUtil::int_to_string(2));
+
+			dbOps->createTable(tablename,colNames,colTypes,colSizes);
 			vector<string> whereList;
 			whereList.push_back("c1");
 			whereList.push_back("co2");
