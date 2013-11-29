@@ -99,11 +99,13 @@ int DataPage::getRecord(int slotEntryNumber,char *&record,int *recordLen){
 	//record=new char[DEFAULT_PAGE_SIZE];
 	int slotEntryOffset=DEFAULT_PAGE_SIZE-(slotEntryNumber+1)*sizeof(SlotDirectoryEntry);
 	memcpy(&slotEntry_,&pageData_[slotEntryOffset],sizeof(SlotDirectoryEntry));
-	if(slotEntry_.recordLength<=0){
-		recordLen=0;
+	if(slotEntry_.recordLength<0){
+		*recordLen=-1;
 		return -1;
 	}
-	memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
+	if(slotEntry_.recordLength>=0){
+		memcpy(record,&pageData_[slotEntry_.recordOffset],slotEntry_.recordLength);
+	}
 	*recordLen=slotEntry_.recordLength;
 	return SUCCESS;
 }
@@ -199,7 +201,7 @@ int DataPage::updateSlotDirectoryEntry(int slotNumber,int recordLength){
 	newOffset=slotDirectoryEntry_.recordOffset+recordLength;
 	newFreeSpace=slotDirectoryEntry_.recordLength+recordLength;
 	slotDirectoryEntry_.recordLength=recordLength;
-	addSlotDirectoyEntry(newOffset,newFreeSpace);
+	//addSlotDirectoyEntry(newOffset,newFreeSpace);
 	memcpy(&pageData_[slotEntryOffset_],&slotDirectoryEntry_,sizeof(SlotDirectoryEntry));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
