@@ -162,7 +162,7 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 
 int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertValues){
 	//we need schema to convert "insert into .." statement to insertvalues vector;
-	int dirPageNumber_=-1;
+	int dirPageNumber_=-1,dirEntryNumber=-1;
 	int recordLength;
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 //	int dpChainHeader_=5;
@@ -193,13 +193,15 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 		}
 	}
 	//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
-	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize());
+	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize(),&dirEntryNumber);
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
 	dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
 	//cout << "data page is: " << dirSlotEntry.pageNumber_ << endl;
 	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
 		dataPage->createDataPageHeaderStruct(dirSlotEntry.pageNumber_);
+		dataPage->setDirectoryPageBackPtr(dirPageNumber_);
+		dataPage->setDirectoryEntryBackPtr(dirEntryNumber);
 	}
 	//cout << "print this also " << recordLength<< endl;
 	dataPage->insertRecord(recordString,recordLength);
