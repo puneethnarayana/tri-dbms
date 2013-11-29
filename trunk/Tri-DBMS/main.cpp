@@ -141,10 +141,10 @@ int main(){
 				insertValues_.push_back(CommonUtil::int_to_string(false));
 				dbOps->insertIntoTable(tablename,insertValues_);
 				dbOps->selectAllFromTable(tablename,whereList);
-				buffManager->commitCache();
+				/*buffManager->commitCache();
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
-				//dbOps->dropTable(tablename);
+				dbOps->dropTable(tablename);
 				cout<< "After dropTable" << endl;
 				buffManager->commitCache();
 				buffManager->hexDump(fd,2);
@@ -160,10 +160,20 @@ int main(){
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
 				cout<< "Please print this DUDE!!";
+				*/
 
+				/* //Back Pointers (in datapage) testing!!
+				 for(unsigned i=0;i<1000;i++){
+					dbOps->insertIntoTable(tablename,insertValues_);
+				}
 
-
-
+				dbOps->selectAllFromTable(tablename,whereList);
+				buffManager->commitCache();
+				buffManager->hexDump(fd,6);
+				buffManager->hexDump(fd,7);
+				buffManager->hexDump(fd,8);
+				buffManager->hexDump(fd,9);
+				*/
 /*//getAllRecords testing
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
