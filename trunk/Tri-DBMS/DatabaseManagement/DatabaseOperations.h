@@ -35,6 +35,7 @@ public:
 	int insertIntoTable(char *tableName, vector<string> insertValues);
 	int selectAllFromTable(char *tableName, vector<string> columnList);
 	int dropTable(char *tableName);
+	int deleteFromTable(char *tableName);
 
 private:
 	BufferManager *buffManager_;

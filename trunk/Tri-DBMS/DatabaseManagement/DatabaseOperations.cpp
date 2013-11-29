@@ -165,16 +165,28 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	int dirPageNumber_=-1,dirEntryNumber=-1;
 	int recordLength;
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
-//	int dpChainHeader_=5;
-//	int noOfColumns_=3;
+	FreePageManager * freePageManager_=new FreePageManager(fd_,1);
+	DataPage *dataPage;
+	Record *record=new Record();
+	//	int dpChainHeader_=5;
+	//	int noOfColumns_=3;
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 	//int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
-	DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
-	FreePageManager * freePageManager_=new FreePageManager(fd_,1);
-	DataPage *dataPage;
-	Record *record=new Record();
+	DirectoryPage *dirPage_;
+	if(dirPageNumber_!=-1){
+		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+
+	}
+	else{
+		dirPageNumber_=freePageManager_->getFreePage();
+		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+		dirPage_->createDirectoryPage(dirPageNumber_);
+		dirHeaderPage_->setNextPageNumber(dirPageNumber_);
+	}
+
+
 	record->getRecordString(insertValues,recordString,&recordLength);
 
 	while(dirPage_->getMaxFreeSpace()<recordLength){
@@ -196,6 +208,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize(),&dirEntryNumber);
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
 	dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
+	freePageManager_->setPage(dirSlotEntry.pageNumber_);
 	//cout << "data page is: " << dirSlotEntry.pageNumber_ << endl;
 	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
@@ -219,14 +232,148 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 }
 
 int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList){
-		Schema schema;
-		vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
-		if(tableEntry.size()==0){
-			cout << tableName << " does not exist in the current Database!" << endl;
-			return -1;
+	Schema schema;
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	if(tableEntry.size()==0){
+		cout << tableName << " does not exist in the current Database!" << endl;
+		return -1;
+	}
+	vector<string> recordVector;
+	//vector<string> recordsVector;
+	int dirPageNumber_=-1;
+	int recordLength;
+	int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
+	Record *record;
+	DirectoryPage *dirPage_;
+	char *recordString;
+	DataPage *dataPage;
+	//		int dpChainHeader_=5;
+	//		int noOfColumns_=3;
+	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+
+	sysColumnCatalog_->getTableSchema(tableName,schema);
+
+	/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
+		for(int i=0;i<schema.columnNames.size();i++){
+			cout << schema.columnNames[i].c_str() << endl;
+			cout << schema.fieldPosition[i] << endl;
+			cout << schema.fieldTypes[i] << endl;
+			cout << endl << endl;
+		}*/
+	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+
+	//loop the following for all the directory pages of table;
+	while(dirPageNumber_!=-1){
+		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+		DirectoryEntry::DirectoryEntryStruct dirEntry_;
+		record=new Record();
+		noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
+		//cout <<" no of dir entries :" <<noOfDirEntries << endl;
+		for(int i=0;i<noOfDirEntries;i++){
+			dirEntry_=dirPage_->getDirectorySlot(i);
+			//cout << dirEntry_.pageNumber_  << " " << dirEntry_.freeSpace_<< endl;
+			if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
+				dataPageNumber=dirEntry_.pageNumber_;
+				//cout << dataPageNumber << endl;
+				dataPage=new DataPage(fd_,dataPageNumber);
+				noOfRecordsInDataPage=dataPage->getNoOfRecords();
+				//cout << noOfRecordsInDataPage << endl;
+				for(int j=0;j<noOfRecordsInDataPage;j++){
+
+					cout << "in j= " << j<<endl;
+					recordString=new char[DEFAULT_PAGE_SIZE];
+					dataPage->getRecord(j,recordString,&recordLength);
+					//buffManager_->hexDump(recordString);
+					if(recordLength>0){
+						cout << "don't come here" << endl;
+						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+						delete[] recordString;
+						stringstream recordStream;
+						int pos;
+
+						for(unsigned c=0;c<columnList.size();c++){
+							pos= schema.getColumnNum(columnList[c].c_str());
+							if(schema.fieldTypes[pos]==TYPE_BOOL) {
+								if(strcmp(recordVector[pos].c_str(),"1")==0)
+									recordStream<< " 'TRUE' ";
+								else
+									recordStream<< " 'FALSE' ";
+							}
+							else
+
+								recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
+						}
+
+						//cout << j << endl;
+						cout << recordStream.str() << endl;
+						//recordStream.clear();
+						//recordsVector.push_back(recordStream.str());
+					}
+					else{
+						delete[] recordString;
+					}
+				}
+				delete dataPage;
+			}
 		}
+		dirPageNumber_=dirPage_->getNextPageNumber();
+		delete dirPage_;
+		delete record;
+		//cout << dirPageNumber_ << endl;
+	}
+	//		for(int l=0;l<recordsVector.size();l++){
+	//			//cout << recordsVector[l].c_str() << endl;
+	//		}
+	delete dirHeaderPage_;
+	//return recordsVector;
+	return SUCCESS;
+}
+
+
+int DatabaseOperations::dropTable(char *tableName){
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	if(tableEntry.size()==0){
+		cout << tableName << " does not exist in the current Database!" << endl;
+		return -1;
+	}
+	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+	sysTableCatalog_->deleteSysTableEntry(tableName);
+	sysColumnCatalog_->deleteSysColumnEntryForTable(tableName);
+	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+	dirHeaderPage_->deleteDirectoryHeaderPage();
+	dbMainHeader_->setNoOfTables(dbMainHeader_->getNoOfTables()-1);
+	delete dirHeaderPage_;
+	return SUCCESS;
+}
+
+
+int DatabaseOperations::deleteFromTable(char *tableName){
+	Schema schema;
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	if(tableEntry.size()==0){
+		cout << tableName << " does not exist in the current Database!" << endl;
+		return -1;
+	}
+	if(0){ // for delete * from table;
+		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+		int dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+		while(dirPageNumber_!=-1){
+			DirectoryPage *dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+			dirPageNumber_=dirPage_->getNextPageNumber();
+			dirPage_->deleteDirectoryPage();
+			delete dirPage_;
+		}
+		dirHeaderPage_->setNoOfDirectoryPages(0);
+		dirHeaderPage_->setNextPageNumber(-1);
+		delete dirHeaderPage_;
+	}
+
+
+	else{
 		vector<string> recordVector;
-		//vector<string> recordsVector;
 		int dirPageNumber_=-1;
 		int recordLength;
 		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
@@ -234,20 +381,11 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 		DirectoryPage *dirPage_;
 		char *recordString;
 		DataPage *dataPage;
-//		int dpChainHeader_=5;
-//		int noOfColumns_=3;
 		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
 
 		sysColumnCatalog_->getTableSchema(tableName,schema);
 
-/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
-		for(int i=0;i<schema.columnNames.size();i++){
-			cout << schema.columnNames[i].c_str() << endl;
-			cout << schema.fieldPosition[i] << endl;
-			cout << schema.fieldTypes[i] << endl;
-			cout << endl << endl;
-		}*/
 		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 
@@ -274,25 +412,25 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
 						delete[] recordString;
 						stringstream recordStream;
-						int pos;
 
-						for(unsigned c=0;c<columnList.size();c++){
-									pos= schema.getColumnNum(columnList[c].c_str());
-									if(schema.fieldTypes[pos]==TYPE_BOOL) {
-										if(strcmp(recordVector[pos].c_str(),"1")==0)
-											recordStream<< " 'TRUE' ";
-										else
-											recordStream<< " 'FALSE' ";
-									}
-									else
 
-									recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
-						}
+						// check the where condition while deleting
+						dataPage->freeSlotDirectoryEntry(j);
 
-						//cout << j << endl;
-						cout << recordStream.str() << endl;
-						//recordStream.clear();
-						//recordsVector.push_back(recordStream.str());
+						//						int pos;
+						//						for(unsigned c=0;c<columnList.size();c++){
+						//							pos= schema.getColumnNum(columnList[c].c_str());
+						//							if(schema.fieldTypes[pos]==TYPE_BOOL) {
+						//								if(strcmp(recordVector[pos].c_str(),"1")==0)
+						//									recordStream<< " 'TRUE' ";
+						//								else
+						//									recordStream<< " 'FALSE' ";
+						//							}
+						//							else
+						//
+						//								recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
+						//						}
+						//cout << recordStream.str() << endl;
 					}
 					delete dataPage;
 				}
@@ -302,23 +440,9 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 			delete record;
 			//cout << dirPageNumber_ << endl;
 		}
-//		for(int l=0;l<recordsVector.size();l++){
-//			//cout << recordsVector[l].c_str() << endl;
-//		}
 		delete dirHeaderPage_;
 		//return recordsVector;
-		return SUCCESS;
-}
 
-
-int DatabaseOperations::dropTable(char *tableName){
-
-	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
-	sysTableCatalog_->deleteSysTableEntry(tableName);
-	sysColumnCatalog_->deleteSysColumnEntryForTable(tableName);
-	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
-	dirHeaderPage_->deleteDirectoryHeaderPage();
-
-	delete dirHeaderPage_;
+	}
 	return SUCCESS;
 }
