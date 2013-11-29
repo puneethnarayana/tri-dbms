@@ -123,8 +123,8 @@ int DatabaseOperations::closeDatabase(int fd){
 	return SUCCESS;
 }
 
-int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList){
-	int i,colPos;
+int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList,vector<string> columnSizeList){
+	int i,colPos,colSize;
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
 	int dirHeaderPageNumber_=freePageManager_->getFreePage();
@@ -147,7 +147,8 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	SysColumnsCatalog *sysColumnCatalog=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	for(unsigned i=0;i<columnList.size();i++){
 		colPos=CommonUtil::string_to_int(columnTypeList[i].c_str());
-		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos);
+		colSize=CommonUtil::string_to_int(columnSizeList[i].c_str());
+		sysColumnCatalog->insertSysColumnEntry((char *)columnList[i].c_str(),tableName,i,colPos,colSize);
 	}
 
 	//cout << " end of create table"<< endl;
