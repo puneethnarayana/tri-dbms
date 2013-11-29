@@ -37,7 +37,7 @@
 
 #define TYPE_INT 1
 #define TYPE_BOOL 2
-#define TYPE_CHAR 3
+#define TYPE_VARCHAR 3
 #define TYPE_DATE 4
 #define TYPE_FLOAT 5
 
@@ -46,7 +46,7 @@
 #define COL_INTEGER 1
 #define COL_FLOAT 2
 #define COL_DOUBLE 3
-#define COL_CHAR 4
+#define COL_VARCHAR 4
 #define COL_LONG 5
 
 #define EQUAL_TO 1
