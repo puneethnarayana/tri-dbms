@@ -5,12 +5,13 @@
  *      Author: ravin
  */
 
-
+#include <stdio.h>
 #include <iostream>
 #include <istream>
 #include <stdlib.h>
 #include <unistd.h>
 #include <cstring>
+#include <string.h>
 
 #include "DatabaseOperations.h"
 #include "../HeapFileManagement/DBMainHeaderPage.h"
@@ -29,7 +30,8 @@
 #include "../BufferManagement/BufferManager.h"
 #include "../HeapFileManagement/Schema.h"
 #include "../HeapFileManagement/DirectoryEntry.h"
-
+#include "../Utils/WhereExpressionElement.h"
+#include "../Utils/PostFixEvaluator.h"
 using namespace std;
 DatabaseOperations::DatabaseOperations() {
 	// TODO Auto-generated constructor stub
@@ -232,6 +234,29 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 }
 
 int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList){
+
+	vector<WhereExpressionElement> whereExpressions;
+	/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
+	whereExpressions.push_back(whereExpr);
+	WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"0");
+	whereExpressions.push_back(whereExpr1);
+	WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
+	whereExpressions.push_back(whereExpr2);
+	WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+	whereExpressions.push_back(whereExpr4);
+	WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"34");
+	whereExpressions.push_back(whereExpr5);
+	WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
+	whereExpressions.push_back(whereExpr6);
+	WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
+	whereExpressions.push_back(whereExpr3);*/
+
+
+
+	//	strcpy((char *)whereExpr.identifierValue.c_str(),"c1");
+	//	strcpy((char *)whereExpr.literalValue.c_str(),"35");
+	//	strcpy((char *)whereExpr.operatorValue.c_str(),">");
+	//	whereExpressions.push_back(whereExpr);
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
 	if(tableEntry.size()==0){
@@ -282,16 +307,17 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 				//cout << noOfRecordsInDataPage << endl;
 				for(int j=0;j<noOfRecordsInDataPage;j++){
 
-					cout << "in j= " << j<<endl;
+					//cout << "in j= " << j<<endl;
 					recordString=new char[DEFAULT_PAGE_SIZE];
 					dataPage->getRecord(j,recordString,&recordLength);
 					//buffManager_->hexDump(recordString);
 					if(recordLength>0){
-						cout << "don't come here" << endl;
+						//cout << "don't come here" << endl;
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
-						delete[] recordString;
+
 						stringstream recordStream;
 						int pos;
+						Record recordWhere(schema,recordString,recordLength);
 
 						for(unsigned c=0;c<columnList.size();c++){
 							pos= schema.getColumnNum(columnList[c].c_str());
@@ -305,11 +331,23 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 
 								recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
 						}
+						if(whereExpressions.size()>0){
+							PostFixEvaluator postFixEval(recordWhere);
+							//cout << "inside where expr size > 0" << endl;
+							if(postFixEval.evaluate(whereExpressions)==true){
 
-						//cout << j << endl;
-						cout << recordStream.str() << endl;
-						//recordStream.clear();
-						//recordsVector.push_back(recordStream.str());
+								//cout << "after postfix eval"<<  j << endl;
+								cout << recordStream.str() << endl;
+								//recordStream.clear();
+								//recordsVector.push_back(recordStream.str());
+							}
+
+						}
+						else{
+							cout << recordStream.str() << endl;
+						}
+
+						delete[] recordString;
 					}
 					else{
 						delete[] recordString;
@@ -349,14 +387,33 @@ int DatabaseOperations::dropTable(char *tableName){
 }
 
 
+
 int DatabaseOperations::deleteFromTable(char *tableName){
+
+	vector<WhereExpressionElement> whereExpressions;
+//
+//			WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
+//		whereExpressions.push_back(whereExpr);
+//		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"1");
+//		whereExpressions.push_back(whereExpr1);
+//		WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
+//		whereExpressions.push_back(whereExpr2);
+//		WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+//		whereExpressions.push_back(whereExpr4);
+//		WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"83");
+//		whereExpressions.push_back(whereExpr5);
+//		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
+//		whereExpressions.push_back(whereExpr6);
+//		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
+//		whereExpressions.push_back(whereExpr3);
+
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
 	if(tableEntry.size()==0){
 		cout << tableName << " does not exist in the current Database!" << endl;
 		return -1;
 	}
-	if(0){ // for delete * from table;
+	if(whereExpressions.size()==0){ // for delete * from table;
 		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 		int dirPageNumber_=dirHeaderPage_->getNextPageNumber();
@@ -410,12 +467,21 @@ int DatabaseOperations::deleteFromTable(char *tableName){
 						dataPage->getRecord(j,recordString,&recordLength);
 						//buffManager_->hexDump(recordString);
 						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
-						delete[] recordString;
+
 						stringstream recordStream;
 
 
 						// check the where condition while deleting
-						dataPage->freeSlotDirectoryEntry(j);
+						Record recordWhere(schema,recordString,recordLength);
+
+						PostFixEvaluator postFixEval(recordWhere);
+						//cout << "inside where expr size > 0" << endl;
+						if(postFixEval.evaluate(whereExpressions)==true){
+							//cout << "inside where expr size == true" << endl;
+							dataPage->freeSlotDirectoryEntry(j);
+						}
+
+						delete[] recordString;
 
 						//						int pos;
 						//						for(unsigned c=0;c<columnList.size();c++){
