@@ -37,7 +37,7 @@ public:
 	int deleteDirectoryPage();
 	int searchForSlotEntry(int sizeRequired);
 	int addSlotEntry(int sizeRequired);
-	DirectoryEntry::DirectoryEntryStruct insertSlotEntry(int sizeRequired);
+	DirectoryEntry::DirectoryEntryStruct insertSlotEntry(int sizeRequired,int *slotNumber);
 	int updateSlotEntry(int slotNumber,int freeSpace);
 	int deleteSlotEntry(int slotNumber);
 	int getFreeSpace(int slotNumber);

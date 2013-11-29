@@ -260,6 +260,16 @@ int DataPage::getContinuousFreeSpaceAvailable(){
 	return dataPageHeader_.continuousFreeSpaceAvailable_;
 }
 
+int DataPage::getDirectoryPageBackPtr(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return dataPageHeader_.directoryPageBackPtr;
+}
+
+int DataPage::getDirectoryEntryBackPtr(){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	return dataPageHeader_.directoryEntryBackPtr;
+}
+
 void DataPage::setPageNumber(int pageNumber){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	dataPageHeader_.genPageHeader_.pageNumber=pageNumber;
@@ -301,6 +311,22 @@ void DataPage::setContinuousFreeSpaceOffset(int offset){
 void DataPage::setContinuousFreeSpaceAvailable(int freeSpace){
 	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
 	dataPageHeader_.continuousFreeSpaceAvailable_=freeSpace;
+	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+}
+
+void DataPage::setDirectoryPageBackPtr(int dirPageBackPtr){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	dataPageHeader_.directoryPageBackPtr=dirPageBackPtr;
+	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+	isDataPageChanged_=true;
+}
+
+void DataPage::setDirectoryEntryBackPtr(int dirEntryBackPtr){
+	//memcpy(&dataPageHeader_, pageData_, sizeof(DataPageHeaderStruct));
+	dataPageHeader_.directoryEntryBackPtr=dirEntryBackPtr;
 	memcpy(pageData_,&dataPageHeader_,sizeof(DataPageHeaderStruct));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
