@@ -17,6 +17,7 @@
 #include <iomanip>
 #include "../Global/globalDefines.h"
 #include "CommonUtil.h"
+#include "../BufferManagement/BufferManager.h"
 using namespace std;
 Record::Record() {
 	// TODO Auto-generated constructor stub
@@ -24,6 +25,14 @@ Record::Record() {
 
 Record::~Record() {
 	// TODO Auto-generated destructor stub
+}
+
+
+Record::Record(Schema& schema, char *record, unsigned recordLen) {
+	fromConstructor_1 = false;
+	schema_ = schema;
+	record_ = record;
+	length_ = recordLen;
 }
 
 void Record::getRecordString(vector<string> values,char *record,int *recLen){
@@ -68,12 +77,25 @@ unsigned Record::getLength() {
 
 void Record::getField(int fieldNum, void *fieldData) {
 	int cur_field_offset;
+	int cur_next_field_offset;
+	int cur_field_length;
+	//cout << "schema no of cols:"<<schema_.numOfColumns << "field num :" <<fieldNum<< endl;
 
+//	BufferManager *bufMan=BufferManager::getInstance();
+//	bufMan->hexDump(record_);
 	memcpy(&cur_field_offset, &record_[fieldNum * sizeof(int)], sizeof(int));
+	if(fieldNum<schema_.numOfColumns-1){
+		//cout << "field offset :"<<cur_field_offset<<" schema no of cols:"<<schema_.numOfColumns << endl;
+		memcpy(&cur_next_field_offset, &record_[(fieldNum +1)* sizeof(int)], sizeof(int));
+		cur_field_length=cur_next_field_offset-cur_field_offset;
+	}
+	else{
 
+		cur_field_length=length_-cur_field_offset;
+		//cout << "don't come here " << cur_field_length << endl;
+	}
 	if (cur_field_offset >= 0 && cur_field_offset <= 8192) {//temp hack to fix a bug
-		memcpy(fieldData, &record_[cur_field_offset], schema_.fieldLengths.at(
-				fieldNum));
+		memcpy(fieldData, &record_[cur_field_offset], cur_field_length);
 	}
 }
 
@@ -131,43 +153,72 @@ bool Record::fieldMatch(std::string columnName, const void *fieldData) {
 bool Record::fieldMatchByConversion(std::string columnName, std::string value) {
 	int fieldNum = schema_.getColumnNum(columnName);
 	if (schema_.fieldTypes.at(fieldNum) == TYPE_INT) {
-		int recordData;
-		getField(fieldNum, &recordData);
-		int inputData = CommonUtil::string_to_int(value);
-		if (inputData == recordData) {
+		//cout << "in record - 1" << endl;
+		//int recordData;
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
+		getField(fieldNum, recordData);
+		//int inputData = CommonUtil::string_to_int(value);
+		string inputData=value;
+		//cout << inputData << " " << recordData;
+		//if (inputData == recordData) {
+		if (strcmp(value.c_str(), recordData) == 0){
+			delete[] recordData;
 			return true;
 		} else {
+			delete[] recordData;
 			return false;
 		}
 	} else if (schema_.fieldTypes.at(fieldNum) == TYPE_VARCHAR) {
-		char recordData[schema_.fieldLengths.at(fieldNum)];
+		//cout << "in record - 2" << endl;
+		//cout << schema_.fieldLengths.at(fieldNum) << endl;
+		//char recordData[schema_.fieldLengths.at(fieldNum)];
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
 		getField(fieldNum, recordData);
+		//cout <<"fieldNum " <<fieldNum << " " << recordData << endl;
 		if (strcmp(value.c_str(), recordData) == 0) {
+			delete []recordData;
 			return true;
 		} else {
+			delete []recordData;
 			return false;
 		}
+
+	} else {
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
+				getField(fieldNum, recordData);
+				//cout <<"fieldNum " <<fieldNum << " " << recordData << endl;
+				if (strcmp(value.c_str(), recordData) == 0) {
+					delete []recordData;
+					return true;
+				} else {
+					delete []recordData;
+					return false;
+				}
 	}
+
 	return false;
 }
 
 bool Record::lessThanByConversion(std::string columnName, std::string value) {
 	int fieldNum = schema_.getColumnNum(columnName);
 	if (schema_.fieldTypes.at(fieldNum) == TYPE_INT) {
-		int recordData;
-		getField(fieldNum, &recordData);
-		int inputData = CommonUtil::string_to_int(value);
-		if (recordData < inputData) {
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
+		getField(fieldNum, recordData);
+		if (strcmp(recordData, value.c_str()) < 0) {
+			delete []recordData;
 			return true;
 		} else {
+			delete []recordData;
 			return false;
 		}
 	} else if (schema_.fieldTypes.at(fieldNum) == TYPE_VARCHAR) {
-		char recordData[schema_.fieldLengths.at(fieldNum)];
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
 		getField(fieldNum, recordData);
 		if (strcmp(recordData, value.c_str()) < 0) {
+			delete []recordData;
 			return true;
 		} else {
+			delete []recordData;
 			return false;
 		}
 	}
@@ -178,22 +229,26 @@ bool Record::lessThanOrEqualByConversion(std::string columnName,
 		std::string value) {
 	int fieldNum = schema_.getColumnNum(columnName);
 	if (schema_.fieldTypes.at(fieldNum) == TYPE_INT) {
-		int recordData;
-		getField(fieldNum, &recordData);
-		int inputData = CommonUtil::string_to_int(value);
-		if (recordData <= inputData) {
-			return true;
-		} else {
-			return false;
-		}
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
+				getField(fieldNum, recordData);
+				if (strcmp(recordData, value.c_str()) <= 0) {
+					delete []recordData;
+					return true;
+				} else {
+					delete []recordData;
+					return false;
+				}
 	} else if (schema_.fieldTypes.at(fieldNum) == TYPE_VARCHAR) {
-		char recordData[schema_.fieldLengths.at(fieldNum)];
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
 		getField(fieldNum, recordData);
 		if (strcmp(recordData, value.c_str()) <= 0) {
+			delete []recordData;
 			return true;
 		} else {
+			delete []recordData;
 			return false;
 		}
+
 	}
 	return false;
 }
@@ -201,20 +256,23 @@ bool Record::lessThanOrEqualByConversion(std::string columnName,
 bool Record::greaterThanByConversion(std::string columnName, std::string value) {
 	int fieldNum = schema_.getColumnNum(columnName);
 	if (schema_.fieldTypes.at(fieldNum) == TYPE_INT) {
-		int recordData;
-		getField(fieldNum, &recordData);
-		int inputData = CommonUtil::string_to_int(value);
-		if (recordData > inputData) {
-			return true;
-		} else {
-			return false;
-		}
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
+		getField(fieldNum, recordData);
+				if (strcmp(recordData, value.c_str()) > 0) {
+					delete []recordData;
+					return true;
+				} else {
+					delete []recordData;
+					return false;
+				}
 	} else if (schema_.fieldTypes.at(fieldNum) == TYPE_VARCHAR) {
-		char recordData[schema_.fieldLengths.at(fieldNum)];
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
 		getField(fieldNum, recordData);
 		if (strcmp(recordData, value.c_str()) > 0) {
+			delete []recordData;
 			return true;
 		} else {
+			delete []recordData;
 			return false;
 		}
 	}
@@ -225,20 +283,23 @@ bool Record::greaterThanOrEqualByConversion(std::string columnName,
 		std::string value) {
 	int fieldNum = schema_.getColumnNum(columnName);
 	if (schema_.fieldTypes.at(fieldNum) == TYPE_INT) {
-		int recordData;
-		getField(fieldNum, &recordData);
-		int inputData = CommonUtil::string_to_int(value);
-		if (recordData >= inputData) {
-			return true;
-		} else {
-			return false;
-		}
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
+		getField(fieldNum, recordData);
+				if (strcmp(recordData, value.c_str()) >= 0) {
+					delete []recordData;
+					return true;
+				} else {
+					delete []recordData;
+					return false;
+				}
 	} else if (schema_.fieldTypes.at(fieldNum) == TYPE_VARCHAR) {
-		char recordData[schema_.fieldLengths.at(fieldNum)];
+		char *recordData=new char[DEFAULT_PAGE_SIZE];
 		getField(fieldNum, recordData);
 		if (strcmp(recordData, value.c_str()) >= 0) {
+			delete []recordData;
 			return true;
 		} else {
+			delete []recordData;
 			return false;
 		}
 	}
@@ -307,7 +368,7 @@ void Record::getKeyData(std::vector<std::string>& columnList, char*& keyData) {
 					schema_.fieldLengths[fieldNum]);
 			offset = offset + schema_.fieldLengths[fieldNum];
 		} else if (schema_.fieldTypes.at(fieldNum) == TYPE_VARCHAR) {
-			char recordData[schema_.fieldLengths.at(fieldNum)];
+			char *recordData=new char[DEFAULT_PAGE_SIZE];
 			getField(fieldNum, recordData);
 			memcpy(&keyData[offset], &recordData,
 					schema_.fieldLengths[fieldNum]);

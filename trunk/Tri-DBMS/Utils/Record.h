@@ -14,6 +14,7 @@ using namespace std;
 class Record {
 public:
 	Record();
+	Record(Schema& schema, char *record, unsigned recordLen);
 	virtual ~Record();
 	void getRecordString(vector<string> values,char *record,int *recLen);
 	vector<string> getvectorFromRecord(char *record,int noOfColumns);
@@ -37,7 +38,7 @@ private:
 	std::vector<std::string> values_;
 	char *record_;
 	unsigned length_;
-			bool fromConstructor_1;
+	bool fromConstructor_1;
 
 };
 
