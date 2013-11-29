@@ -102,6 +102,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 
 	char *recordString;
 	int recordLen=0;
+	int noOfCols=0;
 	Record *record=new Record();
 	vector<string> recordVector;
 	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
@@ -115,6 +116,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 		//cout << "print me" <<endl;
 		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[1].c_str(),tableName)==0){
+			noOfCols++;
 			schema.columnNames.push_back(recordVector[0].c_str());
 			schema.fieldPosition.push_back(CommonUtil::string_to_int(recordVector[2].c_str()));
 			schema.fieldTypes.push_back(CommonUtil::string_to_int(recordVector[3].c_str()));
@@ -123,7 +125,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 		}
 		delete[] recordString;
 	}
-
+	schema.numOfColumns=noOfCols;
 	delete record;
 	delete sysColumnPage;
 	recordVector.clear();
