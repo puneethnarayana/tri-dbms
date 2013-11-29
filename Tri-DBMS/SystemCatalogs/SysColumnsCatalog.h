@@ -17,7 +17,7 @@ public:
 	SysColumnsCatalog(int fd, int pageNumber);
 	virtual ~SysColumnsCatalog();
 	int createSysColumnsPage(int pageNumber);
-	int insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType);
+	int insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType, int columnSize);
 	int getTableSchema(char *tableName,Schema& schema);
 	int deleteSysColumnEntryForTable(char *tableName);
 private:

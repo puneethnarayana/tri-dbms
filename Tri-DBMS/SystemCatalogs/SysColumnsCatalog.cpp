@@ -47,7 +47,7 @@ int SysColumnsCatalog::createSysColumnsPage(int pageNumber){
 	return SUCCESS;
 }
 
-int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType){
+int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, int columnPosition, int columnType, int columnSize){
 
 // Code needs to be written here!!!
 	vector<string> values;
@@ -58,6 +58,7 @@ int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, i
 	values.push_back(tableName);
 	values.push_back(CommonUtil::int_to_string(columnPosition));
 	values.push_back(CommonUtil::int_to_string(columnType));
+	values.push_back(CommonUtil::int_to_string(columnSize));
 
 	record->getRecordString(values,recordString,&sysColumnRecLength_);
 	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
@@ -83,7 +84,7 @@ int SysColumnsCatalog::deleteSysColumnEntryForTable(char *tableName){
 	for(int i=0;i< sysColumnPage->getNoOfRecords();i++){
 		//recordString=new char[DEFAULT_PAGE_SIZE];
 		sysColumnPage->getRecord(i,recordString,&recordLen);
-		recordVector=record->getvectorFromRecord(recordString,4);
+		recordVector=record->getvectorFromRecord(recordString,5);
 
 		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[1].c_str(),tableName)==0){
@@ -112,7 +113,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 		sysColumnPage->getRecord(i,recordString,&recordLen);
 //		buffManager_->hexDump(recordString);
 //		cout << "record length :" << recordLen << endl;
-		recordVector=record->getvectorFromRecord(recordString,4);
+		recordVector=record->getvectorFromRecord(recordString,5);
 		//cout << "print me" <<endl;
 		//cout << recordVector[1].c_str() << " " << tableName << endl;
 		if(strcmp(recordVector[1].c_str(),tableName)==0){
@@ -120,7 +121,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 			schema.columnNames.push_back(recordVector[0].c_str());
 			schema.fieldPosition.push_back(CommonUtil::string_to_int(recordVector[2].c_str()));
 			schema.fieldTypes.push_back(CommonUtil::string_to_int(recordVector[3].c_str()));
-			//schema.fieldLengths.push_back();
+			schema.fieldLengths.push_back(CommonUtil::string_to_int(recordVector[4].c_str()));
 
 		}
 		delete[] recordString;
