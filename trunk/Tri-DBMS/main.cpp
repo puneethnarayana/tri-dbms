@@ -79,13 +79,12 @@ int main(){
 			colNames.push_back("col3");
 			vector<string> colTypes;
 			colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
-			colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
+			colTypes.push_back(CommonUtil::int_to_string(TYPE_VARCHAR));
 			colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
 			dbOps->createTable(tablename,colNames,colTypes);
 			vector<string> whereList;
 			whereList.push_back("c1");
 			whereList.push_back("co2");
-			whereList.push_back("col3");
 			whereList.push_back("col3");
 
 			insertValues_.push_back(CommonUtil::int_to_string(34));
@@ -135,12 +134,39 @@ int main(){
 				insertValues_.push_back(CommonUtil::int_to_string(false));
 				dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(1));
-				insertValues_.push_back("A");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
+//				insertValues_.clear();
+//				insertValues_.push_back(CommonUtil::int_to_string(1));
+//				insertValues_.push_back("A");
+//				insertValues_.push_back(CommonUtil::int_to_string(false));
+//				dbOps->insertIntoTable(tablename,insertValues_);
+				dbOps->selectAllFromTable(tablename,whereList);
+				cout << "After select!! Please print this line" << endl;
+				buffManager->commitCache();
+				//buffManager->hexDump(fd,1);
+				//dbOps->dropTable(tablename);
+				//buffManager->hexDump(fd,7);
+				dbOps->deleteFromTable(tablename);
+				cout << "After delete!! Please print this line" << endl;
+				dbOps->selectAllFromTable(tablename,whereList);
+				cout << "After select!! Please print this line" << endl;
+				//cout << "after delete *"<<endl;
 				dbOps->insertIntoTable(tablename,insertValues_);
 				dbOps->selectAllFromTable(tablename,whereList);
+				//dbOps->selectAllFromTable(tablename,whereList);
+				//buffManager->commitCache();
+				//buffManager->hexDump(fd,1);
+
+				//buffManager->hexDump(fd,6);
+				//dbOps->insertIntoTable(tablename,insertValues_);
+				//dbOps->insertIntoTable(tablename,insertValues_);
+				//dbOps->selectAllFromTable(tablename,whereList);
+				//cout<< "after select *"<< endl;
+				//buffManager->commitCache();
+				//buffManager->hexDump(fd,1);
+				//buffManager->hexDump(fd,6);
+				//buffManager->hexDump(fd,7);
+				//FreePageManager * freePageManager_=new FreePageManager(fd,1);
+				//cout << "next free page :"<<freePageManager_->getFreePage()<<endl;
 				/*buffManager->commitCache();
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
@@ -499,7 +525,7 @@ int main(){
 	colNames.push_back("col3");
 	vector<string> colTypes;
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
-	colTypes.push_back(CommonUtil::int_to_string(TYPE_CHAR));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_VARCHAR));
 	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
 	dbOps->createTable(tablename,colNames,colTypes);
 
