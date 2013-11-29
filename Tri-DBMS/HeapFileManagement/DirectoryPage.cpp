@@ -66,12 +66,13 @@ DirectoryEntry::DirectoryEntryStruct DirectoryPage::getDirectorySlot(int slotEnt
 	return singleEntry->directoryEntry_;
 }
 
-DirectoryEntry::DirectoryEntryStruct DirectoryPage::insertSlotEntry(int sizeRequired){
+DirectoryEntry::DirectoryEntryStruct DirectoryPage::insertSlotEntry(int sizeRequired,int *slotNumber){
 	int slotEntryNumber= searchForSlotEntry(sizeRequired);
 	//cout << "slot entry number" << slotEntryNumber << endl;
 	updateMaxFreeSpace();
 	int offset =directoryPageHeader_.headerOffset_+
 			slotEntryNumber*DirectoryEntry::getDirectoryEntrySize();
+	*slotNumber=slotEntryNumber;
 	DirectoryEntry *singleEntry=new DirectoryEntry();
 	memcpy(&singleEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
 	return singleEntry->directoryEntry_;

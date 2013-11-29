@@ -26,6 +26,8 @@ public:
 	int getHeaderOffset();
 	int getContinuousFreeSpaceOffset();
 	int getContinuousFreeSpaceAvailable();
+	int getDirectoryPageBackPtr();
+	int getDirectoryEntryBackPtr();
 
 	static int getDataPageSize();
 	static int getDataSlotEntrySize();
@@ -35,6 +37,8 @@ public:
 	void setNoOfRecords(int noOfRecords);
 	void setContinuousFreeSpaceOffset(int offset);
 	void setContinuousFreeSpaceAvailable(int freeSpace);
+	void setDirectoryPageBackPtr(int dirPageBackPtr);
+	void setDirectoryEntryBackPtr(int dirPageBackPtr);
 
 	int insertRecord(char *record,int recordLength);
 	vector<string> getAllRecords();
