@@ -73,7 +73,7 @@ int main(){
 		dbOps->createDatabase(dbname,10);
 
 		fd=dbOps->openDatabase(dbname);
-		vector<string> colNames,insertValues_,colSizes,insertValues2_;
+		vector<string> colNames,insertValues_,colSizes,updateColumnList,updateValues;
 			colNames.push_back("c1");
 			colNames.push_back("co2");
 			colNames.push_back("col3");
@@ -144,18 +144,36 @@ int main(){
 //				insertValues_.push_back(CommonUtil::int_to_string(false));
 //				dbOps->insertIntoTable(tablename,insertValues_);
 				dbOps->selectAllFromTable(tablename,whereList);
-				cout << "After select!! Please print this line" << endl;
-				buffManager->commitCache();
+				//cout << "After select!! Please print this line" << endl;
+				//buffManager->commitCache();
 				//buffManager->hexDump(fd,1);
 				//dbOps->dropTable(tablename);
 				//buffManager->hexDump(fd,7);
-				dbOps->deleteFromTable(tablename);
-				cout << "After delete!! Please print this line" << endl;
-				dbOps->selectAllFromTable(tablename,whereList);
-				cout << "After select!! Please print this line" << endl;
+				//dbOps->deleteFromTable(tablename);
+				//cout << "After delete!! Please print this line" << endl;
+				//dbOps->selectAllFromTable(tablename,whereList);
+				//cout << "After select!! Please print this line" << endl;
 				//cout << "after delete *"<<endl;
-				dbOps->insertIntoTable(tablename,insertValues_);
+
+				updateColumnList.push_back("c1");
+				updateColumnList.push_back("col3");
+				updateValues.push_back("10");
+				updateValues.push_back(CommonUtil::int_to_string(false));
+
+//				insertValues_.clear();
+//				insertValues_.push_back(CommonUtil::int_to_string(34));
+//				insertValues_.push_back("Surendra");
+//				insertValues_.push_back(CommonUtil::int_to_string(false));
+//				dbOps->insertIntoTable(tablename,insertValues_);
+
+				dbOps->updateTable(tablename,updateColumnList,updateValues);
+				cout << "after update" << endl;
 				dbOps->selectAllFromTable(tablename,whereList);
+				//buffManager->commitCache();
+				//dbOps->selectAllFromTable(tablename,whereList);
+				//cout << "After update and select "<< endl;
+//				buffManager->commitCache();
+//				buffManager->hexDump(fd,7);
 				//dbOps->selectAllFromTable(tablename,whereList);
 				//buffManager->commitCache();
 				//buffManager->hexDump(fd,1);
