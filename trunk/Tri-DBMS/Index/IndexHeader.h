@@ -1,8 +1,8 @@
 /*
  * IndexHeader.h
  *
- *  Created on: Nov 13, 2013
- *      Author: bill
+ *  Created on: Oct 23, 2013
+ *      Author: puneeth
  */
 
 #ifndef INDEXHEADER_H_
@@ -10,11 +10,10 @@
 
 #include "../Global/globalStructures.h"
 #include "../Global/globalDefines.h"
+#include "../BufferManagement/BufferManager.h"
 
 class IndexHeader {
 public:
-        IndexHeader();
-
 
         IndexHeader(int fd,int indexHeaderPageNumber);
         void createIndexHeaderPage(int numOfColumns, int colTypes[],int colSizes[], int keySize);
@@ -66,4 +65,3 @@ private:
 };
 
 #endif /* INDEXHEADER_H_ */
-Show details
