@@ -34,10 +34,10 @@ DataPage::DataPage(int fd,int pageNumber) {
 
 DataPage::~DataPage() {
 	// TODO Auto-generated destructor stub
-	if(isDataPageChanged_==true){
+
 		buffManager_=BufferManager::getInstance();
 		buffManager_->writePage(fd_,pageNumber_,pageData_);
-	}
+
 	delete []pageData_;
 
 }
@@ -62,7 +62,7 @@ int DataPage::createDataPageHeaderStruct(int pageNumber){
 int DataPage::deleteDataPage(){
 	FreePageManager *freePageManager=new FreePageManager(fd_,1);
 	freePageManager->freePage(pageNumber_);
-	cout << "deleted data pageNo :"<<pageNumber_<<endl;
+	//cout << "deleted data pageNo :"<<pageNumber_<<endl;
 	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	delete freePageManager;
@@ -76,15 +76,18 @@ int DataPage::insertRecord(char *record,int recordLength){
 	if(slotNumberForInsert_==-1){
 		slotNumberForInsert_=getNoOfRecords();
 		addSlotDirectoyEntry(recordLength);
-
+		//cout << "In add" << endl;
 	}
 	else{
+		//cout << "In update : slotNumberForInsert :" << slotNumberForInsert_ << " record length :" << recordLength <<endl;
 		updateSlotDirectoryEntry(slotNumberForInsert_,recordLength);
 	}
 	slotDirectoryEntry_=getSlotDirectoryEntry(slotNumberForInsert_);
 	//cout << "page Number "<<pageNumber_;
-	//cout << "slot number for insert " << slotNumberForInsert_<<endl;
+
 	offsetForInsert_=slotDirectoryEntry_.recordOffset;
+	//cout << "slot number for insert " << slotNumberForInsert_<<endl;
+	//cout << "offset for insert " << offsetForInsert_ <<endl;
 	memcpy(&pageData_[offsetForInsert_],record,recordLength);
 	//cout << "offset for insert is " << offsetForInsert_<<endl;
 	//cout << "record length is " << recordLength<<endl;
@@ -200,9 +203,12 @@ int DataPage::updateSlotDirectoryEntry(int slotNumber,int recordLength){
 
 	newOffset=slotDirectoryEntry_.recordOffset+recordLength;
 	newFreeSpace=slotDirectoryEntry_.recordLength+recordLength;
+	//cout << "slotDirEntry len :" << slotDirectoryEntry_.recordLength << endl;
 	slotDirectoryEntry_.recordLength=recordLength;
+	//cout << "slotDirEntry len:" << slotDirectoryEntry_.recordLength << endl;
 	//addSlotDirectoyEntry(newOffset,newFreeSpace);
 	memcpy(&pageData_[slotEntryOffset_],&slotDirectoryEntry_,sizeof(SlotDirectoryEntry));
+	//cout << "slotEntry offset:" << slotEntryOffset_ << endl;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isDataPageChanged_=true;
 	return SUCCESS;
