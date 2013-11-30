@@ -17,7 +17,7 @@
 #include <iterator>
 #include <time.h>
 #include "Utils/CommonUtil.h"
-
+#include "Index/IndexHeader.h"
 #include "diskManagement/BasicDiskOperations.h"
 #include "BufferManagement/BufferManager.h"
 
@@ -73,6 +73,14 @@ int main(){
 		dbOps->createDatabase(dbname,10);
 
 		fd=dbOps->openDatabase(dbname);
+
+		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
+		int colSizes[3]={SIZE_INT,16,SIZE_BOOL};
+		IndexHeader *indexHeader=new IndexHeader(fd,10);
+		indexHeader->createIndexHeaderPage(3,colTypes,colSizes,21);
+		buffManager->commitCache();
+		buffManager->hexDump(fd,10);
+			/* // Select from where, delete from table, update Tested!!
 		vector<string> colNames,insertValues_,colSizes,updateColumnList,updateValues;
 			colNames.push_back("c1");
 			colNames.push_back("co2");
@@ -189,6 +197,9 @@ int main(){
 				//buffManager->hexDump(fd,7);
 				//FreePageManager * freePageManager_=new FreePageManager(fd,1);
 				//cout << "next free page :"<<freePageManager_->getFreePage()<<endl;
+
+
+*/
 				/*buffManager->commitCache();
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
