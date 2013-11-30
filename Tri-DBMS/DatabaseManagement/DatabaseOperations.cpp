@@ -204,7 +204,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 			delete dirPage_;
 			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
 			dirPage_->createDirectoryPage(dirPageNumber_);
-			cout << "dirPageNumber : "<< dirPageNumber_ << endl;
+			//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
 		}
 	}
 	//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
@@ -220,10 +220,13 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 		dataPage->setDirectoryEntryBackPtr(dirEntryNumber);
 	}
 	//cout << "print this also " << recordLength<< endl;
+	//buffManager_->hexDump(recordString);
+	//buffManager_->hexDump(fd_,7);
 	dataPage->insertRecord(recordString,recordLength);
-	//cout << "print this also2" << endl;
+	//cout << "dirPage No:" << dirPageNumber_ << " dataPage No:"<<dirSlotEntry.pageNumber_<< endl;
 
-	//buffManager_->commitCache();
+//	buffManager_->commitCache();
+//	buffManager_->hexDump(fd_,7);
 	delete[] recordString;
 	delete freePageManager_;
 	delete dirHeaderPage_;
@@ -392,21 +395,21 @@ int DatabaseOperations::dropTable(char *tableName){
 int DatabaseOperations::deleteFromTable(char *tableName){
 
 	vector<WhereExpressionElement> whereExpressions;
-//
-//			WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
-//		whereExpressions.push_back(whereExpr);
-//		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"1");
-//		whereExpressions.push_back(whereExpr1);
-//		WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
-//		whereExpressions.push_back(whereExpr2);
-//		WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
-//		whereExpressions.push_back(whereExpr4);
-//		WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"83");
-//		whereExpressions.push_back(whereExpr5);
-//		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
-//		whereExpressions.push_back(whereExpr6);
-//		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
-//		whereExpressions.push_back(whereExpr3);
+
+			WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+		whereExpressions.push_back(whereExpr);
+		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
+		whereExpressions.push_back(whereExpr1);
+		WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
+		whereExpressions.push_back(whereExpr2);
+		WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+		whereExpressions.push_back(whereExpr4);
+		WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"83");
+		whereExpressions.push_back(whereExpr5);
+		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
+		whereExpressions.push_back(whereExpr6);
+		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
+		whereExpressions.push_back(whereExpr3);
 
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
@@ -513,3 +516,130 @@ int DatabaseOperations::deleteFromTable(char *tableName){
 	}
 	return SUCCESS;
 }
+
+
+int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,vector<string> updateValues){
+
+
+	vector<WhereExpressionElement> whereExpressions;
+
+			WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+		whereExpressions.push_back(whereExpr);
+		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
+		whereExpressions.push_back(whereExpr1);
+		WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
+		whereExpressions.push_back(whereExpr2);
+		WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"co2");
+		whereExpressions.push_back(whereExpr4);
+		WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"Alka");
+		whereExpressions.push_back(whereExpr5);
+		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
+		whereExpressions.push_back(whereExpr6);
+		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
+		whereExpressions.push_back(whereExpr3);
+
+	Schema schema;
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	if(tableEntry.size()==0){
+		cout << tableName << " does not exist in the current Database!" << endl;
+		return -1;
+	}
+
+	else{
+		vector<string> recordVector;
+		int dirPageNumber_=-1;
+		int recordLength;
+		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
+		Record *record;
+		DirectoryPage *dirPage_;
+		char *recordString;
+		DataPage *dataPage;
+		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+
+		sysColumnCatalog_->getTableSchema(tableName,schema);
+
+		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+
+		//loop the following for all the directory pages of table;
+		while(dirPageNumber_!=-1){
+			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+			DirectoryEntry::DirectoryEntryStruct dirEntry_;
+			record=new Record();
+			noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
+			//cout <<" no of dir entries :" <<noOfDirEntries << endl;
+			for(int i=0;i<noOfDirEntries;i++){
+				dirEntry_=dirPage_->getDirectorySlot(i);
+				//cout << dirEntry_.pageNumber_  << " " << dirEntry_.freeSpace_<< endl;
+				if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
+					dataPageNumber=dirEntry_.pageNumber_;
+					//cout << dataPageNumber << endl;
+					dataPage=new DataPage(fd_,dataPageNumber);
+					noOfRecordsInDataPage=dataPage->getNoOfRecords();
+					delete dataPage;
+					//cout << noOfRecordsInDataPage << endl;
+					for(int j=0;j<noOfRecordsInDataPage;j++){
+						recordString=new char[DEFAULT_PAGE_SIZE];
+						dataPage=new DataPage(fd_,dataPageNumber);
+						dataPage->getRecord(j,recordString,&recordLength);
+						//buffManager_->hexDump(recordString);
+						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+
+						stringstream recordStream;
+
+
+						// check the where condition while deleting
+						Record recordWhere(schema,recordString,recordLength);
+						if(whereExpressions.size()>0){
+							PostFixEvaluator postFixEval(recordWhere);
+							//cout << "inside where expr size > 0" << endl;
+							if(postFixEval.evaluate(whereExpressions)==true){
+								//cout << "inside where expr size == true" << endl;
+								dataPage->freeSlotDirectoryEntry(j);
+								delete dataPage;
+								int pos;
+								for(unsigned c=0;c<columnList.size();c++){
+									pos= schema.getColumnNum(columnList[c].c_str());
+									//cout << "c :" << c << " pos :" << pos << endl;
+									recordVector[pos]=updateValues[c];
+//									for (unsigned i=0;i<recordVector.size();i++){
+//										cout << recordVector[i] <<", " ;
+//									}
+//									cout << endl;
+								}
+								insertIntoTable(tableName,recordVector);
+							}
+						}
+						else{
+							dataPage->freeSlotDirectoryEntry(j);
+							delete dataPage;
+							int pos;
+							for(unsigned c=0;c<columnList.size();c++){
+								pos= schema.getColumnNum(columnList[c].c_str());
+								recordVector[pos]=updateValues[c];
+							}
+							insertIntoTable(tableName,recordVector);
+						}
+						delete[] recordString;
+
+
+					}
+
+				}
+			}
+			dirPageNumber_=dirPage_->getNextPageNumber();
+			delete dirPage_;
+			delete record;
+			//cout << dirPageNumber_ << endl;
+		}
+		delete dirHeaderPage_;
+		//return recordsVector;
+
+	}
+	return SUCCESS;
+}
+
+
+
+
