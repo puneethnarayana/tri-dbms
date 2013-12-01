@@ -28,6 +28,8 @@ IndexHeader::IndexHeader(int fd,int indexHeaderPageNumber) {
 	buffManager_->readPage(fd,indexHeaderPageNumber,pageData_);
 	memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	isIndexHeaderChanged_ = false;
+	initializeColumns();
+
 }
 
 IndexHeader::~IndexHeader() {
@@ -97,6 +99,7 @@ void IndexHeader::setRootPageNumber(int rootPageNumber){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.rootPageNumber = rootPageNumber;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -109,6 +112,7 @@ void IndexHeader::setFanout(int fanout){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.fanout = fanout;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -121,6 +125,7 @@ void IndexHeader::setHeightOfTree(int heightOfTree){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.heightOfTree = heightOfTree;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -133,6 +138,7 @@ void IndexHeader::setMaxNoOfRecordsInLeaf(int maxNoOfRecords){
 	//mmemcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.maxNoOfRecordsInLeaf = maxNoOfRecords;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -145,6 +151,7 @@ void IndexHeader::setKeySize(int keySize){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.keySize = keySize;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -157,6 +164,7 @@ void IndexHeader::setNoOfKeys(int numberOfKeys){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.numberOfKeys = numberOfKeys;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -169,6 +177,7 @@ void IndexHeader::setNoOfColumns(int noOfColumns){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.noOfcolumns = noOfColumns;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -181,6 +190,7 @@ void IndexHeader::setPageNumber(int pageNumber){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.generalPageHeaderStruct.pageNumber = pageNumber;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -193,6 +203,7 @@ void IndexHeader::setPageType(int pageType){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.generalPageHeaderStruct.pageType = pageType;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
 }
 
@@ -205,5 +216,50 @@ void IndexHeader::setNextPageNumber(int nextPageNumber){
 	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	indexHeaderPage_.generalPageHeaderStruct.nextPageNumber = nextPageNumber;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	isIndexHeaderChanged_=true;
+}
+
+void IndexHeader::UIIndexHeaderPage() {
+	cout
+			<< "\n\t********************-INDEX HEADER PAGE-***********************"
+			<< endl;
+	cout << "\tINDEX HEADER PAGE NUMBER------------:" << getPageNumber()
+			<< endl;
+	cout << "\tRoot page number--------------------:" << getRootPageNumber() << endl;
+	cout << "\tIndexNode fanout--------------------:" << getFanout() << endl;
+	cout << "\tMaximum records in leaf page--------:"
+			<< getMaxNoOfRecordsInLeaf() << endl;
+	cout << "\tHeight of tree----------------------:" << getHeightOfTree()
+			<< endl;
+	cout << "\tNumber of columns in Index----------:" << getNoOfColumns()
+			<< endl;
+	cout << "\tKey size----------------------------:" << getKeySize() << endl;
+	cout << "\tNumber of Keys----------------------:" << getNoOfKeys()
+			<< endl;
+	for (int i = 0; i < getNoOfColumns(); i++) {
+		char columnT[10];
+		memset(columnT, '\0', 10);
+		switch (colTypes_[i]) {
+		case 1:
+			memcpy(columnT, "INTEGER", sizeof("INTEGER"));
+			break;
+		case 2:
+			memcpy(columnT, "FLOAT", sizeof("FLOAT"));
+			break;
+		case 3:
+			memcpy(columnT, "DOUBLE", sizeof("DOUBLE"));
+			break;
+		case 4:
+			memcpy(columnT, "STRING", sizeof("STRING"));
+			break;
+		case 5:
+			memcpy(columnT, "LONG", sizeof("LONG"));
+			break;
+		}
+		cout << "\tColumn Types [field " << i + 1 << "]--------------:"
+				<< columnT << endl;
+	}
+	cout << "\t**************************************************************"
+			<< endl;
 }

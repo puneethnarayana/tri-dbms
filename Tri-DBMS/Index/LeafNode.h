@@ -15,7 +15,7 @@
 using namespace std;
 class LeafNode {
 public:
-	LeafNode();
+	LeafNode(int fd);
 	LeafNode(int fd,int leafPageNumber);
 	int getIndexHeaderPageNumber();
 	LeafNode(int fd, IndexHeader *indexHeaderPage, int leafPageNumber);
@@ -76,6 +76,8 @@ private:
 	IndexHeader *indexHeader_;
 	int fd_;
 	char* pageData_;
+	BufferManager *bufMgr_;
+	int pageNumber_;
 };
 
 
