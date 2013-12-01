@@ -18,7 +18,7 @@ typedef struct{
 
 typedef struct{
 	int pageNumber;
-	int slotNumber;
+	short slotNumber;
 }RIDStruct;
 
 #endif /* GLOBALSTRUCTURES_H_ */
