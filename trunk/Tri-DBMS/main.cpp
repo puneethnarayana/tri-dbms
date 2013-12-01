@@ -18,6 +18,7 @@
 #include <time.h>
 #include "Utils/CommonUtil.h"
 #include "Index/IndexHeader.h"
+#include "Index/BPlusTree.h"
 #include "diskManagement/BasicDiskOperations.h"
 #include "BufferManagement/BufferManager.h"
 
@@ -70,16 +71,79 @@ int main(){
 		time_t startTime,endTime,startTime1;
 
 		DatabaseOperations *dbOps=new DatabaseOperations();
-		dbOps->createDatabase(dbname,10);
+		dbOps->createDatabase(dbname,1);
 
 		fd=dbOps->openDatabase(dbname);
+		buffManager->commitCache();
+		//cout << "free Page Manager" << endl;
+		//buffManager->hexDump(fd,1);
+		FreePageManager *fpm=new FreePageManager(fd,1);
 
+		cout << "fd is :" << fd << endl;
+		cout << "free page is :"<<fpm->getFreePage()<<endl;
 		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
 		int colSizes[3]={SIZE_INT,16,SIZE_BOOL};
+		buffManager->commitCache();
+		//cout << "free Page Manager" << endl;
+		//buffManager->hexDump(fd,1);
 		IndexHeader *indexHeader=new IndexHeader(fd,10);
 		indexHeader->createIndexHeaderPage(3,colTypes,colSizes,21);
+		//buffManager->commitCache();
+		//buffManager->hexDump(fd,10);
 		buffManager->commitCache();
-		buffManager->hexDump(fd,10);
+		cout << "free Page Manager" << endl;
+		//buffManager->hexDump(fd,1);
+		cout << "after createIndexHeaderPage" << endl;
+		BPlusTree *bplusTree=new BPlusTree(fd,10);
+		cout << "fd sent to b+tree :" << fd << endl;
+		char *key=new char[MAX_FILE_NAME_LENGTH];
+		strcpy(key,"34Ravindra1");
+		RIDStruct rid={34,2};
+		buffManager->commitCache();
+			//	buffManager->hexDump(fd,10);
+		cout << "before insertIntoBPlus" << endl;
+		bplusTree->insertIntoBPlusTree(key,rid);
+		cout << "after 1st insert"<<endl;
+		strcpy(key,"83puneeth0");
+				rid={83,3};
+		bplusTree->insertIntoBPlusTree(key,rid);
+
+		bplusTree->insertIntoBPlusTree(key,rid);
+		bplusTree->insertIntoBPlusTree(key,rid);
+		rid={1,2};
+		cout << "before loop" <<endl;
+		for(unsigned i=0;i<136;i++){
+			bplusTree->insertIntoBPlusTree(key,rid);
+			rid.pageNumber++;
+			rid.slotNumber++;
+			cout << "=========================i value :" <<i <<endl;
+		}
+		buffManager->commitCache();
+		buffManager->hexDump(fd,6);
+		cout << "after loop" <<endl;
+		strcpy(key,"12Alka");
+		rid={83,3};
+		bplusTree->display();
+		buffManager->commitCache();
+				buffManager->hexDump(fd,7);
+				cout << sizeof(RIDStruct)<<endl;
+		//bplusTree->insertIntoBPlusTree(key,rid);
+		//cout << "after second insert" << endl;
+		//strcpy(key,"1");
+//		buffManager->commitCache();
+//		buffManager->hexDump(fd,10);
+		//cout << bplusTree->searchInBPlusTree(key) << endl;
+//		buffManager->hexDump(fd,6);
+//		bplusTree->display();
+//		bplusTree->deleteFromBPlusTree(key,rid);
+//		vector<RIDStruct> resultRids;
+//		//strcpy(key,"83puneeth0");
+//		bplusTree->searchKeyInBPlusTree(key,resultRids);
+//		for(unsigned i=0;i<resultRids.size();i++){
+//			cout << resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+//		}
+//		cout<< endl;
+
 			/* // Select from where, delete from table, update Tested!!
 		vector<string> colNames,insertValues_,colSizes,updateColumnList,updateValues;
 			colNames.push_back("c1");
