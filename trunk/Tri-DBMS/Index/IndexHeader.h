@@ -30,6 +30,8 @@ public:
         int getNoOfKeys();
         int getNoOfColumns();
 
+        void UIIndexHeaderPage();
+
         void setPageNumber(int pageNumber);
         void setPageType(int pageType);
         void setNextPageNumber(int nextPageNumber);

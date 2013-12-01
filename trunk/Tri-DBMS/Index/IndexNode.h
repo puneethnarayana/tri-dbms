@@ -15,7 +15,7 @@
 using namespace std;
 class IndexNode {
 private:
-	int pagenumber;
+	int pagenumber_;
 	typedef struct IndexNodePage {
 		GenPageHeaderStruct generalPageHeaderStruct;
 		int leftPageNumber;
@@ -27,11 +27,12 @@ private:
 	} IndexNodePageHeaderStruct;
 	IndexNodePageHeaderStruct indexNodePageHeader_;
 	IndexHeader *indexHeader_;
+	BufferManager *bufMgr_;
 	char* pageData_;
 	static int debugCount_;
 	int fd_;
 public:
-	IndexNode();
+	IndexNode(int fd);
 	IndexNode(int fd,int indexPageNumber);
 	int getIndexHeaderPageNumber();
 	IndexNode(int fd,IndexHeader *indexHeaderPage, int indexPageNumber);

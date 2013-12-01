@@ -35,11 +35,14 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 	long longKey1 = 0, longKey2 = 0;
 	float floatKey1 = 0.0, floatKey2 = 0.0, diff = 0.0;
 	double doubleKey1 = 0.0, doubleKey2 = 0.0, ddiff = 0.0;
-
+	//cout << "in key compare:"<<numOfColumns <<endl;
 	for (int i = 0; i < numOfColumns; ++i) {
+		//cout << "before col type" <<endl;
+		//cout << "from index header key size :"<<indexHeader->getKeySize()<<endl;
 		int colType = indexHeader->colTypes_[i];
+		//cout << "col type" << colType <<endl;
 		switch (colType) {
-		case COL_INTEGER:
+		case TYPE_INT:
 			//			cout << "\nINTEGER TYPE" << endl;
 			memcpy(&intKey1, &key1[offset], 4);
 			memcpy(&intKey2, &key2[offset], 4);
@@ -50,7 +53,7 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 			}
 			break;
 
-		case COL_FLOAT:
+		case TYPE_FLOAT:
 			//			cout << "\nFLOAT TYPE" << endl;
 			memcpy(&floatKey1, &key1[offset], sizeof(float));
 			memcpy(&floatKey2, &key2[offset], sizeof(float));
@@ -66,26 +69,26 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 				return -1;
 			}
 			break;
-		case COL_DOUBLE:
-			//			cout << "\nDOUBLE TYPE" << endl;
-			memcpy(&doubleKey1, &key1[offset], sizeof(double));
-			memcpy(&doubleKey2, &key2[offset], sizeof(double));
-			if (doubleKey1 > doubleKey2) {
-				return 1;
-			} else if (doubleKey1 < doubleKey2) {
-				return -1;
-			}
-			break;
-		case COL_LONG:
-			memcpy(&longKey1, &key1[offset], sizeof(long));
-			memcpy(&longKey2, &key2[offset], sizeof(long));
-			if (longKey1 > longKey2) {
-				return 1;
-			} else if (longKey1 < longKey2) {
-				return -1;
-			}
-			break;
-		case COL_VARCHAR:
+//		case COL_DOUBLE:
+//			//			cout << "\nDOUBLE TYPE" << endl;
+//			memcpy(&doubleKey1, &key1[offset], sizeof(double));
+//			memcpy(&doubleKey2, &key2[offset], sizeof(double));
+//			if (doubleKey1 > doubleKey2) {
+//				return 1;
+//			} else if (doubleKey1 < doubleKey2) {
+//				return -1;
+//			}
+//			break;
+//		case COL_LONG:
+//			memcpy(&longKey1, &key1[offset], sizeof(long));
+//			memcpy(&longKey2, &key2[offset], sizeof(long));
+//			if (longKey1 > longKey2) {
+//				return 1;
+//			} else if (longKey1 < longKey2) {
+//				return -1;
+//			}
+//			break;
+		case TYPE_VARCHAR:
 			//			cout << "\nVARCHAR TYPE" << endl;
 			if (strncmp(&key1[offset], &key2[offset],
 					indexHeader->colSizes_[i]) > 0) {
@@ -97,7 +100,7 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 			break;
 
 		default:
-			//			cout << "DEFAULT IS VARCHAR TYPE" << endl;
+				//		cout << "DEFAULT IS VARCHAR TYPE" << endl;
 			if (strncmp(&key1[offset], &key2[offset],
 					indexHeader->colSizes_[i]) > 0) {
 				return 1;

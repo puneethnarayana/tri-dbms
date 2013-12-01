@@ -22,18 +22,21 @@
 #include "../HeapFileManagement/FreePageManager.h"
 using namespace std;
 
-IndexNode::IndexNode() {
+IndexNode::IndexNode(int fd) {
 	// TODO Auto-generated constructor stub
 	indexHeaderObjCreatedHere = false;
+	fd_=fd;
+	pageData_=new char[DEFAULT_PAGE_SIZE];
 }
 int IndexNode::debugCount_ = 0;
 IndexNode::IndexNode(int fd, int indexPageNumber)
 {
 	fd_ = fd;
+	pagenumber_=indexPageNumber;
 	pageData_ = new char[DEFAULT_PAGE_SIZE];
-	BufferManager *bufMgr = BufferManager::getInstance();
+	bufMgr_ = BufferManager::getInstance();
 	//		DEBUG_B("Pinning leaf page with with buffer manager")
-	int error = bufMgr->readPage(fd_,indexPageNumber, pageData_);
+	int error = bufMgr_->readPage(fd_,indexPageNumber, pageData_);
 
 	memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
 	int indexHeaderPageNumber = getIndexHeaderPageNumber();
@@ -49,6 +52,7 @@ int IndexNode::getIndexHeaderPageNumber()
 IndexNode::IndexNode(int fd,IndexHeader *indexHeaderPage, int indexPageNumber) {
 
 	indexHeader_ = indexHeaderPage;
+	pagenumber_=indexPageNumber;
 	pageData_ = NULL;
 	fd_ = fd;
 	pageData_ = new char[DEFAULT_PAGE_SIZE];
@@ -62,19 +66,20 @@ IndexNode::~IndexNode() {
 	BufferManager *bufMgr = BufferManager::getInstance();
 
 	bufMgr->writePage(fd_,indexNodePageHeader_.generalPageHeaderStruct.pageNumber,pageData_);
-		delete indexHeader_;
+	delete indexHeader_;
+	delete pageData_;
 
 }
 //Initializes the index node header
 int IndexNode::createIndexNode(IndexHeader* indexHeaderPage) {
-	BufferManager *bufMgr = BufferManager::getInstance();
+	bufMgr_ = BufferManager::getInstance();
 	//Where does newPageNumber come from
 	int newPageNumber;
 	FreePageManager *freePageMgr=new FreePageManager(fd_,1);
 	newPageNumber=freePageMgr->getFreePage();
-	int error = bufMgr->readPage(fd_,newPageNumber, pageData_);
+	//int error = bufMgr->readPage(fd_,newPageNumber, pageData_);
 
-	memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
+	//memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
 	indexNodePageHeader_.generalPageHeaderStruct.pageType=INDEX_INTERNAL_PAGE;
 	indexNodePageHeader_.leftPageNumber = -1;
 	indexNodePageHeader_.rightPageNumber = -1;
@@ -83,6 +88,8 @@ int IndexNode::createIndexNode(IndexHeader* indexHeaderPage) {
 	indexNodePageHeader_.parentPageNumber = -1;
 	memcpy(pageData_, &indexNodePageHeader_, sizeof(IndexNodePageHeaderStruct));
 	indexHeader_ = indexHeaderPage;
+	delete freePageMgr;
+	bufMgr_->writePage(fd_,newPageNumber, pageData_);
 	return SUCCESS;
 }
 int IndexNode::insertIntoIndexNode(const char* key, int leftPageNumber,int rightPageNumber) {
@@ -332,7 +339,7 @@ int IndexNode::insertIntoIndexNode(const char* key, int leftPageNumber,int right
 			}
 
 			//NOW CREATE A NEW INDEX NODE AND COPY REMAINING KEYS INTO THAT NODE
-			IndexNode indexNode;
+			IndexNode indexNode(fd_);
 			indexNode.createIndexNode(indexHeader_);
 			//			cout<<"\nNEW PAGE NUMBER  "<<indexNode.getPageNumber()<<endl;
 			indexNode.setLevelOfIndexNode(indexNodePageHeader_.level);
@@ -388,7 +395,7 @@ int IndexNode::insertIntoIndexNode(const char* key, int leftPageNumber,int right
 			if (indexHeader_->getHeightOfTree()
 					== indexNodePageHeader_.level) {
 				//NOW CREATE A ROOT NODE AND ASSIGN IT AS A PARENT FOR ABOVE NODES
-				IndexNode indexNode1;
+				IndexNode indexNode1(fd_);
 				indexNode1.createIndexNode(indexHeader_);
 				indexHeader_->setRootPageNumber(indexNode1.getPageNumber());
 				indexHeader_->setHeightOfTree(
@@ -417,6 +424,7 @@ int IndexNode::insertIntoIndexNode(const char* key, int leftPageNumber,int right
 			}
 		}
 	}
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 	return SUCCESS;
 }
 int IndexNode::insertAtTheEndOfIndexNode(const char* key,
@@ -475,6 +483,7 @@ int IndexNode::insertAtTheFrontOfIndexNode(const char* key,
 		IndexNode indexNode(fd_,indexHeader_, leftPageNumber);
 		indexNode.setParentOfIndexNode(getPageNumber());
 	}
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 	return SUCCESS;
 }
 int IndexNode::deleteKeyFromIndexNode(const char* key, bool flag,
@@ -936,6 +945,7 @@ int IndexNode::deleteKeyFromIndexNode(const char* key, bool flag,
 			}
 		}
 	}
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 
 	return SUCCESS;
 }
@@ -963,6 +973,7 @@ void IndexNode::deleteFirstKeyFromIndexNode() {
 	}
 	memcpy(&pageData_[offset], &tempPageNumbers[tempCount], sizeof(int));
 	setNoOfKeysInIndexNode(getNoOfKeysInIndexNode() - 1);
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 }
 void IndexNode::deleteLastKeyFromIndexNode() {
 	setNoOfKeysInIndexNode(getNoOfKeysInIndexNode() - 1);
@@ -1007,6 +1018,7 @@ int IndexNode::replaceKey(const char* oldKey, const char* newKey) {
 			indexNode.replaceKey(oldKey, newKey);
 		}
 	}
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 	return SUCCESS;
 }
 
@@ -1033,6 +1045,7 @@ int IndexNode::replaceKeyPreviousToPageNumber(int pageNumber,
 			}
 		}
 	}
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 	return SUCCESS;
 }
 int IndexNode::searchInIndexNode(const char* key) {
@@ -1083,6 +1096,7 @@ int IndexNode::getLevelOfIndexNode() {
 void IndexNode::setLevelOfIndexNode(int level) {
 	indexNodePageHeader_.level = level;
 	memcpy(pageData_, &indexNodePageHeader_, sizeof(IndexNodePageHeaderStruct));
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 }
 int IndexNode::getNoOfKeysInIndexNode() {
 	memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
@@ -1091,6 +1105,7 @@ int IndexNode::getNoOfKeysInIndexNode() {
 void IndexNode::setNoOfKeysInIndexNode(int noOfKeys) {
 	indexNodePageHeader_.noOfKeys = noOfKeys;
 	memcpy(pageData_, &indexNodePageHeader_, sizeof(IndexNodePageHeaderStruct));
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 }
 int IndexNode::getParentOfIndexNode() {
 	memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
@@ -1099,6 +1114,7 @@ int IndexNode::getParentOfIndexNode() {
 void IndexNode::setParentOfIndexNode(int parentPageNumber) {
 	indexNodePageHeader_.parentPageNumber = parentPageNumber;
 	memcpy(pageData_, &indexNodePageHeader_, sizeof(IndexNodePageHeaderStruct));
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 }
 int IndexNode::getLeftPageNumberOfIndexNode() {
 	memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
@@ -1107,6 +1123,7 @@ int IndexNode::getLeftPageNumberOfIndexNode() {
 void IndexNode::setLeftPageNumberOfIndexNode(int leftPageNumber) {
 	indexNodePageHeader_.leftPageNumber = leftPageNumber;
 	memcpy(pageData_, &indexNodePageHeader_, sizeof(IndexNodePageHeaderStruct));
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 }
 int IndexNode::getRightPageNumber() {
 	memcpy(&indexNodePageHeader_, pageData_, sizeof(IndexNodePageHeaderStruct));
@@ -1115,6 +1132,7 @@ int IndexNode::getRightPageNumber() {
 void IndexNode::setRightPageNumber(int rightPageNumber) {
 	indexNodePageHeader_.rightPageNumber = rightPageNumber;
 	memcpy(pageData_, &indexNodePageHeader_, sizeof(IndexNodePageHeaderStruct));
+	bufMgr_->writePage(fd_,pagenumber_, pageData_);
 }
 int IndexNode::getPageNumber() {
 	return indexNodePageHeader_.generalPageHeaderStruct.pageNumber;
