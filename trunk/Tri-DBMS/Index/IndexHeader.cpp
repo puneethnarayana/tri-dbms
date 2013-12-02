@@ -55,7 +55,8 @@ void IndexHeader::createIndexHeaderPage(int numOfColumns, int colTypes[],int col
 	indexHeaderPage_.heightOfTree = 0;
 	indexHeaderPage_.numberOfKeys = 0;
 	indexHeaderPage_.noOfcolumns = numOfColumns;
-
+//	pageData_=new char[DEFAULT_PAGE_SIZE];
+//	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	memcpy(pageData_, &indexHeaderPage_, sizeof(IndexHeaderStruct));
 	int offset = sizeof(IndexHeaderStruct);
 	for (int i = 0; i < numOfColumns; i++) {
@@ -165,6 +166,7 @@ void IndexHeader::setNoOfKeys(int numberOfKeys){
 	indexHeaderPage_.numberOfKeys = numberOfKeys;
 	memcpy(pageData_,&indexHeaderPage_,sizeof(IndexHeaderStruct));
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
+//	buffManager_
 	isIndexHeaderChanged_=true;
 }
 
@@ -182,7 +184,7 @@ void IndexHeader::setNoOfColumns(int noOfColumns){
 }
 
 int IndexHeader::getPageNumber(){
-	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct))
+	//memcpy(&indexHeaderPage_,pageData_,sizeof(IndexHeaderStruct));
 	return indexHeaderPage_.generalPageHeaderStruct.pageNumber;
 }
 
