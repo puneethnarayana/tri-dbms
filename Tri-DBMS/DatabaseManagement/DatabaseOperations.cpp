@@ -34,6 +34,7 @@
 #include "../Utils/PostFixEvaluator.h"
 #include "../Index/IndexHeader.h"
 #include "../Index/BPlusTree.h"
+#include "../Utils/WhereExpressionElement.h"
 
 extern int indexHeaderPageNo;
 
@@ -246,9 +247,10 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	return SUCCESS;
 }
 
-int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList){
+int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList,vector<WhereExpressionElement> whereExpressions){
 
-	vector<WhereExpressionElement> whereExpressions;
+	//vector<WhereExpressionElement> whereExpressions;
+
 	/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
 	whereExpressions.push_back(whereExpr);
 	WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"0");
@@ -401,11 +403,11 @@ int DatabaseOperations::dropTable(char *tableName){
 
 
 
-int DatabaseOperations::deleteFromTable(char *tableName){
+int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionElement> whereExpressions){
 
-	vector<WhereExpressionElement> whereExpressions;
+	//vector<WhereExpressionElement> whereExpressions;
 
-			WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+			/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
 		whereExpressions.push_back(whereExpr);
 		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
 		whereExpressions.push_back(whereExpr1);
@@ -419,7 +421,7 @@ int DatabaseOperations::deleteFromTable(char *tableName){
 		whereExpressions.push_back(whereExpr6);
 		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
 		whereExpressions.push_back(whereExpr3);
-
+*/
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
 	if(tableEntry.size()==0){
@@ -527,12 +529,12 @@ int DatabaseOperations::deleteFromTable(char *tableName){
 }
 
 
-int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,vector<string> updateValues){
+int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,vector<string> updateValues,vector<WhereExpressionElement> whereExpressions){
 
 
-	vector<WhereExpressionElement> whereExpressions;
+	//vector<WhereExpressionElement> whereExpressions;
 
-			WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+		/*	WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
 		whereExpressions.push_back(whereExpr);
 		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
 		whereExpressions.push_back(whereExpr1);
@@ -545,7 +547,7 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
 		whereExpressions.push_back(whereExpr6);
 		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
-		whereExpressions.push_back(whereExpr3);
+		whereExpressions.push_back(whereExpr3);*/
 
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
@@ -659,7 +661,7 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 
 
 
-int DatabaseOperations::createIndex(char *tableName,vector<string> columnList){
+int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<string> columnList){
 
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
