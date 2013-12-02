@@ -38,6 +38,11 @@ public:
 	int deleteFromTable(char *tableName);
 	int updateTable(char *tableName,vector<string> columnList,vector<string> updateValues);
 
+
+
+
+	int createIndex(char *tableName,vector<string> columnList);
+
 private:
 	BufferManager *buffManager_;
 	int fd_;
