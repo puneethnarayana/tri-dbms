@@ -22,6 +22,7 @@
 #include <sstream>
 using namespace std;
 int LeafNode::testPinCount = 0;
+extern int noOfLeafPages;
 LeafNode::LeafNode(int fd) {
 	// TODO Auto-generated constructor stub
 	indexHeaderObjCreatedHere = false;
@@ -61,18 +62,21 @@ LeafNode::~LeafNode() {
 	bufMgr_ = BufferManager::getInstance();
 	bufMgr_->writePage(fd_,leafNodePageHeader_.generalPageHeader.pageNumber,pageData_);
 	//	testPinCount--;
+	delete[] pageData_;
 	if(indexHeaderObjCreatedHere == true){
-		delete indexHeader_;
+		//delete indexHeader_;
 	}
 }
 
 int LeafNode::createLeafPage(IndexHeader *indexHeaderPage) {
 	bufMgr_ = BufferManager::getInstance();
 	int newPageNumber;
+	noOfLeafPages++;
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	FreePageManager *freePageMgr=new FreePageManager(fd_,1);
 	newPageNumber=freePageMgr->getFreePage();
-	cout << "fd is :" << fd_ <<" new page number is:" << newPageNumber <<endl;
+	pageNumber_=newPageNumber;
+	//cout << "fd is :" << fd_ <<" new page number is:" << newPageNumber <<endl;
 	//int error = bufMgr->readPage(fd_,newPageNumber, pageData_);
 //	if (error != SUCCESS) {
 //		cout << "error";
@@ -125,18 +129,18 @@ int LeafNode::dummyKeyCompare(char* key1, char* key2) {
 int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 	char tempKey[indexHeader_->getKeySize()];
 	int i = 0;
+	//cout << "in insert into leaf page" <<endl;
 	if (leafNodePageHeader_.noOfRecords
 			== indexHeader_->getMaxNoOfRecordsInLeaf()) {
-			cout<<"\n here "<<endl;
-			cout<<"\n initial "<<getPageNumber()<<"  "<<getLeftPageNumber()<<"  "<<getRightPageNumber()<<endl;
+			//cout<<"\n here "<<endl;
+			//cout<<"\n initial "<<getPageNumber()<<"  "<<getLeftPageNumber()<<"  "<<getRightPageNumber()<<endl;
 		int promoteLeafLeftPage, promoteLeafRightPage;
 		char promoteKey[indexHeader_->getKeySize()];
-		char
-				tempKeys[leafNodePageHeader_.noOfRecords + 1][indexHeader_->getKeySize()];
+		char tempKeys[leafNodePageHeader_.noOfRecords + 1][indexHeader_->getKeySize()];
 		RIDStruct tempRIDS[leafNodePageHeader_.noOfRecords + 1];
 		int tempCount = 0, found = 0;
 		int offset = LeafNode::getLeafNodeHeaderSize();
-		cout << "before for loop" << endl;
+		//cout << "before for loop" << endl;
 		for (int i = 0; i < leafNodePageHeader_.noOfRecords; i++) {
 			memcpy(tempKeys[tempCount], &pageData_[offset],
 					indexHeader_->getKeySize());
@@ -167,9 +171,11 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 			memcpy(&tempRIDS[tempCount], &rid, sizeof(RIDStruct));
 			tempCount++;
 		}
-
+		//cout << "temp count :"<< tempCount <<endl;
 		offset = LeafNode::getLeafNodeHeaderSize();
 		leafNodePageHeader_.noOfRecords = 0;
+		//cout << "leaf page no of rec :" <<leafNodePageHeader_.noOfRecords <<endl;
+		memset(pageData_,0,DEFAULT_PAGE_SIZE);
 		for (int i = 0; i < tempCount / 2; i++) {
 			memcpy(&pageData_[offset], tempKeys[i], indexHeader_->getKeySize());
 			offset = offset + indexHeader_->getKeySize();
@@ -177,29 +183,37 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 			offset = offset + sizeof(RIDStruct);
 			leafNodePageHeader_.noOfRecords++;
 		}
-			cout<<"\n initial "<<getPageNumber()<<"  "<<getLeftPageNumber()<<"  "<<getRightPageNumber()<<endl;
-			cout<<"\n initial "<<getPageNumber()<<"  "<<getLeftPageNumber()<<"  "<<getRightPageNumber()<<endl;
+		//cout << "leaf page no of rec :(1)" <<leafNodePageHeader_.noOfRecords <<endl;
+
+//			cout<<"\n initial "<<getPageNumber()<<"  "<<getLeftPageNumber()<<"  "<<getRightPageNumber()<<endl;
+//			cout<<"\n initial "<<getPageNumber()<<"  "<<getLeftPageNumber()<<"  "<<getRightPageNumber()<<endl;
+		//cout << "leaf page no of rec :(1_1)" <<leafNodePageHeader_.noOfRecords <<endl;
 		LeafNode newLeafNode(fd_);
 		newLeafNode.createLeafPage(indexHeader_);
 		//cout << "after create new leaf node" << endl;
 		promoteLeafLeftPage = leafNodePageHeader_.generalPageHeader.pageNumber;
-		cout << "before right page" << endl;
+		//cout << "before right page" << endl;
 		promoteLeafRightPage = newLeafNode.getPageNumber();
-		cout << "before memcpy" << endl;
+		//cout << "before memcpy" << endl;
 		memcpy(promoteKey, tempKeys[tempCount / 2], indexHeader_->getKeySize());
-			cout<<"\n right page number "<<leafNodePageHeader_.rightPageNumber<<endl;
+			//cout<<"\n right page number "<<leafNodePageHeader_.rightPageNumber<<endl;
+			//cout << "no of records in left 6(2):"<< leafNodePageHeader_.noOfRecords <<endl;
 		if (leafNodePageHeader_.rightPageNumber != -1) {
 			LeafNode rightLeafNode(fd_,indexHeader_,
 					leafNodePageHeader_.rightPageNumber);
 			rightLeafNode.setLeftPageNumber(newLeafNode.getPageNumber());
 		}
+		//cout << "no of records in left 6:(3)"<< leafNodePageHeader_.noOfRecords <<endl;
 		newLeafNode.setRightPageNumber(leafNodePageHeader_.rightPageNumber);
 		newLeafNode.setLeftPageNumber(
 				leafNodePageHeader_.generalPageHeader.pageNumber);
+		leafNodePageHeader_.rightPageNumber=newLeafNode.getPageNumber();
 		memcpy(pageData_, &leafNodePageHeader_,
 				sizeof(LeafNodePageHeaderStruct));
-			cout<<"\n current "<<leafNodePageHeader_.leftPageNumber<<"  "<<leafNodePageHeader_.generalPageHeader.pageNumber<<"  "<<leafNodePageHeader_.rightPageNumber<<endl;
-			cout << "================================come here=====================" << endl;
+//			cout << "no of records in left 6:(4)"<< leafNodePageHeader_.noOfRecords <<endl;
+//			cout<<"\n current "<<leafNodePageHeader_.leftPageNumber<<"  "<<leafNodePageHeader_.generalPageHeader.pageNumber<<"  "<<leafNodePageHeader_.rightPageNumber<<endl;
+//			cout << "================================come here=====================" << endl;
+//			cout << "\n new Leaf Node (right) "<<newLeafNode.getLeftPageNumber() << " "  << newLeafNode.getPageNumber() << " "<<newLeafNode.getRightPageNumber() << endl;
 		// now create new leaf node
 
 		//bufMgr->unPinPage(newLeafNode.getPageNumber(),true);
@@ -216,6 +230,7 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 //			{
 //				BPlusTreeUtil::displayKey(promoteKey,indexHeader_);
 //			}
+			//cout << "index page number :"<<indexNode.getPageNumber()<<endl;
 			indexNode.insertIntoIndexNode(promoteKey, promoteLeafLeftPage,
 					promoteLeafRightPage);
 			leafNodePageHeader_.parentPageNumber = indexPageNumber;
@@ -223,7 +238,7 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 					sizeof(LeafNodePageHeaderStruct));
 			setRightPageNumber(newLeafNode.getPageNumber());
 			setLeftPageNumber(leafNodePageHeader_.leftPageNumber);
-
+//
 			//	newLeafNode.setParentPageNumber(indexPageNumber);
 		} else {
 			IndexNode indexNode(fd_,indexHeader_,
@@ -257,6 +272,11 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 		}
 		//	cout<<"\n current "<<leafNodePageHeader_.leftPageNumber<<"  "<<leafNodePageHeader_.generalPageHeader.pageNumber<<"  "<<leafNodePageHeader_.rightPageNumber<<endl;
 		bufMgr_->writePage(fd_,pageNumber_,pageData_);
+//				bufMgr_->commitCache();
+//				bufMgr_->hexDump(fd_,6);
+//				bufMgr_->hexDump(fd_,7);
+//				bufMgr_->hexDump(fd_,8);
+//				cout << "=========================================="<<leafNodePageHeader_.noOfRecords <<"========================================"<<endl;
 		return SUCCESS;
 	} else {
 		//cout << "in lf else key search"<<endl;
@@ -286,9 +306,10 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 			memcpy(pageData_, &leafNodePageHeader_,
 					sizeof(LeafNodePageHeaderStruct));
 		} else {
-			cout << "only for 2nd insert" << endl;
+			//cout << "only for 2nd insert" << endl;
 			if (leafNodePageHeader_.noOfRecords == i) {
 				//insert at the end
+				//cout << "no of records == i"<<endl;
 				int offset = LeafNode::getLeafNodeHeaderSize()
 				+ leafNodePageHeader_.noOfRecords
 				* (indexHeader_->getKeySize() + sizeof(RIDStruct));
@@ -300,6 +321,7 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 				memcpy(pageData_, &leafNodePageHeader_,
 						sizeof(LeafNodePageHeaderStruct));
 			} else {
+				// cout << "in else if no of records !=i"<<endl;
 				//insert at first or the middle
 				char previousFirstKey[indexHeader_->getKeySize()];
 				char tempo[indexHeader_->getKeySize()];
@@ -358,20 +380,20 @@ int LeafNode::deleteFromLeafPage(const char* key, RIDStruct &givenRid,
 
 	if ((currentNoOfRecords - 1) >= ceil(
 			indexHeader_->getMaxNoOfRecordsInLeaf() / 2)) {
-		cout << "inside >= ceil" << endl;
+		//cout << "inside >= ceil" << endl;
 		//delete key safely because it has enough number of keys
 		int offset = LeafNode::getLeafNodeHeaderSize();
 		char tempKey[indexHeader_->getKeySize()];
 		RIDStruct tempRid;
 		int found = 0, i;
-		cout << "no of records :" << getNoOfRecordsInNode() << endl;
+		//cout << "no of records :" << getNoOfRecordsInNode() << endl;
 		for (i = 0; i < getNoOfRecordsInNode(); i++) {
 			memcpy(tempKey, &pageData_[offset], indexHeader_->getKeySize());
 			offset = offset + indexHeader_->getKeySize();
 			memcpy(&tempRid, &pageData_[offset], sizeof(RIDStruct));
 			offset = offset + sizeof(RIDStruct);
 			//			dummyKeyCompare(tempKey, key);
-			cout << "temp key :" << tempKey << " key: " << key <<endl;
+			//cout << "temp key :" << tempKey << " key: " << key <<endl;
 			if (BPlusTreeUtil::keyCompare(tempKey, key, indexHeader_) == 0
 					&& ridsCompare(tempRid, givenRid) == 0) {
 				found = 1;
@@ -406,7 +428,7 @@ int LeafNode::deleteFromLeafPage(const char* key, RIDStruct &givenRid,
 			return SUCCESS;
 		}
 	} else {
-		cout << " in else :" <<endl;
+		//cout << " in else :" <<endl;
 		//ohh leaf node does not have enough number of keys so do either rotate or merge
 		if (getParentPageNumber() == -1) {
 			if (getLevelOfNode() == indexHeader_->getHeightOfTree()) {
@@ -414,11 +436,11 @@ int LeafNode::deleteFromLeafPage(const char* key, RIDStruct &givenRid,
 				char tempKey[indexHeader_->getKeySize()];
 				RIDStruct tempRid;
 				int found = 0, i;
-				cout << "in else in if height =level" <<endl;
-				cout << "no of records :" << getNoOfRecordsInNode() <<endl;
+				//cout << "in else in if height =level" <<endl;
+				//cout << "no of records :" << getNoOfRecordsInNode() <<endl;
 				for (i = 0; i < getNoOfRecordsInNode(); i++) {
 					//bufMgr_->hexDump(pageData_);
-					cout << "offset :" << offset <<endl;
+					//cout << "offset :" << offset <<endl;
 					memcpy(tempKey, &pageData_[offset],
 							indexHeader_->getKeySize());
 
@@ -431,23 +453,23 @@ int LeafNode::deleteFromLeafPage(const char* key, RIDStruct &givenRid,
 					//					dummyKeyCompare(tempKey, key)
 					if (BPlusTreeUtil::keyCompare(tempKey, key, indexHeader_)
 							== 0 && ridsCompare(tempRid, givenRid) == 0) {
-						cout << "found!!!!" <<endl;
+						//cout << "found!!!!" <<endl;
 						found = 1;
 						break;
 					}
 				}
 				if (found == 1 && i == getNoOfRecordsInNode() - 1) {
-					cout << "last one:" << i<<endl;
-					cout << "getNo" << getNoOfRecordsInNode()<< endl;
+					//cout << "last one:" << i<<endl;
+					//cout << "getNo" << getNoOfRecordsInNode()<< endl;
 					setNoOfRecordsInNode(getNoOfRecordsInNode() - 1);
-					cout << "getNo" << getNoOfRecordsInNode()<< endl;
+					//cout << "getNo" << getNoOfRecordsInNode()<< endl;
 					if (getNoOfRecordsInNode() == 0) {
-						cout << "don't come" <<endl;
+						//cout << "don't come" <<endl;
 						deletedPages.push_back(getPageNumber());
 						indexHeader_->setRootPageNumber(-1);
 						indexHeader_->setHeightOfTree(0);
 					}
-					cout << "befor return" <<endl;
+					//cout << "befor return" <<endl;
 					return SUCCESS;
 				}
 				if (found == 1) {
