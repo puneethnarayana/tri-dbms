@@ -16,6 +16,10 @@ public:
 			return TYPE_INT;
 		}else if (strcmp(dataTypeString, "VARCHAR") == 0) {
 			return TYPE_VARCHAR;
+		}else if (strcmp(dataTypeString, "BOOL") == 0) {
+			return TYPE_BOOL;
+		}else if (strcmp(dataTypeString, "DATE") == 0) {
+			return TYPE_DATE;
 		}
 		return -1;
 	}
@@ -26,6 +30,10 @@ public:
 			return "INTEGER";
 		case TYPE_VARCHAR:
 			return "VARCHAR";
+		case TYPE_BOOL:
+			return "BOOL";
+		case TYPE_DATE:
+			return "DATE";
 		default:
 			break;
 		}
