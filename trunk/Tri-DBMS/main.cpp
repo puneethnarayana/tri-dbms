@@ -39,7 +39,8 @@ using namespace std;
 //	cout << "in fun"<< endl;
 //	delete[] temp;
 //}
-
+int noOfIndexPages=0;
+int noOfLeafPages=0;
 int main(){
 
 	BufferManager *buffManager=BufferManager::getInstance();
@@ -79,8 +80,7 @@ int main(){
 		//buffManager->hexDump(fd,1);
 		FreePageManager *fpm=new FreePageManager(fd,1);
 
-		cout << "fd is :" << fd << endl;
-		cout << "free page is :"<<fpm->getFreePage()<<endl;
+
 		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
 		int colSizes[3]={SIZE_INT,16,SIZE_BOOL};
 		buffManager->commitCache();
@@ -91,19 +91,19 @@ int main(){
 		//buffManager->commitCache();
 		//buffManager->hexDump(fd,10);
 		buffManager->commitCache();
-		cout << "free Page Manager" << endl;
+		//cout << "free Page Manager" << endl;
 		//buffManager->hexDump(fd,1);
-		cout << "after createIndexHeaderPage" << endl;
+		//cout << "after createIndexHeaderPage" << endl;
 		BPlusTree *bplusTree=new BPlusTree(fd,10);
-		cout << "fd sent to b+tree :" << fd << endl;
+		//cout << "fd sent to b+tree :" << fd << endl;
 		char *key=new char[MAX_FILE_NAME_LENGTH];
 		strcpy(key,"34Ravindra1");
 		RIDStruct rid={34,2};
 		buffManager->commitCache();
 			//	buffManager->hexDump(fd,10);
-		cout << "before insertIntoBPlus" << endl;
+		//cout << "before insertIntoBPlus" << endl;
 		bplusTree->insertIntoBPlusTree(key,rid);
-		cout << "after 1st insert"<<endl;
+		//cout << "after 1st insert"<<endl;
 		strcpy(key,"83puneeth0");
 				rid={83,3};
 		bplusTree->insertIntoBPlusTree(key,rid);
@@ -111,22 +111,34 @@ int main(){
 		bplusTree->insertIntoBPlusTree(key,rid);
 		bplusTree->insertIntoBPlusTree(key,rid);
 		rid={1,2};
-		cout << "before loop" <<endl;
-		for(unsigned i=0;i<136;i++){
+		//cout << "before loop" <<endl;
+
+		for(unsigned i=0;i<1000000;i++){
 			bplusTree->insertIntoBPlusTree(key,rid);
 			rid.pageNumber++;
 			rid.slotNumber++;
-			cout << "=========================i value :" <<i <<endl;
+			//cout << "=========================i value :" <<i <<endl;
 		}
+		cout << "after for loop" <<endl;
 		buffManager->commitCache();
-		buffManager->hexDump(fd,6);
+		buffManager->hexDump(fd,1);
+		fpm=new FreePageManager(fd,1);
+		cout << "Last page :"<< fpm->getFreePage()-1 <<endl;
 		cout << "after loop" <<endl;
-		strcpy(key,"12Alka");
-		rid={83,3};
-		bplusTree->display();
-		buffManager->commitCache();
-				buffManager->hexDump(fd,7);
-				cout << sizeof(RIDStruct)<<endl;
+		cout << "No of leaf pages:"<< noOfLeafPages << " No of Index pages:"<<noOfIndexPages<<endl;
+//
+//		buffManager->hexDump(fd,1430);
+//		buffManager->hexDump(fd,322);
+//		buffManager->hexDump(fd,10);
+//		buffManager->hexDump(fd,8);
+//		buffManager->hexDump(fd,9);
+//		buffManager->hexDump(fd,173);
+//		strcpy(key,"12Alka");
+//		rid={83,3};
+//		bplusTree->display();
+//		buffManager->commitCache();
+//				buffManager->hexDump(fd,7);
+//				cout << sizeof(RIDStruct)<<endl;
 		//bplusTree->insertIntoBPlusTree(key,rid);
 		//cout << "after second insert" << endl;
 		//strcpy(key,"1");
