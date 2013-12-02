@@ -17,6 +17,12 @@ public:
 	static int getType(char *fieldLengthString){
 		if(strcmp(fieldLengthString,"INTEGER")==0){
 			return SIZE_INT;
+		}else if(strcmp(fieldLengthString,"VARCHAR")==0){
+			return SIZE_CHAR;
+		}else if(strcmp(fieldLengthString,"BOOL")==0){
+			return SIZE_BOOL;
+		}else if(strcmp(fieldLengthString,"DATE")==0){
+			return SIZE_DATE;
 		}
 
 		int len = strlen(fieldLengthString);
@@ -33,6 +39,12 @@ public:
 		switch (length) {
 			case SIZE_INT:
 				return "INTEGER";
+				break;
+			case SIZE_BOOL:
+				return "BOOL";
+				break;
+			case SIZE_DATE:
+				return "DATE";
 				break;
 			default:
 				result = "(";
