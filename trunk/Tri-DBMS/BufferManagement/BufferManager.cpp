@@ -544,6 +544,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	//char c;
 	int ptr=0;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
+	memset(pageContent,0,DEFAULT_PAGE_SIZE);
 	int err=diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
 	if(err==-1){
 		cout<< endl << "FILE_NOT_OPENED" << endl;
