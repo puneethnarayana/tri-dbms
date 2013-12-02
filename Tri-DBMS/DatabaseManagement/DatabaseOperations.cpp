@@ -49,13 +49,17 @@ DatabaseOperations::~DatabaseOperations() {
 }
 
 int DatabaseOperations::createDatabase(char *databaseName){
+
 	createDatabase(databaseName,DEFAULT_DB_SIZE);
-	//delete[] databaseName;
 	return SUCCESS;
 }
 
 
 int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
+	char *dbName=new char[MAX_FILE_NAME_LENGTH+MAX_FILE_NAME_LENGTH];
+	strcpy(dbName,databaseName);
+	strcpy(databaseName,"./DatabaseFiles/");
+	strcat(databaseName,dbName);
 	int noOfPages=(databaseSize*1024*1024)/DEFAULT_PAGE_SIZE;
 	int sysTablePageNumber_,sysColumnPageNumber_,indexCatalogPageNumber_;
 	buffManager_=BufferManager::getInstance();
@@ -97,7 +101,7 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	delete sysTablePage_;
 	delete sysColumnPage_;
 	delete indexCatalogPage_;
-
+	delete[] dbName;
 	return fd_;
 }
 int DatabaseOperations::openDatabase(char *databaseName){
