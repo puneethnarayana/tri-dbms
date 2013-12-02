@@ -32,6 +32,11 @@
 #include "../HeapFileManagement/DirectoryEntry.h"
 #include "../Utils/WhereExpressionElement.h"
 #include "../Utils/PostFixEvaluator.h"
+#include "../Index/IndexHeader.h"
+#include "../Index/BPlusTree.h"
+
+extern int indexHeaderPageNo;
+
 using namespace std;
 DatabaseOperations::DatabaseOperations() {
 	// TODO Auto-generated constructor stub
@@ -642,6 +647,132 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 
 	}
 	return SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+int DatabaseOperations::createIndex(char *tableName,vector<string> columnList){
+
+	Schema schema;
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	if(tableEntry.size()==0){
+		cout << tableName << " does not exist in the current Database!" << endl;
+		return -1;
+	}
+	vector<string> recordVector;
+	//vector<string> recordsVector;
+	int dirPageNumber_=-1;
+	int recordLength;
+	int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
+	Record *record;
+	DirectoryPage *dirPage_;
+	char *recordString;
+	DataPage *dataPage;
+	//		int dpChainHeader_=5;
+	//		int noOfColumns_=3;
+	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+	int pos;
+	int keySizeForIndex=0;
+	sysColumnCatalog_->getTableSchema(tableName,schema);
+	int colTypes[columnList.size()];
+	int colSizes[columnList.size()];
+	RIDStruct ridForIndex;
+	for(unsigned c=0;c<columnList.size();c++){
+		pos= schema.getColumnNum(columnList[c].c_str());
+		colSizes[c]=schema.fieldLengths[pos];
+		colTypes[c]=schema.fieldTypes[pos];
+		keySizeForIndex+=schema.fieldLengths[pos];
+	}
+
+	FreePageManager *fpMgr_=new FreePageManager(fd_,1);
+	int indexHeaderPageNumber_=fpMgr_->getFreePage();
+	indexHeaderPageNo=indexHeaderPageNumber_;
+	IndexHeader *indexHeader=new IndexHeader(fd_,indexHeaderPageNumber_);
+	indexHeader->createIndexHeaderPage(columnList.size(),colTypes,colSizes,keySizeForIndex);
+	BPlusTree *bplusTree=new BPlusTree(fd_,indexHeaderPageNumber_);
+	/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
+			for(int i=0;i<schema.columnNames.size();i++){
+				cout << schema.columnNames[i].c_str() << endl;
+				cout << schema.fieldPosition[i] << endl;
+				cout << schema.fieldTypes[i] << endl;
+				cout << endl << endl;
+			}*/
+	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+
+	//loop the following for all the directory pages of table;
+	while(dirPageNumber_!=-1){
+		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+		DirectoryEntry::DirectoryEntryStruct dirEntry_;
+		record=new Record();
+		noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
+		//cout <<" no of dir entries :" <<noOfDirEntries << endl;
+		for(int i=0;i<noOfDirEntries;i++){
+			dirEntry_=dirPage_->getDirectorySlot(i);
+			//cout << dirEntry_.pageNumber_  << " " << dirEntry_.freeSpace_<< endl;
+			if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
+				dataPageNumber=dirEntry_.pageNumber_;
+				//cout << dataPageNumber << endl;
+				dataPage=new DataPage(fd_,dataPageNumber);
+				noOfRecordsInDataPage=dataPage->getNoOfRecords();
+				//cout << noOfRecordsInDataPage << endl;
+				for(int j=0;j<noOfRecordsInDataPage;j++){
+
+					//cout << "in j= " << j<<endl;
+					recordString=new char[DEFAULT_PAGE_SIZE];
+					dataPage->getRecord(j,recordString,&recordLength);
+					//buffManager_->hexDump(recordString);
+					if(recordLength>0){
+						//cout << "don't come here" << endl;
+						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+
+						stringstream recordStream;
+						int pos;
+						Record recordWhere(schema,recordString,recordLength);
+
+						for(unsigned c=0;c<columnList.size();c++){
+							pos= schema.getColumnNum(columnList[c].c_str());
+							recordStream<<recordVector[pos].c_str();
+
+						}
+						ridForIndex={dataPageNumber,j};
+						bplusTree->insertIntoBPlusTree(recordStream.str().c_str(),ridForIndex);
+						//cout << "index root page :"<<indexHeader->getRootPageNumber();
+						delete[] recordString;
+					}
+					else{
+						delete[] recordString;
+					}
+				}
+				delete dataPage;
+			}
+		}
+		dirPageNumber_=dirPage_->getNextPageNumber();
+		delete dirPage_;
+		delete record;
+		//cout << dirPageNumber_ << endl;
+	}
+	//		for(int l=0;l<recordsVector.size();l++){
+	//			//cout << recordsVector[l].c_str() << endl;
+	//		}
+	buffManager_->commitCache();
+	delete indexHeader;
+	delete bplusTree;
+	delete dirHeaderPage_;
+	delete fpMgr_;
+
+	//return recordsVector;
+	return SUCCESS;
+
 }
 
 
