@@ -81,51 +81,93 @@ int main(){
 		FreePageManager *fpm=new FreePageManager(fd,1);
 
 
-		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
-		int colSizes[3]={SIZE_INT,16,SIZE_BOOL};
-		buffManager->commitCache();
+//		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
+//		int colSizes[3]={SIZE_INT,16,SIZE_BOOL};
+		int colTypes[1]={TYPE_INT};
+		int colSizes[1]={10};
+		//buffManager->commitCache();
 		//cout << "free Page Manager" << endl;
 		//buffManager->hexDump(fd,1);
-		IndexHeader *indexHeader=new IndexHeader(fd,10);
-		indexHeader->createIndexHeaderPage(3,colTypes,colSizes,21);
+		int indexHeaderPageNo=fpm->getFreePage();
+		IndexHeader *indexHeader=new IndexHeader(fd,indexHeaderPageNo);
+		indexHeader->createIndexHeaderPage(1,colTypes,colSizes,10);
 		//buffManager->commitCache();
 		//buffManager->hexDump(fd,10);
 		buffManager->commitCache();
 		//cout << "free Page Manager" << endl;
 		//buffManager->hexDump(fd,1);
 		//cout << "after createIndexHeaderPage" << endl;
-		BPlusTree *bplusTree=new BPlusTree(fd,10);
+		BPlusTree *bplusTree=new BPlusTree(fd,indexHeaderPageNo);
 		//cout << "fd sent to b+tree :" << fd << endl;
+
+		//bplusTree->userInterface(indexHeaderPageNo);
+		bplusTree->IntRange(1,100000,5);
+		cout << "after insert range"<<endl;
+		bplusTree->UISearching();
 		char *key=new char[MAX_FILE_NAME_LENGTH];
 		strcpy(key,"34Ravindra1");
 		RIDStruct rid={34,2};
 		buffManager->commitCache();
-			//	buffManager->hexDump(fd,10);
-		//cout << "before insertIntoBPlus" << endl;
-		bplusTree->insertIntoBPlusTree(key,rid);
-		//cout << "after 1st insert"<<endl;
-		strcpy(key,"83puneeth0");
-				rid={83,3};
-		bplusTree->insertIntoBPlusTree(key,rid);
 
-		bplusTree->insertIntoBPlusTree(key,rid);
-		bplusTree->insertIntoBPlusTree(key,rid);
+			//	buffManager->hexDump(fd,10);
+//		//cout << "before insertIntoBPlus" << endl;
+//		bplusTree->insertIntoBPlusTree(key,rid);
+//		//cout << "after 1st insert"<<endl;
+//		strcpy(key,"1");
+//				rid={83,3};
+//		bplusTree->insertIntoBPlusTree(key,rid);
+//
+//		bplusTree->insertIntoBPlusTree(key,rid);
+//		bplusTree->insertIntoBPlusTree(key,rid);
 		rid={1,2};
 		//cout << "before loop" <<endl;
 
-		for(unsigned i=0;i<1000000;i++){
-			bplusTree->insertIntoBPlusTree(key,rid);
-			rid.pageNumber++;
-			rid.slotNumber++;
-			//cout << "=========================i value :" <<i <<endl;
-		}
-		cout << "after for loop" <<endl;
-		buffManager->commitCache();
-		buffManager->hexDump(fd,1);
+//		for(unsigned i=0;i<1000000;i++){
+//			strcpy(key,CommonUtil::int_to_string(i).c_str());
+//			bplusTree->insertIntoBPlusTree(key,rid);
+//			rid.pageNumber++;
+//			rid.slotNumber++;
+//			//cout << "=========================i value :" <<i <<endl;
+//		}
+	/*	vector<RIDStruct> resultRids;
+		bplusTree->IntRange(1,100000,5);
+		cout << "after inserting range ints" <<endl;
 		fpm=new FreePageManager(fd,1);
 		cout << "Last page :"<< fpm->getFreePage()-1 <<endl;
 		cout << "after loop" <<endl;
 		cout << "No of leaf pages:"<< noOfLeafPages << " No of Index pages:"<<noOfIndexPages<<endl;
+		strcpy(key,"23451");
+		cout << "key is :" << key <<endl;
+		resultRids.clear();
+		bplusTree->searchKeyInBPlusTree(key,resultRids);
+
+		for(unsigned i=0;i<resultRids.size();i++){
+			cout << " in search :"<<resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+		}*/
+
+
+//		buffManager->commitCache();
+//		buffManager->hexDump(fd,indexHeaderPageNo);
+//		resultRids.clear();
+//		strcpy(key,"1001");
+//		bplusTree->searchKeyInBPlusTree(key,resultRids);
+//		for(unsigned i=0;i<resultRids.size();i++){
+//			cout << resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+//		}
+//		rid={1001,1002};
+//		bplusTree->deleteFromBPlusTree(key,rid);
+//		cout << "========================================================"<<endl;
+//		strcpy(key,"1000");
+//		resultRids.clear();
+//
+//		for(unsigned i=0;i<resultRids.size();i++){
+//			cout << "inside search 2:"<<resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+//		}
+//		//bplusTree->display();
+//		cout<< endl;
+
+
+
 //
 //		buffManager->hexDump(fd,1430);
 //		buffManager->hexDump(fd,322);
