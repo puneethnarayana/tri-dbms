@@ -15,7 +15,7 @@ int lineno = 1;
 \n		lineno++;
 	
 	/* keywords */
-FLOAT		{ yylval.sval = strdup(yytext);return FLOAT; }
+DATE		{ yylval.sval = strdup(yytext);return DATE; }
 INT   		{ yylval.sval = strdup(yytext);return INT; }
 ALL		{ return ALL; }
 AND		{ yylval.sval = strdup(yytext);return AND; }
@@ -115,7 +115,7 @@ DATABASES	{ return DATABASES;}
 USE		{ return USE;}
 
 
-[(),.;]		{ return yytext[0]; }
+[(),*.;]		{ return yytext[0]; }
 
 
 	/* punctuation */

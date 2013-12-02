@@ -4,17 +4,18 @@
 
 extern int yylex();
 extern void yyerror(const char *s);
+
+DatabaseOperations *dbOps= new DatabaseOperations();
 %}
 
 %union YYSTYPE{
 	int ival;
-	float fval;
 	char *sval;
 	int subtok;
 }
 
 %token <ival> INT
-%token STRING NAME INTNUM APPROXNUM BOOL
+%token STRING NAME INTNUM APPROXNUM BOOL DATE
 
 %token ALL AMMSC AND ANY AS ASC AUTHORIZATION BETWEEN BY
 %token CHARACTER CHECK CLOSE COMMIT CONTINUE CREATE CURRENT
@@ -66,6 +67,8 @@ extern void yyerror(const char *s);
 %type<sval> PRIMARY
 %type<sval> KEY
 %type<sval> column_ref
+%type<sval> BOOL
+%type<sval> DATE
 
 %start list
 %%
@@ -97,8 +100,16 @@ query_list:
 	
 
 create_statement:
-		CREATE TABLE table '(' base_table_element_commalist ')' 
-		{cout<<"CREATE TABLE"<<endl<<endl;
+		CREATE TABLE table '(' base_table_element_commalist ')' {
+			globalStatementType=CREATE_TABLE_STATEMENT;
+			globalTableName=CommonUtil::char_to_string($3) ;
+			char *tableName= new char[globalTableName.length()+1];
+			strcpy(tableName,globalTableName.c_str() );
+			dbOps->createTable(tableName,globalColumnNameList,globalColumnDatatypeList,globalColumnDatasizeList);
+			cout<<"Table "<<tableName<<" created successfully with "<<globalColumnNameList.size()<<" column(s)!"<<endl;
+			globalColumnNameList.clear();
+			globalColumnDatatypeList.clear();
+			globalColumnDatasizeList.clear();
 		}
 	;
 
@@ -149,31 +160,44 @@ column_commalist:
 	;
 
 table:
-		NAME { cout<<"table name = "<< $1 <<endl ;}
+		NAME
 	;
 
-column:		NAME  { cout<<"column name = "<< $1 <<endl ;}
+column:		NAME{ 
+				globalColumnNameList.push_back( CommonUtil::char_to_string($1) );
+			}
 	;
 
 data_type:	
-		CHARACTER { cout<<"datatype = char" <<endl ; }
-	|	CHARACTER '(' INTNUM ')' { cout<<"char size = "<< $3 <<endl ; }
-	|	VARCHAR '(' INTNUM ')' { cout<<"varchar size = "<< $3 <<endl ; }
-	|	NUMERIC  { cout<<"datatype = numeric" <<endl ; }
-	|	NUMERIC '(' INTNUM ')'
-	|	DECIMAL { cout<<"datatype = decimal" <<endl ; }
-	|	DECIMAL '(' INTNUM ')'
-	|	FLOAT { cout<<"datatype = float" <<endl ; }
-	|	FLOAT '(' INTNUM ')'
-	|	INTEGER { cout<<"datatype = integer" <<endl ; }
-	|	BOOL { cout<<"datatype = bool" <<endl ; }
-	|	REAL { cout<<"datatype = real" <<endl ; }
+		VARCHAR '(' INTNUM ')' 
+		{ globalColumnDatatypeList.push_back(CommonUtil::int_to_string(DataTypeLookup::getType($1)));
+		  globalColumnDatasizeList.push_back($3); 
+		}
+	|	INTEGER
+		{ globalColumnDatatypeList.push_back(CommonUtil::int_to_string(DataTypeLookup::getType($1)));
+	      globalColumnDatasizeList.push_back(CommonUtil::int_to_string(FieldLengthLookup::getType($1))); 
+		}
+	|	BOOL
+		{ globalColumnDatatypeList.push_back(CommonUtil::int_to_string(DataTypeLookup::getType($1)));
+		  globalColumnDatasizeList.push_back(CommonUtil::int_to_string(FieldLengthLookup::getType($1))); 
+		}
+	|	DATE
+		{ globalColumnDatatypeList.push_back(CommonUtil::int_to_string(DataTypeLookup::getType($1))); 
+		  globalColumnDatasizeList.push_back(CommonUtil::int_to_string(FieldLengthLookup::getType($1)));
+		}
 	;
 
 		
 
 createdb_statement:
-		CREATE DATABASE db_name	
+		CREATE DATABASE db_name	{
+			globalStatementType=CREATE_DATABASE_STATEMENT;
+			globalDatabaseName=CommonUtil::char_to_string($3) ;
+			char *databaseName= new char[globalDatabaseName.length()+1];
+			strcpy(databaseName,globalDatabaseName.c_str() );
+			dbOps->createDatabase(databaseName);
+			cout<<"create database executed successfully!"<<endl;
+		}
 	;
 
 create_index:
@@ -186,7 +210,18 @@ index_name:
 		
 
 insert_statement:
-		INSERT INTO table opt_column_commalist values_or_query_spec {cout<<"INSERT INTO "<<endl<<endl;}
+		INSERT INTO table opt_column_commalist values_or_query_spec {
+			globalTableName=CommonUtil::char_to_string($3) ;
+			char *tableName= new char[globalTableName.length()+1];
+			strcpy(tableName,globalTableName.c_str() );
+			/* dbOps->insertIntoTable(tableName,globalColumnValueList); */
+			cout<<"Inserted 1 row successfully!"<<endl;
+			for(unsigned ii=0; ii < globalColumnValueList.size(); ii++)
+    		    {
+                cout << globalColumnValueList[ii]<<" " ;
+        		}
+			globalColumnValueList.clear();
+		}
 	;
 
 opt_column_commalist:
@@ -209,29 +244,14 @@ insert_atom_commalist:
 	;
 
 insert_atom:
-		atom	
-	;
-
-atom:
-		parameter_ref 
-	|	literal 
-	;
-	
-parameter_ref:
-		parameter 
-	|	parameter parameter 
-	;
-	
-parameter:
-							/*Empty*/
-	| ':' NAME 
+		literal	
 	;
 
 literal:
-		STRING  { cout<<"literal string = "<<$1<<endl ;}
-	|	INTNUM  { cout<<"literal intnum = "<<$1<<endl ;}
-	|	APPROXNUM  { cout<<"literal approxnum = "<<$1<<endl ;}
-	|	NAME  { cout<<"literal name = "<<$1<<endl ;}
+		STRING  { globalColumnValueList.push_back($1); }
+	|	INTNUM  { globalColumnValueList.push_back($1); }
+	|	APPROXNUM  { globalColumnValueList.push_back($1); }
+	|	NAME  { globalColumnValueList.push_back($1); }
 	;
 
 		
@@ -298,6 +318,10 @@ atom_commalist:
 	|	atom_commalist ',' atom
 	;
 
+atom:
+		literal
+	;
+
 subquery:
 		'(' SELECT opt_all_distinct selection table_exp ')'
 	;
@@ -356,7 +380,7 @@ opt_all_distinct:
 
 selection:
 		scalar_exp_commalist
-	|	'*'
+	|	'*'{cout<<"SELECT * "<<endl<<endl;}
 	;
 
 table_exp:
@@ -414,7 +438,7 @@ db_struct:
 	|	TABLE table {cout<<"DROP TABLE "<<endl<<endl;}
 
 db_name:
-		NAME
+		NAME 
 	;
 
 		

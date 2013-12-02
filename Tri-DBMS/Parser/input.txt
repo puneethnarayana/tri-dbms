@@ -4,3 +4,6 @@ CREATE INDEX new_key ON asd;
 DROP TABLE asd;
 show DATABASES;
 use qwe;
+
+
+dbOps->insertIntoTable(tableName,globalColumnValueList);
