@@ -13,6 +13,7 @@
 #include<limits>
 #include <sstream>
 #include "../Global/globalDefines.h"
+#include "../Utils/CommonUtil.h"
 using namespace std;
 BPlusTreeUtil::BPlusTreeUtil() {
 	// TODO Auto-generated constructor stub
@@ -44,13 +45,22 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 		switch (colType) {
 		case TYPE_INT:
 			//			cout << "\nINTEGER TYPE" << endl;
-			memcpy(&intKey1, &key1[offset], 4);
-			memcpy(&intKey2, &key2[offset], 4);
-			if (intKey1 > intKey2) {
+//			memcpy(&intKey1, &key1[offset], 4);
+//			memcpy(&intKey2, &key2[offset], 4);
+//			if (intKey1 > intKey2) {
+//				return 1;
+//			} else if (intKey1 < intKey2) {
+//				return -1;
+//			}
+			//cout << " in type int"<< key1 << " " <<key2<<endl;
+			if(CommonUtil::string_to_int(key1)>CommonUtil::string_to_int(key2)){
 				return 1;
-			} else if (intKey1 < intKey2) {
+			}
+			else if(CommonUtil::string_to_int(key1)<CommonUtil::string_to_int(key2)){
 				return -1;
 			}
+
+
 			break;
 
 		case TYPE_FLOAT:
@@ -138,8 +148,9 @@ void BPlusTreeUtil::displayKey(const char *key,
 			cout << floatKey;
 			break;
 		case COL_DOUBLE:
-			memcpy(&doubleKey, &key[offset], sizeof(double));
-			cout << doubleKey;
+			//memcpy(&doubleKey, &key[offset], sizeof(double));
+
+			cout << key;
 			break;
 		case COL_LONG:
 			memcpy(&longKey, &key[offset], sizeof(long));

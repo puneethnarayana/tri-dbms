@@ -20,6 +20,7 @@
 #include<stdlib.h>
 #include <string.h>
 #include<vector>
+#include "../Utils/CommonUtil.h"
 #include "../HeapFileManagement/FreePageManager.h"
 
 using namespace std;
@@ -83,7 +84,7 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		//cout << "in else"<<endl;
 		int insertLeafPageNumber = -1;
 		insertLeafPageNumber = searchInBPlusTree(key);
-		//cout << "insert leaf pageNumber :" << insertLeafPageNumber <<endl;
+		cout << "insert leaf pageNumber :" << insertLeafPageNumber <<endl;
 		LeafNode leafNode(fd_,indexHeaderPage_, insertLeafPageNumber);
 		//		DEBUG_B("no of records in this leaf node "<<leafNode.getNoOfRecordsInNode())
 		//	DEBUG_B("leaf Page Number "<<leafNode.getPageNumber());
@@ -93,11 +94,11 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		//		strncpy(newKey, key, strlen(key));
 		//cout << "before 2nd insert in else" <<endl;
 		leafNode.insertIntoLeafPage(key, rid);
-		//cout << "after 2nd insert in else" <<endl;
+		cout << "after 2nd insert in else" <<endl;
 
 		indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys()
 				+ 1);
-		//cout << "indexHeaderPage no of keys:" << indexHeaderPage_->getNoOfKeys()<<endl;
+		cout << "indexHeaderPage no of keys:" << indexHeaderPage_->getNoOfKeys()<<endl;
 //		bufMgr_->commitCache();
 //					bufMgr_->hexDump(fd_,10);
 //					bufMgr_->hexDump(fd_,6);
@@ -134,6 +135,7 @@ int BPlusTree::deleteFromBPlusTree(const char* key, RIDStruct &rid) {
 				break;
 			}
 			LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
+			cout << "before right page : come here "<<endl;
 			status = leafNode.searchInLeafNode(key, rid);
 		}
 
@@ -179,9 +181,14 @@ int BPlusTree::searchKeyInBPlusTree(const char *key, std::vector<
 		//			IndexNode indexNode(indexHeaderPage_,rootPageNumber);
 		int leafPageNumber = searchInBPlusTree(key);
 		//			DEBUG_B("leaf page "<<leafPageNumber)
-		//		cout << " leaf page number " << leafPageNumber << endl;
+				//cout << " is it here? leaf page number " << leafPageNumber << endl;
+				//cout << " key : "<<key <<endl;
+
 		LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
+		//cout << " key : "<<key <<endl;
+
 		leafNode.searchKeyInLeafNode(key, RIDVector);
+		//cout<<"Seraching DOne"<<endl;
 	}
 	//	int leafPageNumber=searchInBPlusTree(key);
 	//	DEBUG_B(" FIND LEAF PAGE NUMBER "<<leafPageNumber)
@@ -240,6 +247,18 @@ int BPlusTree::userInterface(int indexHeaderPageNumber) {
 		case 4: {
 			cout << "\n Insert Record UI" << endl;
 			UIInsertRecord();
+			break;
+		}
+		case 5:{
+			cout<<"Enter Start key"<<endl;
+			int start,end;
+			cin>>start;
+			cout<<"Enter end key"<<endl;
+			cin>>end;
+			cout<<"Enter Increment Value:"<<endl;
+			int increment;
+			cin>>increment;
+			IntRange(start,end,increment);
 			break;
 		}
 		case 6: {
@@ -505,16 +524,18 @@ void BPlusTree::IntRange(int range1, int range2, int incrementFactor) {
 	//	srand(first);
 	int intKey = range1, count = 0;
 	char totalKey[indexHeaderPage_->getKeySize()];
-	memset(totalKey, '\0', indexHeaderPage_->colSizes_[0]);
+	memset(totalKey, 0, indexHeaderPage_->colSizes_[0]);
 	RIDStruct rid;
 	time_t start, end;
 	double diffTime;
 	time(&start);
 	for (int i = 0; intKey <= range2; i++) {
-		memcpy(totalKey, &intKey, sizeof(int));
+		//cout << "int key is :" <<intKey<<endl;
+		//memcpy(totalKey, &intKey, sizeof(int));
 		rid.pageNumber = i;
-		rid.slotNumber = (unsigned short) i;
-		insertIntoBPlusTree(totalKey, rid);
+		rid.slotNumber = (short) i;
+		cout << " in range insert :" << CommonUtil::int_to_string(intKey).c_str() <<"rid: "<< rid.pageNumber <<rid.slotNumber<< endl;
+		insertIntoBPlusTree(CommonUtil::int_to_string(intKey).c_str(), rid);
 		count++;
 		intKey = intKey + incrementFactor;
 	}
@@ -523,6 +544,7 @@ void BPlusTree::IntRange(int range1, int range2, int incrementFactor) {
 	cout << "\t" << count << " keys are inserted" << endl;
 	cout << "TOTAL TIME TO COMPLETE (in seconds): " << diffTime << endl;
 }
+
 void BPlusTree::insertFloatRange(float range1, float range2,
 		float incrementFactor) {
 	float floatKey = range1;
@@ -1535,7 +1557,8 @@ void BPlusTree::UISearching() {
 			inValid = 1;
 		}
 	} while (inValid == 1);
-	if (op == 6) {
+	if (op == 6)
+	{
 		//**********************************************************************
 		int numOfColumns = indexHeaderPage_->getNoOfColumns();
 		int offset = 0;
@@ -1725,7 +1748,7 @@ void BPlusTree::UISearching() {
 					rid = RIDVector.at(i);
 					string x;
 					x = keyVector.at(i);
-					cout << "      key :";
+					cout << "      key :"<<x.c_str()<<endl;
 					BPlusTreeUtil::displayKey(x.c_str(), indexHeaderPage_);
 					cout << "\tPage No : " << rid.pageNumber << "\tSlot No : "
 							<< rid.slotNumber << endl;
@@ -1740,7 +1763,8 @@ void BPlusTree::UISearching() {
 		}
 		//**********************************************************************
 	}
-	if (op != 0 && op != 6) {
+	if (op != 0 && op != 6)
+	{
 		int numOfColumns = indexHeaderPage_->getNoOfColumns();
 		int offset = 0;
 		char totalKey[indexHeaderPage_->getKeySize()];
@@ -1754,7 +1778,7 @@ void BPlusTree::UISearching() {
 			char key[indexHeaderPage_->colSizes_[i]];
 			memset(totalKey, '\0', indexHeaderPage_->getKeySize());
 			switch (colType) {
-			case COL_INTEGER:
+			case TYPE_INT:
 				do {
 					cout << "\nEnter integer key to search : ";
 					cin >> intKey;
@@ -1770,7 +1794,8 @@ void BPlusTree::UISearching() {
 					}
 				} while (valid == 0);
 
-				memcpy(&totalKey[offset], &intKey, sizeof(int));
+				//memcpy(&totalKey[offset], &intKey, sizeof(int));
+				strcpy(&totalKey[offset],CommonUtil::int_to_string(intKey).c_str());
 				break;
 			case COL_FLOAT:
 				do {
@@ -1789,6 +1814,7 @@ void BPlusTree::UISearching() {
 				} while (valid == 0);
 
 				memcpy(&totalKey[offset], &floatKey, sizeof(float));
+
 				break;
 			case COL_DOUBLE:
 				do {
@@ -1805,7 +1831,8 @@ void BPlusTree::UISearching() {
 						valid = 1;
 					}
 				} while (valid == 0);
-				memcpy(&totalKey[offset], &doubleKey, sizeof(double));
+				//memcpy(&totalKey[offset], &doubleKey, sizeof(double));
+				strcpy(&totalKey[offset],CommonUtil::int_to_string(doubleKey).c_str());
 				break;
 			case COL_LONG:
 				do {
@@ -1839,6 +1866,7 @@ void BPlusTree::UISearching() {
 		time(&start);
 		vector<RIDStruct> RIDVector;
 		vector<string> keyVector;
+		cout << "you should be here dude :"<<endl;
 		bplusTreeSearchKeyInLeafNodeWithOp(leafNodeNumber, totalKey, op,
 				RIDVector, keyVector);
 		time(&end);
@@ -1855,8 +1883,7 @@ void BPlusTree::UISearching() {
 				rid = RIDVector.at(i);
 				string x;
 				x = keyVector.at(i);
-				cout << "      key :";
-				BPlusTreeUtil::displayKey(x.c_str(), indexHeaderPage_);
+				cout << "      key :"<<x.c_str();
 				cout << "\tPage No : " << rid.pageNumber << "\tSlot No : "
 						<< rid.slotNumber << endl;
 			}
@@ -1866,6 +1893,7 @@ void BPlusTree::UISearching() {
 		}
 	}
 }
+
 void BPlusTree::tempKeyCompare(char *key1, char* key2) {
 	int x = BPlusTreeUtil::keyCompare(key1, key2, indexHeaderPage_);
 	cout << "comparision value :" << x << endl;
@@ -1898,15 +1926,24 @@ void BPlusTree::bplusTreeSearchKeyInLeafNodeWithOp(int leafPageNumber,
 		while (found == 1) {
 			if (leafPageNumber != -1) {
 				LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
-				found = leafNode.searchKeyInLeafNodeWithOp(totalKey, op,
+				//cout << "leaf page number :"<< leafNode.getPageNumber()<<" leaf page right pagenumber :"<< leafNode.getRightPageNumber() <<endl;
+				leafNode.searchKeyInLeafNodeWithOp(totalKey, op,
 						RIDVector, keyVector);
-				if (found == 1) {
-					leafPageNumber = leafNode.getRightPageNumber();
-				}
+				leafPageNumber = leafNode.getRightPageNumber();
+
 			} else {
 				found = 0;
 			}
+//
+//			cout << "root page Number :"<<indexHeaderPage_->getRootPageNumber()<<endl;
+//				IndexNode indexNode(fd_,indexHeaderPage_,indexHeaderPage_->getRootPageNumber());
+//				if(indexNode.getPageType()==INDEX_LEAF_PAGE){
+//
+//				}
+//				indexNode.searchKeyInIndexNodeWithOp(totalKey, op, RIDVector, keyVector);
+
 		}
+
 	} else if (op == 2) {
 		while (found == 1) {
 			if (leafPageNumber != -1) {

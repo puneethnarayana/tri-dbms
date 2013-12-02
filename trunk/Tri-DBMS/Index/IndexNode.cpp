@@ -1071,18 +1071,26 @@ int IndexNode::replaceKeyPreviousToPageNumber(int pageNumber,
 int IndexNode::searchInIndexNode(const char* key) {
 	int offset = IndexNode::getIndexNodeHeaderSize();
 	char tempKey[indexHeader_->getKeySize()];
+	//bufMgr_->commitCache();
+	//bufMgr_->hexDump(fd_,1);
+	//bufMgr_->hexDump(fd_,6);
 	int leftPageNumber, rightPageNumber;
+	//cout <<  "number of keys :"<<indexHeader_->getNoOfKeys()<<endl;
 	for (int i = 0; i < indexNodePageHeader_.noOfKeys; i++) {
 		memcpy(&leftPageNumber, &pageData_[offset], sizeof(int));
+		//cout << "left page number :"<< leftPageNumber<<endl;
 		offset = offset + sizeof(int);
 		memcpy(tempKey, &pageData_[offset], indexHeader_->getKeySize());
 		offset = offset + indexHeader_->getKeySize();
 		memcpy(&rightPageNumber, &pageData_[offset], sizeof(int));
 		//		dummyKeyCompare(tempKey, key)
+		//cout << "left:"<< leftPageNumber << "right : "<<rightPageNumber<<endl;
+		//cout << "tempKey :"<<tempKey << "key :"<<key <<endl;
 		int compValue = BPlusTreeUtil::keyCompare(tempKey, key, indexHeader_);
 		//		DEBUG_B(" temp key "<<tempKey<<" new key "<<key)
 		//		DEBUG_B("left page number "<<leftPageNumber)
 		//		DEBUG_B("comparision return value "<<compValue<<endl)
+		//cout << "comp value :"<<compValue<<endl;
 		if (compValue == 0)
 			return rightPageNumber;
 		if (compValue == 1)
@@ -1156,6 +1164,9 @@ void IndexNode::setRightPageNumber(int rightPageNumber) {
 }
 int IndexNode::getPageNumber() {
 	return indexNodePageHeader_.generalPageHeaderStruct.pageNumber;
+}
+int IndexNode::getPageType() {
+	return indexNodePageHeader_.generalPageHeaderStruct.pageType;
 }
 void IndexNode::getFirstKeyPresentInIndexNode(char* key) {
 	int offset = IndexNode::getIndexNodeHeaderSize();
@@ -1512,4 +1523,40 @@ void IndexNode::findFirstLeafPage(std::vector<int> &leafPages)
 		}
 	}
 
+}
+int IndexNode::searchKeyInIndexNodeWithOp(const char* key, int op, std::vector<
+		RIDStruct> &RIDVector, std::vector<string> &keyVector) {
+
+	int nextPageNumber;
+	switch (op) {
+	case 1:
+		//cout << "op ==1 "<<endl;
+		nextPageNumber=searchInIndexNode(key);
+		cout << "current page number :"<<getPageNumber()<<"next page number :"<< nextPageNumber<<endl;
+		if(nextPageNumber==-1){
+			return 0;
+		}
+		if(getLevelOfIndexNode()==1){
+			int found=1;
+			//while (found == 1) {
+				if (nextPageNumber != -1) {
+					LeafNode leafNode(fd_,indexHeader_, nextPageNumber);
+					cout << "leaf page number :"<< leafNode.getPageNumber()<<" leaf page right pagenumber :"<< leafNode.getRightPageNumber() <<endl;
+					found=leafNode.searchKeyInLeafNodeWithOp(key, op,
+							RIDVector, keyVector);
+
+					nextPageNumber = leafNode.getRightPageNumber();
+
+				}
+				else{
+					found =0;
+				}
+			//}
+		}
+		else{
+			IndexNode indexNode(fd_,indexHeader_,nextPageNumber);
+			indexNode.searchKeyInIndexNodeWithOp(key,op,RIDVector,keyVector);
+		}
+		break;
+	}
 }
