@@ -15,23 +15,22 @@
 #include <stdlib.h>
 
 using namespace std;
-#include "../DatabaseManagement/QueryStructure.h"
 #include "../Utils/CommonUtil.h"
 #include "../Utils/DataTypeLookup.h"
 #include "../Utils/FieldLengthLookup.h"
 #include "../DatabaseManagement/DatabaseOperations.h"
 
 
-extern string globalDatabaseName;
-extern string globalTableName;
-extern string globalIndexName;
-extern vector<string> globalColumnNameList;
-extern vector<string> globalColumnValueList;
-extern vector<string> globalColumnDatatypeList;
-extern vector<string> globalColumnDatasizeList;
-extern vector<string> globalWhereList;
+string globalDatabaseName;
+string globalTableName;
+string globalIndexName;
+vector<string> globalColumnNameList;
+vector<string> globalColumnValueList;
+vector<string> globalColumnDatatypeList;
+vector<string> globalColumnDatasizeList;
+vector<string> globalWhereList;
 
-extern int globalStatementType;
+int globalStatementType;
 
 
 static const int CREATE_DATABASE_STATEMENT = 0;
