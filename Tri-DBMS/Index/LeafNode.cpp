@@ -872,6 +872,7 @@ int LeafNode::searchKeyInLeafNode(const char* key, std::vector<
 		memcpy(tempKey, &pageData_[offset], indexHeader_->getKeySize());
 		//			dummyKeyCompare(tempKey, key);
 		int comp = BPlusTreeUtil::keyCompare(tempKey, key, indexHeader_);
+		//cout << "temp key & key are :" << tempKey << " " <<key << endl;
 		if (comp == 0) {
 			found = 1;
 		}
@@ -988,15 +989,19 @@ int LeafNode::searchKeyInLeafNodeWithOp(const char* key, int op, std::vector<
 	int found = 0;
 	switch (op) {
 	case 1:
+		//cout << "op ==1 "<<endl;
 		for (int i = 0; i < getNoOfRecordsInNode(); i++) {
 			memcpy(insideKey, &pageData_[offset], indexHeader_->getKeySize());
 			offset = offset + indexHeader_->getKeySize();
+			//cout << "inside key :"<<insideKey << " key :"<<key<<endl;
 			if (BPlusTreeUtil::keyCompare(insideKey, key, indexHeader_) == 0) {
+				//cout << " compare success : "<<i<<"-----------------------------------------"<<endl;
 				found = 1;
 				memcpy(&rid, &pageData_[offset], sizeof(RIDStruct));
 				RIDVector.push_back(rid);
 				keyVector.push_back(insideKey);
 			} else if (i == (getNoOfRecordsInNode() - 1)) {
+				//cout << "not found "<<endl;
 				found = 0;
 				break;
 			}

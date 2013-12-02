@@ -62,6 +62,7 @@ public:
 	int getRightPageNumber();
 	void setRightPageNumber(int rightPageNumber);
 	int getPageNumber();
+	int getPageType();
 	int isKeyFound(char* key);
 	int replaceKey(const char* oldKey, const char* newKey);
 	int replaceKeyPreviousToPageNumber(int pageNumber,
@@ -92,6 +93,8 @@ public:
 	void findFirstLeafPage(std::vector<int> &leafPages);
 	bool indexHeaderObjCreatedHere;
 	virtual ~IndexNode();
+	int searchKeyInIndexNodeWithOp(const char* key, int op, std::vector<
+			RIDStruct> &RIDVector, std::vector<string> &keyVector);
 
 };
 
