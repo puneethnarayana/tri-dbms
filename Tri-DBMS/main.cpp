@@ -39,6 +39,7 @@ using namespace std;
 //	cout << "in fun"<< endl;
 //	delete[] temp;
 //}
+int indexHeaderPageNo;
 int noOfIndexPages=0;
 int noOfLeafPages=0;
 int main(){
@@ -57,30 +58,30 @@ int main(){
 	int DBSizeInMB;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	char *readPage=new char[DEFAULT_PAGE_SIZE];
-//	stringstream mystream;
-//	mystream<<"hey";
-//	mystream<<"wassup";
-//	cout << mystream.str() << endl;
+	//	stringstream mystream;
+	//	mystream<<"hey";
+	//	mystream<<"wassup";
+	//	cout << mystream.str() << endl;
 
 	buffManager->setInitCache(true);
-		//buffManager->setInitCache(false);
-		dbname=new char[MAX_FILE_NAME_LENGTH];
-		strcpy(dbname,"db1");
-		char *tablename=new char[MAX_FILE_NAME_LENGTH];
-		strcpy(tablename,"table1");
+	//buffManager->setInitCache(false);
+	dbname=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(dbname,"db1");
+	char *tablename=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(tablename,"table1");
 
-		time_t startTime,endTime,startTime1;
+	time_t startTime,endTime,startTime1;
 
-		DatabaseOperations *dbOps=new DatabaseOperations();
-		dbOps->createDatabase(dbname,1);
+	DatabaseOperations *dbOps=new DatabaseOperations();
+	dbOps->createDatabase(dbname,1);
 
-		fd=dbOps->openDatabase(dbname);
-		buffManager->commitCache();
-		//cout << "free Page Manager" << endl;
-		//buffManager->hexDump(fd,1);
-		FreePageManager *fpm=new FreePageManager(fd,1);
+	fd=dbOps->openDatabase(dbname);
+	buffManager->commitCache();
+	//cout << "free Page Manager" << endl;
+	//buffManager->hexDump(fd,1);
+	FreePageManager *fpm=new FreePageManager(fd,1);
 
-
+	/*
 //		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
 //		int colSizes[3]={SIZE_INT,16,SIZE_BOOL};
 		int colTypes[1]={TYPE_INT};
@@ -109,6 +110,7 @@ int main(){
 		RIDStruct rid={34,2};
 		buffManager->commitCache();
 
+
 			//	buffManager->hexDump(fd,10);
 //		//cout << "before insertIntoBPlus" << endl;
 //		bplusTree->insertIntoBPlusTree(key,rid);
@@ -119,7 +121,7 @@ int main(){
 //
 //		bplusTree->insertIntoBPlusTree(key,rid);
 //		bplusTree->insertIntoBPlusTree(key,rid);
-		rid={1,2};
+	//	rid={1,2};
 		//cout << "before loop" <<endl;
 
 //		for(unsigned i=0;i<1000000;i++){
@@ -129,6 +131,9 @@ int main(){
 //			rid.slotNumber++;
 //			//cout << "=========================i value :" <<i <<endl;
 //		}
+
+
+	 */
 	/*	vector<RIDStruct> resultRids;
 		bplusTree->IntRange(1,100000,5);
 		cout << "after inserting range ints" <<endl;
@@ -146,179 +151,203 @@ int main(){
 		}*/
 
 
-//		buffManager->commitCache();
-//		buffManager->hexDump(fd,indexHeaderPageNo);
-//		resultRids.clear();
-//		strcpy(key,"1001");
-//		bplusTree->searchKeyInBPlusTree(key,resultRids);
-//		for(unsigned i=0;i<resultRids.size();i++){
-//			cout << resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
-//		}
-//		rid={1001,1002};
-//		bplusTree->deleteFromBPlusTree(key,rid);
-//		cout << "========================================================"<<endl;
-//		strcpy(key,"1000");
-//		resultRids.clear();
-//
-//		for(unsigned i=0;i<resultRids.size();i++){
-//			cout << "inside search 2:"<<resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
-//		}
-//		//bplusTree->display();
-//		cout<< endl;
+	//		buffManager->commitCache();
+	//		buffManager->hexDump(fd,indexHeaderPageNo);
+	//		resultRids.clear();
+	//		strcpy(key,"1001");
+	//		bplusTree->searchKeyInBPlusTree(key,resultRids);
+	//		for(unsigned i=0;i<resultRids.size();i++){
+	//			cout << resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+	//		}
+	//		rid={1001,1002};
+	//		bplusTree->deleteFromBPlusTree(key,rid);
+	//		cout << "========================================================"<<endl;
+	//		strcpy(key,"1000");
+	//		resultRids.clear();
+	//
+	//		for(unsigned i=0;i<resultRids.size();i++){
+	//			cout << "inside search 2:"<<resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+	//		}
+	//		//bplusTree->display();
+	//		cout<< endl;
 
 
 
-//
-//		buffManager->hexDump(fd,1430);
-//		buffManager->hexDump(fd,322);
-//		buffManager->hexDump(fd,10);
-//		buffManager->hexDump(fd,8);
-//		buffManager->hexDump(fd,9);
-//		buffManager->hexDump(fd,173);
-//		strcpy(key,"12Alka");
-//		rid={83,3};
-//		bplusTree->display();
-//		buffManager->commitCache();
-//				buffManager->hexDump(fd,7);
-//				cout << sizeof(RIDStruct)<<endl;
-		//bplusTree->insertIntoBPlusTree(key,rid);
-		//cout << "after second insert" << endl;
-		//strcpy(key,"1");
-//		buffManager->commitCache();
-//		buffManager->hexDump(fd,10);
-		//cout << bplusTree->searchInBPlusTree(key) << endl;
-//		buffManager->hexDump(fd,6);
-//		bplusTree->display();
-//		bplusTree->deleteFromBPlusTree(key,rid);
-//		vector<RIDStruct> resultRids;
-//		//strcpy(key,"83puneeth0");
-//		bplusTree->searchKeyInBPlusTree(key,resultRids);
-//		for(unsigned i=0;i<resultRids.size();i++){
-//			cout << resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
-//		}
-//		cout<< endl;
+	//
+	//		buffManager->hexDump(fd,1430);
+	//		buffManager->hexDump(fd,322);
+	//		buffManager->hexDump(fd,10);
+	//		buffManager->hexDump(fd,8);
+	//		buffManager->hexDump(fd,9);
+	//		buffManager->hexDump(fd,173);
+	//		strcpy(key,"12Alka");
+	//		rid={83,3};
+	//		bplusTree->display();
+	//		buffManager->commitCache();
+	//				buffManager->hexDump(fd,7);
+	//				cout << sizeof(RIDStruct)<<endl;
+	//bplusTree->insertIntoBPlusTree(key,rid);
+	//cout << "after second insert" << endl;
+	//strcpy(key,"1");
+	//		buffManager->commitCache();
+	//		buffManager->hexDump(fd,10);
+	//cout << bplusTree->searchInBPlusTree(key) << endl;
+	//		buffManager->hexDump(fd,6);
+	//		bplusTree->display();
+	//		bplusTree->deleteFromBPlusTree(key,rid);
+	//		vector<RIDStruct> resultRids;
+	//		//strcpy(key,"83puneeth0");
+	//		bplusTree->searchKeyInBPlusTree(key,resultRids);
+	//		for(unsigned i=0;i<resultRids.size();i++){
+	//			cout << resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
+	//		}
+	//		cout<< endl;
 
-			/* // Select from where, delete from table, update Tested!!
-		vector<string> colNames,insertValues_,colSizes,updateColumnList,updateValues;
-			colNames.push_back("c1");
-			colNames.push_back("co2");
-			colNames.push_back("col3");
-			vector<string> colTypes;
-			colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
-			colTypes.push_back(CommonUtil::int_to_string(TYPE_VARCHAR));
-			colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
-			colSizes.push_back(CommonUtil::int_to_string(4));
-			colSizes.push_back(CommonUtil::int_to_string(16));
-			colSizes.push_back(CommonUtil::int_to_string(2));
+	// Select from where, delete from table, update Tested!!
+	vector<string> colNames,insertValues_,colSizes,updateColumnList,updateValues;
+	colNames.push_back("c1");
+	colNames.push_back("co2");
+	colNames.push_back("col3");
+	vector<string> colTypes;
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_INT));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_VARCHAR));
+	colTypes.push_back(CommonUtil::int_to_string(TYPE_BOOL));
+	colSizes.push_back(CommonUtil::int_to_string(4));
+	colSizes.push_back(CommonUtil::int_to_string(16));
+	colSizes.push_back(CommonUtil::int_to_string(2));
 
-			dbOps->createTable(tablename,colNames,colTypes,colSizes);
-			vector<string> whereList;
-			whereList.push_back("c1");
-			whereList.push_back("co2");
-			whereList.push_back("col3");
+	dbOps->createTable(tablename,colNames,colTypes,colSizes);
+	vector<string> whereList;
+	whereList.push_back("c1");
+	whereList.push_back("co2");
+	whereList.push_back("col3");
 
-			insertValues_.push_back(CommonUtil::int_to_string(34));
-				insertValues_.push_back("Ravindra");
-				insertValues_.push_back(CommonUtil::int_to_string(true));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.push_back(CommonUtil::int_to_string(34));
+	insertValues_.push_back("Ravindra");
+	insertValues_.push_back(CommonUtil::int_to_string(true));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(12));
-				insertValues_.push_back("Alka");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(12));
+	insertValues_.push_back("Alka");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(83));
-				insertValues_.push_back("puneeth");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(83));
+	insertValues_.push_back("puneeth");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(48));
-				insertValues_.push_back("sreeraag");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(48));
+	insertValues_.push_back("sreeraag");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(36));
-				insertValues_.push_back("vikranth");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(36));
+	insertValues_.push_back("vikranth");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(66));
-				insertValues_.push_back("pridhvi");
-				insertValues_.push_back(CommonUtil::int_to_string(true));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(66));
+	insertValues_.push_back("pridhvi");
+	insertValues_.push_back(CommonUtil::int_to_string(true));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(60));
-				insertValues_.push_back("sriram");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(60));
+	insertValues_.push_back("sriram");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-				insertValues_.clear();
-				insertValues_.push_back(CommonUtil::int_to_string(45));
-				insertValues_.push_back("don't know");
-				insertValues_.push_back(CommonUtil::int_to_string(false));
-				dbOps->insertIntoTable(tablename,insertValues_);
+	insertValues_.clear();
+	insertValues_.push_back(CommonUtil::int_to_string(45));
+	insertValues_.push_back("don't know");
+	insertValues_.push_back(CommonUtil::int_to_string(false));
+	dbOps->insertIntoTable(tablename,insertValues_);
 
-//				insertValues_.clear();
-//				insertValues_.push_back(CommonUtil::int_to_string(1));
-//				insertValues_.push_back("A");
-//				insertValues_.push_back(CommonUtil::int_to_string(false));
-//				dbOps->insertIntoTable(tablename,insertValues_);
-				dbOps->selectAllFromTable(tablename,whereList);
-				//cout << "After select!! Please print this line" << endl;
-				//buffManager->commitCache();
-				//buffManager->hexDump(fd,1);
-				//dbOps->dropTable(tablename);
-				//buffManager->hexDump(fd,7);
-				//dbOps->deleteFromTable(tablename);
-				//cout << "After delete!! Please print this line" << endl;
-				//dbOps->selectAllFromTable(tablename,whereList);
-				//cout << "After select!! Please print this line" << endl;
-				//cout << "after delete *"<<endl;
+	//				insertValues_.clear();
+	//				insertValues_.push_back(CommonUtil::int_to_string(1));
+	//				insertValues_.push_back("A");
+	//				insertValues_.push_back(CommonUtil::int_to_string(false));
+	//				dbOps->insertIntoTable(tablename,insertValues_);
+	dbOps->selectAllFromTable(tablename,whereList);
+	vector<string> colNamesIndex;
+	colNamesIndex.push_back("c1");
+		colNamesIndex.push_back("co2");
+		//colNamesIndex.push_back("col3");
+	dbOps->createIndex(tablename,colNamesIndex);
+	buffManager->commitCache();
+	buffManager->hexDump(fd,8);
+	buffManager->hexDump(fd,9);
+	BPlusTree *bpTree=new BPlusTree(fd,indexHeaderPageNo);
+	vector<RIDStruct> searchResRids;
+	cout << "index header page no:"<<indexHeaderPageNo<<endl;
+	char *key=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(key,"830");
+	cout << "page no for key :"<< bpTree->searchInBPlusTree(key)<<endl;
+	bpTree->searchKeyInBPlusTree(key,searchResRids);
 
-				updateColumnList.push_back("c1");
-				updateColumnList.push_back("col3");
-				updateValues.push_back("10");
-				updateValues.push_back(CommonUtil::int_to_string(false));
-
-//				insertValues_.clear();
-//				insertValues_.push_back(CommonUtil::int_to_string(34));
-//				insertValues_.push_back("Surendra");
-//				insertValues_.push_back(CommonUtil::int_to_string(false));
-//				dbOps->insertIntoTable(tablename,insertValues_);
-
-				dbOps->updateTable(tablename,updateColumnList,updateValues);
-				cout << "after update" << endl;
-				dbOps->selectAllFromTable(tablename,whereList);
-				//buffManager->commitCache();
-				//dbOps->selectAllFromTable(tablename,whereList);
-				//cout << "After update and select "<< endl;
-//				buffManager->commitCache();
-//				buffManager->hexDump(fd,7);
-				//dbOps->selectAllFromTable(tablename,whereList);
-				//buffManager->commitCache();
-				//buffManager->hexDump(fd,1);
-
-				//buffManager->hexDump(fd,6);
-				//dbOps->insertIntoTable(tablename,insertValues_);
-				//dbOps->insertIntoTable(tablename,insertValues_);
-				//dbOps->selectAllFromTable(tablename,whereList);
-				//cout<< "after select *"<< endl;
-				//buffManager->commitCache();
-				//buffManager->hexDump(fd,1);
-				//buffManager->hexDump(fd,6);
-				//buffManager->hexDump(fd,7);
-				//FreePageManager * freePageManager_=new FreePageManager(fd,1);
-				//cout << "next free page :"<<freePageManager_->getFreePage()<<endl;
+	for(unsigned i=0;i<searchResRids.size();i++){
+		cout << " Rid is :"<<searchResRids[i].pageNumber << " "<< searchResRids[i].slotNumber<<endl;
+	}
+	cout << "after search"<<endl;
 
 
-*/
-				/*buffManager->commitCache();
+	//cout << "After select!! Please print this line" << endl;
+	//buffManager->commitCache();
+	//buffManager->hexDump(fd,1);
+	//dbOps->dropTable(tablename);
+	//buffManager->hexDump(fd,7);
+	//dbOps->deleteFromTable(tablename);
+	//cout << "After delete!! Please print this line" << endl;
+	//dbOps->selectAllFromTable(tablename,whereList);
+	//cout << "After select!! Please print this line" << endl;
+	//cout << "after delete *"<<endl;
+
+
+	/*// for testing update !!
+	updateColumnList.push_back("c1");
+	updateColumnList.push_back("col3");
+	updateValues.push_back("10");
+	updateValues.push_back(CommonUtil::int_to_string(false));
+
+	//				insertValues_.clear();
+	//				insertValues_.push_back(CommonUtil::int_to_string(34));
+	//				insertValues_.push_back("Surendra");
+	//				insertValues_.push_back(CommonUtil::int_to_string(false));
+	//				dbOps->insertIntoTable(tablename,insertValues_);
+
+	dbOps->updateTable(tablename,updateColumnList,updateValues);
+	cout << "after update" << endl;
+	dbOps->selectAllFromTable(tablename,whereList);
+	//buffManager->commitCache();
+	//dbOps->selectAllFromTable(tablename,whereList);
+	//cout << "After update and select "<< endl;
+	//				buffManager->commitCache();
+	//				buffManager->hexDump(fd,7);
+	//dbOps->selectAllFromTable(tablename,whereList);
+	//buffManager->commitCache();
+	//buffManager->hexDump(fd,1);
+
+	//buffManager->hexDump(fd,6);
+	//dbOps->insertIntoTable(tablename,insertValues_);
+	//dbOps->insertIntoTable(tablename,insertValues_);
+	//dbOps->selectAllFromTable(tablename,whereList);
+	//cout<< "after select *"<< endl;
+	//buffManager->commitCache();
+	//buffManager->hexDump(fd,1);
+	//buffManager->hexDump(fd,6);
+	//buffManager->hexDump(fd,7);
+	//FreePageManager * freePageManager_=new FreePageManager(fd,1);
+	//cout << "next free page :"<<freePageManager_->getFreePage()<<endl;
+
+
+	*/
+	/*buffManager->commitCache();
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
 				dbOps->dropTable(tablename);
@@ -337,9 +366,9 @@ int main(){
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
 				cout<< "Please print this DUDE!!";
-				*/
+	 */
 
-				/* //Back Pointers (in datapage) testing!!
+	/* //Back Pointers (in datapage) testing!!
 				 for(unsigned i=0;i<1000;i++){
 					dbOps->insertIntoTable(tablename,insertValues_);
 				}
@@ -350,8 +379,8 @@ int main(){
 				buffManager->hexDump(fd,7);
 				buffManager->hexDump(fd,8);
 				buffManager->hexDump(fd,9);
-				*/
-/*//getAllRecords testing
+	 */
+	/*//getAllRecords testing
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -391,8 +420,8 @@ int main(){
 	{
 		cout << SS2[ii] ;
 	}
-*/
-/*
+	 */
+	/*
 	// Testing getvectorFromRecord!!
 	vector<string> colNames,colCopy;
 	int recSize=0,ii;
@@ -407,10 +436,10 @@ int main(){
 	{
 		cout << colCopy[ii] ;
 	}
-*/
+	 */
 
 
-/*
+	/*
 	vector<string> values_;
 	values_.push_back("hello");
 	values_.push_back("hey wassup");
@@ -426,8 +455,8 @@ int main(){
 	buffManager->commitCache();
 	buffManager->hexDump(fd,3);
 
-	*/
-/*	//Vector testing!!
+	 */
+	/*	//Vector testing!!
 
 	vector<string> SS;
 
@@ -486,7 +515,7 @@ int main(){
 //	buffManager->hexDump(fd,3);
 
 
-*/
+	 */
 
 
 
@@ -519,9 +548,9 @@ int main(){
 	        buffManager->hexDump(fd,3);
 	        cout << "*****  end  *****" << endl;
 
-*/
+	 */
 
-/* // SysTablePage Testing!!
+	/* // SysTablePage Testing!!
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
 
@@ -536,7 +565,7 @@ int main(){
 	syscat->insertSysTableEntry("table1",35,7,5,pageContent);
 	buffManager->commitCache();
 	buffManager->hexDump(fd,5);
-*/
+	 */
 
 	/* //Data page testing!!
 
@@ -563,9 +592,9 @@ int main(){
 	buffManager->commitCache();
 	buffManager->hexDump(fd,3);
 	cout << "end!!!----------------------" << endl;
-*/
+	 */
 
-/* //freePageManager Testing!!
+	/* //freePageManager Testing!!
 
 	dbname=new char[MAX_FILE_NAME_LENGTH];
 	strcpy(dbname,"test");
@@ -611,8 +640,8 @@ int main(){
 	for(i=0;i<20;i++){
 			cout << "is free (" << i << ") is:" << fpm->isPageFree(i) << endl;
 		}
-*/
-/*
+	 */
+	/*
 	typedef struct abc{
 		int a;
 		char *c;
@@ -647,9 +676,9 @@ int main(){
 	buffManager->readPage(fd,0,pageContent);
 	cout << pageContent << endl;
 
-*/
+	 */
 
-/*
+	/*
 
 	//Create Database, Insert into table, Select from Table Testing!!!
 	buffManager->setInitCache(true);
@@ -797,9 +826,9 @@ int main(){
 //	cout << endl <<double( clock() - startTime1 ) << " micro seconds." << endl;
 
 
-*/
+	 */
 
-/*
+	/*
 // Testing for freeing memory. Problem resolved.
 
 	time_t startTime,endTime;
@@ -835,9 +864,9 @@ int main(){
 	buffManager->getHitRate();
 	endTime=clock();
 	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
-*/
+	 */
 
-/*
+	/*
 	while(1){
 		cout << endl << endl <<"Cache-Console>>";
 		query_string=new char[100];
@@ -1019,7 +1048,7 @@ int main(){
 
 
 	}
-*/
+	 */
 
 
 	/*
@@ -1061,7 +1090,7 @@ int main(){
 	buffManager->viewFrameBuffer(0);
 	buffManager->viewFrameBuffer(1);
 	buffManager->viewFrameBuffer(2);
-	*/
+	 */
 
 	/*
 	diskOps->createDiskFile(DBName,DEFAULT_PAGE_SIZE,DBSizeInMB*256);
@@ -1078,17 +1107,17 @@ int main(){
 	cout << "\nreading page 1:";
 	cout << pageContent;
 	diskOps->closeDiskFile();
-	*/
+	 */
 
-/* test for delete
+	/* test for delete
 //	char *test=new char[DEFAULT_PAGE_SIZE];
 //	strcpy(test,"hey");
 //	fun(test);
 //	delete[] test;
 //	cout << test << endl;
- *
- *
- */
+	 *
+	 *
+	 */
 }
 
 
