@@ -22,6 +22,7 @@
 #include "../Global/globalDefines.h"
 #include "../Global/globalStructures.h"
 #include "../HeapFileManagement/Schema.h"
+#include "../Utils/WhereExpressionElement.h"
 using namespace std;
 class DatabaseOperations {
 public:
@@ -33,15 +34,15 @@ public:
 	int closeDatabase(int fd);
 	int createTable(char *tableName, vector<string> columnList, vector<string> columnTypeList,vector<string> columnSizeList);
 	int insertIntoTable(char *tableName, vector<string> insertValues);
-	int selectAllFromTable(char *tableName, vector<string> columnList);
+	int selectAllFromTable(char *tableName, vector<string> columnList,vector<WhereExpressionElement> whereExpressions);
 	int dropTable(char *tableName);
-	int deleteFromTable(char *tableName);
-	int updateTable(char *tableName,vector<string> columnList,vector<string> updateValues);
+	int deleteFromTable(char *tableName,vector<WhereExpressionElement> whereExpressions);
+	int updateTable(char *tableName,vector<string> columnList,vector<string> updateValues,vector<WhereExpressionElement> whereExpressions);
 
 
 
 
-	int createIndex(char *tableName,vector<string> columnList);
+	int createIndex(char *indexName,char *tableName,vector<string> columnList);
 
 private:
 	BufferManager *buffManager_;
