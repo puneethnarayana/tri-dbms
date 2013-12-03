@@ -57,6 +57,7 @@ private:
 	//FreePageManager *freePageManager_;
 	SysTablesCatalog *sysTableCatalog_;
 	SysColumnsCatalog *sysColumnCatalog_;
+	IndexCatalog *indexCatalog_;
 };
 
 #endif /* DATABASEOPERATIONS_H_ */

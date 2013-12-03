@@ -409,11 +409,12 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 
 
 int DatabaseOperations::dropTable(char *tableName){
-	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
-
+	indexCatalog_ = new IndexCatalog(fd_,dbMainHeader_->getIndexCatalogHeaderPageNumber());
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
 	if(tableEntry.size()==0){
 		cout << tableName << " does not exist in the current Database!" << endl;
 		return -1;
@@ -421,6 +422,13 @@ int DatabaseOperations::dropTable(char *tableName){
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 	sysTableCatalog_->deleteSysTableEntry(tableName);
 	sysColumnCatalog_->deleteSysColumnEntryForTable(tableName);
+	vector<string> indices = indexCatalog_->getIndexNamesFromTableName(tableName);
+	cout << "indices :"<<indices.size()<<endl;
+	for(unsigned i=0;i<indices.size();i++){
+		cout << "in delete index loop :"<<endl;
+		cout << "in delete index loop :"<<(char *)indices[i].c_str()<<endl;
+		deleteIndex((char *)indices[i].c_str());
+	}
 
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 	dirHeaderPage_->deleteDirectoryHeaderPage();
@@ -428,6 +436,7 @@ int DatabaseOperations::dropTable(char *tableName){
 	delete dbMainHeader_;
 	delete sysTableCatalog_;
 	delete sysColumnCatalog_;
+	delete indexCatalog_;
 	delete dirHeaderPage_;
 	return SUCCESS;
 }
@@ -854,9 +863,11 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 int DatabaseOperations::deleteIndex(char *indexName){
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
-
+	delete dbMainHeader_;
+	cout << "indexCatalog page no:"<<indexCatalogPageNumber<<endl;
 	IndexCatalog *indexCatalog=new IndexCatalog(fd_,indexCatalogPageNumber);
 	int indexHeaderPagenumber=indexCatalog->getIndexHeaderPageNumberUsingIndexName(indexName);
+	cout << "indexCatalog page no:"<<indexHeaderPagenumber<<endl;
 	IndexHeader *indexHeaderPage=new IndexHeader(fd_,indexHeaderPagenumber);
 	BPlusTree *bplusTree=new BPlusTree(fd_,indexHeaderPagenumber);
 	bplusTree->deleteIndex(indexHeaderPagenumber);
@@ -865,7 +876,7 @@ int DatabaseOperations::deleteIndex(char *indexName){
 	cout << "4"<<endl;
 	delete indexCatalog;
 	delete bplusTree;
-	delete dbMainHeader_;
+
 
 	return SUCCESS;
 }
