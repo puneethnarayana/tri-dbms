@@ -49,6 +49,9 @@
 #define COL_VARCHAR 4
 #define COL_LONG 5
 
+#define INDEX_SIMPLE_KEY 1
+#define INDEX_COMPOSITE_KEY 2
+
 #define EQUAL_TO 1
 #define GREATER_THAN 2
 #define GREATER_THAN_OR_EQUAL_TO 3
