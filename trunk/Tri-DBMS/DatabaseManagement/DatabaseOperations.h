@@ -38,12 +38,14 @@ public:
 	int dropTable(char *tableName);
 	int deleteFromTable(char *tableName,vector<WhereExpressionElement> whereExpressions);
 	int updateTable(char *tableName,vector<string> columnList,vector<string> updateValues,vector<WhereExpressionElement> whereExpressions);
+	int listDatabases();
 	int listTables();
 
 
 
 	int createIndex(char *indexName,char *tableName,vector<string> columnList);
 	int listIndex();
+	int deleteIndex(char *indexName);
 
 private:
 	BufferManager *buffManager_;
