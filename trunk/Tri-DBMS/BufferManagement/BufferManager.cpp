@@ -94,7 +94,9 @@ int BufferManager::createDatabase(char *fileName, int pageSize, int noOfPages){
 int BufferManager::openDatabase(char *fileName){
 	openedFileName_=fileName;
 	long int fd;
+	cout << "in buffer mgr open db:"<<fileName<<endl;
 	fd=diskManager_->openDiskFile(fileName);
+	cout << "fd in bfr mgf :"<<fd<<endl;
 	totalNumberOfRequests_++;
 	numberOfDiskAccesses_++;
 	if(fd!=-1){
@@ -103,6 +105,7 @@ int BufferManager::openDatabase(char *fileName){
 		noOfDBsOpened_++;
 		return noOfDBsOpened_-1;
 	}
+
 	return -1;
 }
 int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
@@ -357,12 +360,17 @@ int BufferManager::commitCache(){
 }
 int BufferManager::resetCache(){
 	flushAllPagesToDisk();
-	for (int i = 0; i < numberOfFrames_; i++) {
-		delete[] BufferPool_[i]->pageData_;
-	}
-	delete[] BufferPool_;
-	initializeCache(numberOfFrames_);
-
+//	for (int i = 0; i < numberOfFrames_; i++) {
+//		delete[] BufferPool_[i]->pageData_;
+//	}
+//	delete[] BufferPool_;
+	//initializeCache(numberOfFrames_);
+	numberOfFramesUsed_=0;
+	bufferSizeInMB_=numberOfFrames_*pageSize_/(1024*1024);
+	//cout << bufferSizeInMB_ << endl;
+	totalNumberOfRequests_=0;
+	numberOfHits_=0;
+	numberOfDiskAccesses_=0;
 	return SUCCESS;
 }
 
@@ -545,7 +553,8 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	int ptr=0;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
 	memset(pageContent,0,DEFAULT_PAGE_SIZE);
-	int err=diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
+	//int err=diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
+	int err=readPage(cd,pageNumber,pageContent);
 	if(err==-1){
 		cout<< endl << "FILE_NOT_OPENED" << endl;
 		return -1;
