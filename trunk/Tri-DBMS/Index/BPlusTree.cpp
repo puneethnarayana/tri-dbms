@@ -123,10 +123,10 @@ int BPlusTree::deleteFromBPlusTree(const char* key, RIDStruct &rid) {
 		//		DEBUG_B("DELETION BPLUS TREE "<<key)
 		int rootPageNumber = indexHeaderPage_->getRootPageNumber();
 		int leafPageNumber = searchInBPlusTree(key);
-		cout << "leaf page NUmber" << leafPageNumber<< endl;
+		//cout << "leaf page NUmber" << leafPageNumber<< endl;
 		LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
 		int status = leafNode.searchInLeafNode(key, rid);
-		cout << "status :" << status << endl;
+		//cout << "status :" << status << endl;
 		while (status == 2 && leafPageNumber != -1) {
 			leafPageNumber = leafNode.getRightPageNumber();
 			//			DEBUG_B("leaf page number "<<leafPageNumber)
@@ -135,33 +135,33 @@ int BPlusTree::deleteFromBPlusTree(const char* key, RIDStruct &rid) {
 				break;
 			}
 			LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
-			cout << "before right page : come here "<<endl;
+			//cout << "before right page : come here "<<endl;
 			status = leafNode.searchInLeafNode(key, rid);
 		}
 
 		if (status == 0 && leafPageNumber != -1) {
-			cout << "come here" << endl;
+			//cout << "come here" << endl;
 			vector<int> deletedPages;
 			//LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
 			leafNode.deleteFromLeafPage(key, rid, deletedPages);
-			cout << "after delete from leaf page 1" << endl;
+			//cout << "after delete from leaf page 1" << endl;
 			indexHeaderPage_->setNoOfKeys(
 					indexHeaderPage_->getNoOfKeys() - 1);
-			cout << "after delete from leaf page " << endl;
+			//cout << "after delete from leaf page " << endl;
 			FreePageManager *freeMgr = new FreePageManager(fd_,1);
-			cout << "deleted pages No:" << deletedPages.size() << endl;
+			//cout << "deleted pages No:" << deletedPages.size() << endl;
 			for (int i = 0; i < deletedPages.size(); i++) {
 				//bufMgr->freePage(deletedPages.at(i));
-				cout << "don't come here" << endl;
+				//cout << "don't come here" << endl;
 				freeMgr->freePage(deletedPages.at(i));
 				deletedPages.erase(deletedPages.begin() + i);
 			}
-
+			delete freeMgr;
 		} else {
 			cout << "\n\t KEY NOT FOUND" << endl;
 		}
 
-		cout << "after update:" << leafNode.getNoOfRecordsInNode() << endl;
+		//cout << "after update:" << leafNode.getNoOfRecordsInNode() << endl;
 	}
 
 }
@@ -2016,7 +2016,7 @@ void BPlusTree::deleteIndex(int indexPageNumber) {
 	}
 
 	for (int i = 0; i < allPageNumbers.size(); i++) {
-		//				cout<<"deleteing : "<<allPageNumbers.at(i)<<endl;
+		cout<<"deleteing : "<<allPageNumbers.at(i)<<endl;
 		//bufMgr->freePage(allPageNumbers.at(i));
 
 		freePageMgr->freePage(allPageNumbers.at(i));
@@ -2026,6 +2026,8 @@ void BPlusTree::deleteIndex(int indexPageNumber) {
 		//bufMgr->freePage(rootPageNumber);
 		freePageMgr->freePage(rootPageNumber);
 	}
+	freePageMgr->freePage(indexPageNumber);
+	delete freePageMgr;
 }
 
 void BPlusTree::bplusTreeSearchKeyInLeafNodeWithRangeSearch(int leafPageNumber,
