@@ -119,6 +119,9 @@ vector<string> SysTablesCatalog::getSysTableRecordAsVector(char *tableName){
 		//recordString=new char[DEFAULT_PAGE_SIZE];
 		flag=sysTablePage->getRecord(i,recordString,&recordLen);
 		if(flag!=-1){
+			if(recordLen==-1){
+				continue;
+			}
 			recordVector=record->getvectorFromRecord(recordString,4);
 
 			//cout << recordVector[1].c_str() << " " << tableName << endl;
