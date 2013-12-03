@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <iterator>
 #include <time.h>
+#include <stdio.h>
+#include <string.h>
 #include "Utils/CommonUtil.h"
 #include "Index/IndexHeader.h"
 #include "Index/BPlusTree.h"
@@ -74,7 +76,7 @@ int main(){
 
 	DatabaseOperations *dbOps=new DatabaseOperations();
 	dbOps->createDatabase(dbname,1);
-
+	strcpy(dbname,"db1");
 	fd=dbOps->openDatabase(dbname);
 	buffManager->commitCache();
 	//cout << "free Page Manager" << endl;
@@ -148,8 +150,8 @@ int main(){
 
 		for(unsigned i=0;i<resultRids.size();i++){
 			cout << " in search :"<<resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
-		}*/
-
+		}
+*/
 
 	//		buffManager->commitCache();
 	//		buffManager->hexDump(fd,indexHeaderPageNo);
@@ -341,11 +343,62 @@ int main(){
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	cout << "done!!"<<endl;
+
+	dbOps->closeDatabase(fd);
 
 //	buffManager->commitCache();
 //	buffManager->hexDump(fd,4);
+//
+//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+//	strcpy(dbname,"myNewDatabase");
+//	dbOps->createDatabase(dbname,1);
+//	fd=dbOps->openDatabase(dbname);
+//	dbOps->closeDatabase(fd);
+//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+//	strcpy(dbname,"myOldDB");
+//	dbOps->createDatabase(dbname,1);
+//	fd=dbOps->openDatabase(dbname);
+//		dbOps->closeDatabase(fd);
+//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+//	strcpy(dbname,"db1");
+
+	cout << "after close"<<endl;
+	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+	strcpy(dbname,"db1");
+	fd=dbOps->openDatabase(dbname);
+	cout << "fd is(in main):" <<fd<<endl;
+	dbOps->listDatabases();
+	cout << "fd after list db :"<<fd<<endl;
+	dbOps->listIndex();
+	cout << "fd after list index :"<<fd<<endl;
+	dbOps->listTables();
+	cout << "fd after list tables :"<<fd<<endl;
+	//buffManager->commitCache();
+//	buffManager->hexDump(fd,0);
+//	buffManager->hexDump(fd,1);
+
+//	cout << "before reset cache:"<<endl;
+//	dbOps->listIndex();
+//	strcpy(indexName,"testIndex2Cols");
+//	dbOps->deleteIndex(indexName);
+//	cout << "after 1st delete "<<endl;
+//	dbOps->listIndex();
+//	cout << "before 2nd delete"<<endl;
+//	strcpy(indexName,"testIndex3Cols");
+//	dbOps->deleteIndex(indexName);
+//	cout << "after 2nd delete "<<endl;
+//	strcpy(indexName,"testIndex1Col");
+//	dbOps->deleteIndex(indexName);
+	dbOps->listIndex();
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	dbOps->listIndex();
+	dbOps->dropTable(tablename);
 	dbOps->listIndex();
 	dbOps->listTables();
+
+	cout<< "after reset cache"<<endl;
+
 
 	//cout << "After select!! Please print this line" << endl;
 	//buffManager->commitCache();
