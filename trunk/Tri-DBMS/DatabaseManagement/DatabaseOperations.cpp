@@ -52,6 +52,7 @@ DatabaseOperations::~DatabaseOperations() {
 	// TODO Auto-generated destructor stub
 	delete[] pageData_;
 	delete[] openDatabaseName_;
+
 }
 
 int DatabaseOperations::createDatabase(char *databaseName){
@@ -90,7 +91,7 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	sysColumnPage_->createSysColumnsPage(sysColumnPageNumber_);
 
 	indexCatalogPageNumber_=freePageManager_->getFreePage();
-	IndexCatalog *indexCatalogPage_=new IndexCatalog();
+	IndexCatalog *indexCatalogPage_=new IndexCatalog(fd_,indexCatalogPageNumber_);
 	indexCatalogPage_->createIndexCatalogPage(indexCatalogPageNumber_);
 
 	dbMainHeader_->setFreeStructurePageNumber(1);
@@ -99,7 +100,9 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	dbMainHeader_->setIndexCatalogHeaderPageNumber(indexCatalogPageNumber_);
 	dbMainHeader_->setNoOfPagesUsed(dbMainHeader_->getNoOfPagesUsed()+3);
 
-	//buffManager_->commitCache();
+//	buffManager_->commitCache();
+//	buffManager_->hexDump(fd_,1);
+
 	buffManager_->closeDatabase(fd_);
 
 	delete dbMainHeader_;
@@ -108,6 +111,7 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	delete sysColumnPage_;
 	delete indexCatalogPage_;
 	delete[] dbName;
+
 	return fd_;
 }
 int DatabaseOperations::openDatabase(char *databaseName){
@@ -235,8 +239,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	dataPage->insertRecord(recordString,recordLength);
 	//cout << "dirPage No:" << dirPageNumber_ << " dataPage No:"<<dirSlotEntry.pageNumber_<< endl;
 
-//	buffManager_->commitCache();
-//	buffManager_->hexDump(fd_,7);
+
 	delete[] recordString;
 	delete freePageManager_;
 	delete dirHeaderPage_;
@@ -244,6 +247,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	delete record;
 	delete dataPage;
 	//insertValues.clear();
+
 	return SUCCESS;
 }
 
@@ -669,6 +673,12 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 		cout << tableName << " does not exist in the current Database!" << endl;
 		return -1;
 	}
+	buffManager_->hexDump(fd_,1);
+	FreePageManager *fpMgr_=new FreePageManager(fd_,1);
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
+	IndexCatalog *indexCatalog=new IndexCatalog(fd_,indexCatalogPageNumber);
+	cout << "index cat page no:" <<indexCatalogPageNumber<<endl;
 	vector<string> recordVector;
 	//vector<string> recordsVector;
 	int dirPageNumber_=-1;
@@ -677,6 +687,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 	Record *record;
 	DirectoryPage *dirPage_;
 	char *recordString;
+	stringstream indexAttribute;
 	DataPage *dataPage;
 	//		int dpChainHeader_=5;
 	//		int noOfColumns_=3;
@@ -695,11 +706,27 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 		keySizeForIndex+=schema.fieldLengths[pos];
 	}
 
-	FreePageManager *fpMgr_=new FreePageManager(fd_,1);
+	for(unsigned c=0;c<columnList.size();c++){
+		indexAttribute<<columnList[c].c_str();
+
+	}
+	cout << "index Attr :"<<indexAttribute.str()<<endl;
 	int indexHeaderPageNumber_=fpMgr_->getFreePage();
+	delete fpMgr_;
 	indexHeaderPageNo=indexHeaderPageNumber_;
+	cout<< "indexHeader page :"<< indexHeaderPageNumber_<<endl;
+
 	IndexHeader *indexHeader=new IndexHeader(fd_,indexHeaderPageNumber_);
 	indexHeader->createIndexHeaderPage(columnList.size(),colTypes,colSizes,keySizeForIndex);
+	if(columnList.size()==1){
+		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_SIMPLE_KEY,keySizeForIndex,indexHeaderPageNumber_);
+	}
+	else{
+		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_COMPOSITE_KEY,keySizeForIndex,indexHeaderPageNumber_);
+	}
+
+	cout << "1" <<endl;
+
 	BPlusTree *bplusTree=new BPlusTree(fd_,indexHeaderPageNumber_);
 	/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
 			for(int i=0;i<schema.columnNames.size();i++){
@@ -710,7 +737,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 			}*/
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
-
+	cout << "2" <<endl;
 	//loop the following for all the directory pages of table;
 	while(dirPageNumber_!=-1){
 		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
@@ -746,6 +773,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 							recordStream<<recordVector[pos].c_str();
 
 						}
+						//cout << recordStream.str() <<endl;
 						ridForIndex={dataPageNumber,j};
 						bplusTree->insertIntoBPlusTree(recordStream.str().c_str(),ridForIndex);
 						//cout << "index root page :"<<indexHeader->getRootPageNumber();
@@ -766,11 +794,14 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 	//		for(int l=0;l<recordsVector.size();l++){
 	//			//cout << recordsVector[l].c_str() << endl;
 	//		}
-	buffManager_->commitCache();
+	//buffManager_->commitCache();
+
 	delete indexHeader;
 	delete bplusTree;
 	delete dirHeaderPage_;
-	delete fpMgr_;
+
+	delete indexCatalog;
+	delete dbMainHeader_;
 
 	//return recordsVector;
 	return SUCCESS;
@@ -778,5 +809,91 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 }
 
 
+int DatabaseOperations::listTables(){
+
+	Schema schema;
+	char *recordString;
+	int recordLength;
+	vector<string> recordVector;
+	Record *record=new Record();
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	int sysTablePageNumber=dbMainHeader_->getSysTablesHeaderPageNumber();
+	DataPage *sysTableCatalog=new DataPage(fd_,sysTablePageNumber);
+	cout << endl<<endl;
+	cout << "||\tTable Name\t||  Max Record Size  ||  No of Columns  ||  DBChain Header Page No\t" <<endl;
+	for(int i=0;i<sysTableCatalog->getNoOfRecords();i++){
+		recordString=new char[DEFAULT_PAGE_SIZE];
+		sysTableCatalog->getRecord(i,recordString,&recordLength);
+		//buffManager_->hexDump(recordString);
+		if(recordLength>0){
+			//cout << "don't come here" << endl;
+			stringstream recordStream;
+			recordVector=record->getvectorFromRecord(recordString,4);
+			for(unsigned j=0;j<recordVector.size();j++){
+					recordStream<<"||\t" <<recordVector[j].c_str()<<"\t\t";
+			}
+
+			cout << recordStream.str()<<endl;
+			recordVector.clear();
+		}
+		delete[] recordString;
+
+	}
+	cout << endl<<endl;
+	delete sysTableCatalog;
+	delete dbMainHeader_;
+	delete record;
+	return SUCCESS;
+}
+
+
+
+
+
+
+
+int DatabaseOperations::listIndex(){
+
+	Schema schema;
+	char *recordString;
+	int recordLength;
+	vector<string> recordVector;
+	Record *record=new Record();
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
+	DataPage *indexCatalog=new DataPage(fd_,indexCatalogPageNumber);
+	cout << endl<<endl;
+	cout << "||\tIndex Name\t||\tKey Type\t\t||\tSize\t|| IndexHeaderPage ||\tTable\t||\tIndex Attribute\t" <<endl;
+	for(int i=0;i<indexCatalog->getNoOfRecords();i++){
+		recordString=new char[DEFAULT_PAGE_SIZE];
+		indexCatalog->getRecord(i,recordString,&recordLength);
+		//buffManager_->hexDump(recordString);
+		if(recordLength>0){
+			//cout << "don't come here" << endl;
+			stringstream recordStream;
+			recordVector=record->getvectorFromRecord(recordString,6);
+			for(unsigned j=0;j<recordVector.size();j++){
+				if(j==1){
+					if(CommonUtil::string_to_int(recordVector[j].c_str())==1)
+						recordStream << "||\tSIMPLE_ATTRIBUTE   \t";
+					else
+						recordStream << "||\tCOMPOSITE_ATTRIBUTE\t";
+				}
+				else
+					recordStream<<"||\t" <<recordVector[j].c_str()<<"\t";
+			}
+
+			cout << recordStream.str()<<endl;
+			recordVector.clear();
+		}
+		delete[] recordString;
+
+	}
+	cout << endl<<endl;
+	delete indexCatalog;
+	delete dbMainHeader_;
+	delete record;
+	return SUCCESS;
+}
 
 
