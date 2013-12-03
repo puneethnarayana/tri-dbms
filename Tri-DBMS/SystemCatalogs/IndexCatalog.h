@@ -18,8 +18,12 @@ public:
 	IndexCatalog(int fd,int pageNumber);
 	virtual ~IndexCatalog();
 	int createIndexCatalogPage(int pageNumber);
-	int insertIndexEntry(char *indexName, char *tableName, char *indexKey, int indexType,int keySize,int indexHeaderPageNo);
-
+	int insertIndexEntry(char *indexName, char *tableName, char *indexKey, int indexType,int keySize,int indexHeaderPageNo,int useIndex);
+	int deleteIndexEntryForTable(char *indexName);
+	vector<string> getIndexCatalogVectorFromIndexName(char *tableName);
+	int getIndexHeaderPageNumberUsingIndexName(char *indexName);
+	vector<string> getIndexCatalogVectorFromIndexAttr(char *indexName);
+	int getIndexHeaderPageNumberUsingAttr(char *indexAttr);
 private:
 
 	        int fd_;
