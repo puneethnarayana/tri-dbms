@@ -11,6 +11,10 @@
 #include "../BufferManagement/BufferManager.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <iostream>
+
+using namespace std;
 DBMainHeaderPage::DBMainHeaderPage(int fd,int pageNumber) {
 	// TODO Auto-generated constructor stub
 	fd_=fd;
@@ -20,6 +24,9 @@ DBMainHeaderPage::DBMainHeaderPage(int fd,int pageNumber) {
 	memset(pageData_,0,DEFAULT_PAGE_SIZE);
 	buffManager_->readPage(fd,pageNumber,pageData_);
 	memcpy(&dbMainHeader_,pageData_,sizeof(DBMainHeaderStruct));
+	//cout << "in dbmain header page --------------------------:"<< getIndexCatalogHeaderPageNumber()<<endl;
+	//cout << "dbmain header page index page no:"<< dbMainHeader_.indexCatalogHeaderPageNumber_<<endl;
+	//buffManager_->hexDump(fd_,0);
 	isDBMainHeaderChanged_=false;
 
 }
@@ -27,10 +34,9 @@ DBMainHeaderPage::DBMainHeaderPage(int fd,int pageNumber) {
 DBMainHeaderPage::~DBMainHeaderPage() {
 	// TODO Auto-generated destructor stub
 
-	if(isDBMainHeaderChanged_==true){
-		buffManager_=BufferManager::getInstance();
-		buffManager_->writePage(fd_,pageNumber_,pageData_);
-	}
+	buffManager_=BufferManager::getInstance();
+	buffManager_->writePage(fd_,pageNumber_,pageData_);
+
 	delete[] pageData_;
 }
 
