@@ -28,10 +28,10 @@ FreePageManager::FreePageManager(int fd,int pageNumber) {
 
 FreePageManager::~FreePageManager() {
 	// TODO Auto-generated destructor stub
-	if(isFreePageManagerChanged_==true){
+
 		buffManager_=BufferManager::getInstance();
 		buffManager_->writePage(fd_,pageNumber_,pageData_);
-	}
+
 	delete []pageData_;
 }
 
