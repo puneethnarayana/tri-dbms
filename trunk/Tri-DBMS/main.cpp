@@ -79,7 +79,7 @@ int main(){
 	buffManager->commitCache();
 	//cout << "free Page Manager" << endl;
 	//buffManager->hexDump(fd,1);
-	FreePageManager *fpm=new FreePageManager(fd,1);
+	//FreePageManager *fpm=new FreePageManager(fd,1);
 
 	/*
 //		int colTypes[3]={TYPE_INT,TYPE_VARCHAR,TYPE_BOOL};
@@ -205,6 +205,22 @@ int main(){
 
 	// Select from where, delete from table, update Tested!!
 	vector<string> colNames,insertValues_,colSizes,updateColumnList,updateValues;
+	vector<WhereExpressionElement> whereExpressions;
+
+	WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
+	whereExpressions.push_back(whereExpr);
+	WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"0");
+	whereExpressions.push_back(whereExpr1);
+	WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
+	whereExpressions.push_back(whereExpr2);
+	WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+	whereExpressions.push_back(whereExpr4);
+	WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"34");
+	whereExpressions.push_back(whereExpr5);
+	WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
+	whereExpressions.push_back(whereExpr6);
+	WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
+	whereExpressions.push_back(whereExpr3);
 	colNames.push_back("c1");
 	colNames.push_back("co2");
 	colNames.push_back("col3");
@@ -274,28 +290,62 @@ int main(){
 	//				insertValues_.push_back("A");
 	//				insertValues_.push_back(CommonUtil::int_to_string(false));
 	//				dbOps->insertIntoTable(tablename,insertValues_);
-	dbOps->selectAllFromTable(tablename,whereList);
+	dbOps->selectAllFromTable(tablename,whereList,whereExpressions);
 	vector<string> colNamesIndex;
 	colNamesIndex.push_back("c1");
-		colNamesIndex.push_back("co2");
-		//colNamesIndex.push_back("col3");
-	dbOps->createIndex(tablename,colNamesIndex);
-	buffManager->commitCache();
-	buffManager->hexDump(fd,8);
-	buffManager->hexDump(fd,9);
-	BPlusTree *bpTree=new BPlusTree(fd,indexHeaderPageNo);
-	vector<RIDStruct> searchResRids;
-	cout << "index header page no:"<<indexHeaderPageNo<<endl;
-	char *key=new char[MAX_FILE_NAME_LENGTH];
-	strcpy(key,"830");
-	cout << "page no for key :"<< bpTree->searchInBPlusTree(key)<<endl;
-	bpTree->searchKeyInBPlusTree(key,searchResRids);
+	colNamesIndex.push_back("co2");
+	//colNamesIndex.push_back("col3");
+	char *indexName=new char[MAX_FILE_NAME_LENGTH];
+	strcpy(indexName,"testIndex2Cols");
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
-	for(unsigned i=0;i<searchResRids.size();i++){
-		cout << " Rid is :"<<searchResRids[i].pageNumber << " "<< searchResRids[i].slotNumber<<endl;
-	}
+//	buffManager->commitCache();
+//	buffManager->hexDump(fd,8);
+//	buffManager->hexDump(fd,9);
+
+//	cout << "next free page after 1st create index:"<< fpm->getFreePage()<<endl;
+//	BPlusTree *bpTree=new BPlusTree(fd,indexHeaderPageNo);
+//	vector<RIDStruct> searchResRids;
+//	cout << "index header page no:"<<indexHeaderPageNo<<endl;
+//	char *key=new char[MAX_FILE_NAME_LENGTH];
+//	strcpy(key,"83Puneeth");
+//	cout << "page no for key :"<< bpTree->searchInBPlusTree(key)<<endl;
+//	bpTree->searchKeyInBPlusTree(key,searchResRids);
+//
+//	for(unsigned i=0;i<searchResRids.size();i++){
+//		cout << " Rid is :"<<searchResRids[i].pageNumber << " "<< searchResRids[i].slotNumber<<endl;
+//	}
 	cout << "after search"<<endl;
 
+
+	strcpy(indexName,"testIndex3Cols");
+	colNamesIndex.clear();
+	colNamesIndex.push_back("c1");
+	colNamesIndex.push_back("co2");
+	colNamesIndex.push_back("col3");
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+
+//	buffManager->commitCache();
+//	buffManager->hexDump(fd,1);
+	cout << "after 2nd create index"<<endl;
+
+	strcpy(indexName,"testIndex1Col");
+	colNamesIndex.clear();
+	colNamesIndex.push_back("c1");
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+
+
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	dbOps->createIndex(indexName,tablename,colNamesIndex);
+
+//	buffManager->commitCache();
+//	buffManager->hexDump(fd,4);
+	dbOps->listIndex();
+	dbOps->listTables();
 
 	//cout << "After select!! Please print this line" << endl;
 	//buffManager->commitCache();
