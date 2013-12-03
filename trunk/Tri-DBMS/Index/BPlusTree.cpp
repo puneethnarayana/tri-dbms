@@ -76,7 +76,7 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		//		memset(newKey, '\0', );
 		//		strncpy(newKey, key, strlen(key));
 		leafNode.insertIntoLeafPage(key, rid);
-		//cout << "after insert into leafpage" << endl;
+		cout << "after insert into leafpage" << endl;
 		indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys()
 				+ 1);
 		//cout<< "after set no of keys"<<endl;
@@ -84,7 +84,7 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		//cout << "in else"<<endl;
 		int insertLeafPageNumber = -1;
 		insertLeafPageNumber = searchInBPlusTree(key);
-		cout << "insert leaf pageNumber :" << insertLeafPageNumber <<endl;
+		//cout << "insert leaf pageNumber :" << insertLeafPageNumber <<endl;
 		LeafNode leafNode(fd_,indexHeaderPage_, insertLeafPageNumber);
 		//		DEBUG_B("no of records in this leaf node "<<leafNode.getNoOfRecordsInNode())
 		//	DEBUG_B("leaf Page Number "<<leafNode.getPageNumber());
@@ -94,11 +94,11 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		//		strncpy(newKey, key, strlen(key));
 		//cout << "before 2nd insert in else" <<endl;
 		leafNode.insertIntoLeafPage(key, rid);
-		cout << "after 2nd insert in else" <<endl;
+		//cout << "after 2nd insert in else" <<endl;
 
 		indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys()
 				+ 1);
-		cout << "indexHeaderPage no of keys:" << indexHeaderPage_->getNoOfKeys()<<endl;
+		//cout << "indexHeaderPage no of keys:" << indexHeaderPage_->getNoOfKeys()<<endl;
 //		bufMgr_->commitCache();
 //					bufMgr_->hexDump(fd_,10);
 //					bufMgr_->hexDump(fd_,6);
@@ -189,6 +189,9 @@ int BPlusTree::searchKeyInBPlusTree(const char *key, std::vector<
 
 		leafNode.searchKeyInLeafNode(key, RIDVector);
 		//cout<<"Seraching DOne"<<endl;
+	}
+	if(RIDVector.size()==0){
+		cout << "KEY NOT FOUND"<<endl;
 	}
 	//	int leafPageNumber=searchInBPlusTree(key);
 	//	DEBUG_B(" FIND LEAF PAGE NUMBER "<<leafPageNumber)

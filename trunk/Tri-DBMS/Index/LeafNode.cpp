@@ -273,7 +273,8 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 		//	cout<<"\n current "<<leafNodePageHeader_.leftPageNumber<<"  "<<leafNodePageHeader_.generalPageHeader.pageNumber<<"  "<<leafNodePageHeader_.rightPageNumber<<endl;
 		bufMgr_->writePage(fd_,pageNumber_,pageData_);
 //				bufMgr_->commitCache();
-//				bufMgr_->hexDump(fd_,6);
+//				cout << "in leaf node================================================ "<<endl;
+//				bufMgr_->hexDump(fd_,1);
 //				bufMgr_->hexDump(fd_,7);
 //				bufMgr_->hexDump(fd_,8);
 //				cout << "=========================================="<<leafNodePageHeader_.noOfRecords <<"========================================"<<endl;
@@ -305,6 +306,7 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 			+ 1;
 			memcpy(pageData_, &leafNodePageHeader_,
 					sizeof(LeafNodePageHeaderStruct));
+			bufMgr_->writePage(fd_,pageNumber_,pageData_);
 		} else {
 			//cout << "only for 2nd insert" << endl;
 			if (leafNodePageHeader_.noOfRecords == i) {
@@ -367,10 +369,15 @@ int LeafNode::insertIntoLeafPage(const char* key, RIDStruct rid) {
 						//						indexNode.display();
 					}
 				}
+
 			}
+			bufMgr_->writePage(fd_,pageNumber_,pageData_);
 		}
+
 	}
 	bufMgr_->writePage(fd_,pageNumber_,pageData_);
+	//bufMgr_->commitCache();
+	//bufMgr_->hexDump(fd_,1);
 	return SUCCESS;
 }
 int LeafNode::deleteFromLeafPage(const char* key, RIDStruct &givenRid,
@@ -872,12 +879,15 @@ int LeafNode::searchKeyInLeafNode(const char* key, std::vector<
 		memcpy(tempKey, &pageData_[offset], indexHeader_->getKeySize());
 		//			dummyKeyCompare(tempKey, key);
 		int comp = BPlusTreeUtil::keyCompare(tempKey, key, indexHeader_);
-		//cout << "temp key & key are :" << tempKey << " " <<key << endl;
+		//cout << "temp key & key & comp are :" << tempKey << " " <<key << " "<<comp<< endl;
+
 		if (comp == 0) {
+			//cout << "found =1"<<endl;
 			found = 1;
 		}
 		offset = offset + indexHeader_->getKeySize();
 		if (found == 1) {
+			//cout << "found ==1";
 			memcpy(&tempRid, &pageData_[offset], sizeof(RIDStruct));
 			RIDVector.push_back(tempRid);
 			found = 0;

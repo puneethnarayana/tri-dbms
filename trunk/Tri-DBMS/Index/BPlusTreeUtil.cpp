@@ -45,13 +45,13 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 		switch (colType) {
 		case TYPE_INT:
 			//			cout << "\nINTEGER TYPE" << endl;
-//			memcpy(&intKey1, &key1[offset], 4);
-//			memcpy(&intKey2, &key2[offset], 4);
-//			if (intKey1 > intKey2) {
-//				return 1;
-//			} else if (intKey1 < intKey2) {
-//				return -1;
-//			}
+			//			memcpy(&intKey1, &key1[offset], 4);
+			//			memcpy(&intKey2, &key2[offset], 4);
+			//			if (intKey1 > intKey2) {
+			//				return 1;
+			//			} else if (intKey1 < intKey2) {
+			//				return -1;
+			//			}
 			//cout << " in type int"<< key1 << " " <<key2<<endl;
 			if(CommonUtil::string_to_int(key1)>CommonUtil::string_to_int(key2)){
 				return 1;
@@ -61,6 +61,37 @@ int BPlusTreeUtil::keyCompare(const char* key1, const char* key2,
 			}
 
 
+			break;
+
+		case TYPE_BOOL:
+			//			cout << "\nINTEGER TYPE" << endl;
+			//			memcpy(&intKey1, &key1[offset], 4);
+			//			memcpy(&intKey2, &key2[offset], 4);
+			//			if (intKey1 > intKey2) {
+			//				return 1;
+			//			} else if (intKey1 < intKey2) {
+			//				return -1;
+			//			}
+			//cout << " in type int"<< key1 << " " <<key2<<endl;
+			if(CommonUtil::string_to_int(key1)>CommonUtil::string_to_int(key2)){
+				return 1;
+			}
+			else if(CommonUtil::string_to_int(key1)<CommonUtil::string_to_int(key2)){
+				return -1;
+			}
+
+
+			break;
+
+		case TYPE_DATE:
+			//			cout << "\nVARCHAR TYPE" << endl;
+			if (strncmp(&key1[offset], &key2[offset],
+					indexHeader->colSizes_[i]) > 0) {
+				return 1;
+			} else if (strncmp(&key1[offset], &key2[offset],
+					indexHeader->colSizes_[i]) < 0) {
+				return -1;
+			}
 			break;
 
 		case TYPE_FLOAT:
