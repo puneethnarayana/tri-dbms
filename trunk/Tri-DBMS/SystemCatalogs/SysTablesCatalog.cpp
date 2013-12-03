@@ -78,13 +78,18 @@ int SysTablesCatalog::deleteSysTableEntry(char *tableName){
 	for(int i=0;i< sysTablePage->getNoOfRecords();i++){
 		//recordString=new char[DEFAULT_PAGE_SIZE];
 		sysTablePage->getRecord(i,recordString,&recordLen);
-		recordVector=record->getvectorFromRecord(recordString,4);
-
-		//cout << recordVector[1].c_str() << " " << tableName << endl;
-		if(strcmp(recordVector[0].c_str(),tableName)==0){
-			sysTablePage->freeSlotDirectoryEntry(i);
+		if(recordLen==-1){
+			continue;
 		}
-		recordVector.clear();
+		recordVector=record->getvectorFromRecord(recordString,4);
+		if(recordVector.size()>0){
+			//cout << recordVector[1].c_str() << " " << tableName << endl;
+			if(strcmp(recordVector[0].c_str(),tableName)==0){
+				sysTablePage->freeSlotDirectoryEntry(i);
+			}
+			recordVector.clear();
+		}
+
 	}
 	delete[] recordString;
 	delete record;
