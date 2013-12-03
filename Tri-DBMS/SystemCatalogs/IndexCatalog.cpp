@@ -90,7 +90,7 @@ int IndexCatalog::deleteIndexEntryForTable(char *indexName){
 	int recordLen=0;
 	cout << "in dlete entry index:"<<fd_<<pageNumber_<<endl;
 	Record *record=new Record();
-	cout << "1"<<endl;
+	//cout << "1"<<endl;
 	vector<string> recordVector,nullVector;
 	//cout << "2"<<endl;
 	//cout << "in dlete entry index:"<<fd_<<" "<<pageNumber_<<endl;
@@ -105,7 +105,7 @@ int IndexCatalog::deleteIndexEntryForTable(char *indexName){
 		}
 		recordVector=record->getvectorFromRecord(recordString,7);
 		if(recordVector.size()>0){
-			cout << recordVector[0].c_str() << " " << indexName << endl;
+			//cout << recordVector[0].c_str() << " " << indexName << endl;
 			if(strcmp(recordVector[0].c_str(),indexName)==0){
 				indexCatalogPage->freeSlotDirectoryEntry(i);
 			}
@@ -135,6 +135,9 @@ vector<string> IndexCatalog::getIndexCatalogVectorFromIndexName(char *indexName)
 		//recordString=new char[DEFAULT_PAGE_SIZE];
 		flag=indexCatalogPage->getRecord(i,recordString,&recordLen);
 		if(flag!=-1){
+			if(recordLen==-1){
+				continue;
+			}
 			recordVector=record->getvectorFromRecord(recordString,7);
 
 			//cout << recordVector[1].c_str() << " " << tableName << endl;
@@ -193,7 +196,10 @@ vector<string> IndexCatalog::getIndexCatalogVectorFromIndexAttr(char *indexName)
 int IndexCatalog::getIndexHeaderPageNumberUsingIndexName(char *indexName){
 	//vector<string> recordVector=getSysTableRecordAsVector(tableName);
 	//return 3;
-	return CommonUtil::string_to_int(getIndexCatalogVectorFromIndexName(indexName)[3].c_str());
+	if(getIndexCatalogVectorFromIndexName(indexName).size()>0){
+		return CommonUtil::string_to_int(getIndexCatalogVectorFromIndexName(indexName)[3].c_str());
+	}
+	return -1;
 
 }
 
@@ -206,3 +212,33 @@ int IndexCatalog::getIndexHeaderPageNumberUsingAttr(char *indexAttribute){
 
 }
 
+vector<string> IndexCatalog::getIndexNamesFromTableName(char *tableName){
+	char *recordString=new char[DEFAULT_PAGE_SIZE];
+	int recordLen=0,flag=1;
+	Record *record=new Record();
+	vector<string> recordVector,nullVector,indexNames;
+	DataPage *indexCatalogPage=new DataPage(fd_,pageNumber_);
+	//cout <<sysTablePage->getNoOfRecords();
+	for(int i=0;i< indexCatalogPage->getNoOfRecords();i++){
+		//recordString=new char[DEFAULT_PAGE_SIZE];
+		flag=indexCatalogPage->getRecord(i,recordString,&recordLen);
+		if(flag!=-1){
+			if(recordLen==-1){
+				continue;
+			}
+			recordVector=record->getvectorFromRecord(recordString,7);
+
+			//cout << recordVector[1].c_str() << " " << tableName << endl;
+			if(strcmp(recordVector[4].c_str(),tableName)==0){
+				indexNames.push_back(recordVector[0].c_str());
+
+			}
+			recordVector.clear();
+		}
+		flag=1;
+	}
+	delete[] recordString;
+	delete record;
+	delete indexCatalogPage;
+	return indexNames;
+}

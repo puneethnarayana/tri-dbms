@@ -24,6 +24,7 @@ public:
 	int getIndexHeaderPageNumberUsingIndexName(char *indexName);
 	vector<string> getIndexCatalogVectorFromIndexAttr(char *indexName);
 	int getIndexHeaderPageNumberUsingAttr(char *indexAttr);
+	vector<string> getIndexNamesFromTableName(char *tableName);
 private:
 
 	        int fd_;
