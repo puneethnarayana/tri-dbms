@@ -5,6 +5,7 @@ create table students(Name VARCHAR(25), Age integer, Pass bool);
 INSERT INTO students VALUES ("Alka",23,"True");
 INSERT INTO students VALUES ("Rav",21,"False");
 select * from students;
+insert into marks values (1,50);
 select * from students;
 close st;
 use st;
