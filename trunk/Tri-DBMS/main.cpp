@@ -238,7 +238,7 @@ int main(){
 	vector<string> whereList;
 	whereList.push_back("c1");
 	whereList.push_back("co2");
-	whereList.push_back("col3");
+	//whereList.push_back("col3");
 
 	insertValues_.push_back(CommonUtil::int_to_string(34));
 	insertValues_.push_back("Ravindra");
@@ -385,7 +385,7 @@ int main(){
 //	cout << "after 1st delete "<<endl;
 //	dbOps->listIndex();
 //	cout << "before 2nd delete"<<endl;
-//	strcpy(indexName,"testIndex3Cols");
+	strcpy(indexName,"testIndex3Cols");
 //	dbOps->deleteIndex(indexName);
 //	cout << "after 2nd delete "<<endl;
 //	strcpy(indexName,"testIndex1Col");
@@ -393,13 +393,24 @@ int main(){
 	dbOps->listIndex();
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 	dbOps->listIndex();
-	dbOps->dropTable(tablename);
+	//dbOps->dropTable(tablename);
 	dbOps->listIndex();
 	dbOps->listTables();
-
+	buffManager->hexDump(fd,4);
+	dbOps->listIndex();
+	dbOps->useIndex(indexName);
+	buffManager->hexDump(fd,4);
+	dbOps->listIndex();
+	dbOps->unUseIndex(indexName);
+	buffManager->hexDump(fd,4);
+	dbOps->listIndex();
 	cout<< "after reset cache"<<endl;
 
 
+	dbOps->selectAllFromTable(tablename,whereList,whereExpressions);
+	whereList.clear();
+	vector<string> columnsSelect;
+	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
 	//cout << "After select!! Please print this line" << endl;
 	//buffManager->commitCache();
 	//buffManager->hexDump(fd,1);
