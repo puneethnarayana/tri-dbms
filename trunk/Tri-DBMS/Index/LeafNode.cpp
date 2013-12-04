@@ -22,6 +22,7 @@
 #include <sstream>
 using namespace std;
 int LeafNode::testPinCount = 0;
+
 LeafNode::LeafNode(int fd) {
 	// TODO Auto-generated constructor stub
 	indexHeaderObjCreatedHere = false;
@@ -70,6 +71,7 @@ LeafNode::~LeafNode() {
 int LeafNode::createLeafPage(IndexHeader *indexHeaderPage) {
 	bufMgr_ = BufferManager::getInstance();
 	int newPageNumber;
+
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	FreePageManager *freePageMgr=new FreePageManager(fd_,1);
 	newPageNumber=freePageMgr->getFreePage();
