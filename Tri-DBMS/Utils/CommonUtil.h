@@ -15,6 +15,7 @@
 #include <string>
 #include <cstring>
 #include <sstream>
+#include "../Global/globalDefines.h"
 using namespace std;
 class CommonUtil {
 public:
