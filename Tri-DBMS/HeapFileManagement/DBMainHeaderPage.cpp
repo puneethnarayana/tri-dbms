@@ -21,8 +21,10 @@ DBMainHeaderPage::DBMainHeaderPage(int fd,int pageNumber) {
 	pageNumber_=pageNumber;
 	buffManager_=BufferManager::getInstance();
 	pageData_=new char[DEFAULT_PAGE_SIZE];
-	memset(pageData_,0,DEFAULT_PAGE_SIZE);
-	buffManager_->readPage(fd,pageNumber,pageData_);
+	memset(pageData_,'0',DEFAULT_PAGE_SIZE);
+	//buffManager_->hexDump(0,3);
+	buffManager_->readPage(fd,pageNumber_,pageData_);
+	//buffManager_->hexDump(0,3);
 	memcpy(&dbMainHeader_,pageData_,sizeof(DBMainHeaderStruct));
 	//cout << "in dbmain header page --------------------------:"<< getIndexCatalogHeaderPageNumber()<<endl;
 	//cout << "dbmain header page index page no:"<< dbMainHeader_.indexCatalogHeaderPageNumber_<<endl;
