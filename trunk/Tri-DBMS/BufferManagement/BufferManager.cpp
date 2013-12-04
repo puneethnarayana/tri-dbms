@@ -345,8 +345,8 @@ int BufferManager::closeDatabase(int cd){
 	cacheIndex[cd].fd_=-1;
 	return SUCCESS;
 }
-int BufferManager::dropDatabase(){
-	if(diskManager_->deleteDiskFile(openedFileName_)==-1){
+int BufferManager::dropDatabase(char *dababaseName){
+	if(diskManager_->deleteDiskFile(dababaseName)==-1){
 		return -1;
 	}
 	return SUCCESS;
