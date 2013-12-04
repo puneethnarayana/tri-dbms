@@ -32,6 +32,7 @@ BasicDiskOperations::~BasicDiskOperations() {
 int BasicDiskOperations::createDiskFile(char *fileName, int pageSize, int noOfPages){
 	long int diskFileSize=pageSize*noOfPages;
 	char *writeNull=new char[1];
+	memset(writeNull,0,1);
 	long int totalWritten;
 	fd_=creat(fileName,S_IRUSR|S_IWUSR);/*S_IRWXU : read, write, execute/search by owner*/
 	if(fd_==-1){
@@ -47,6 +48,7 @@ int BasicDiskOperations::createDiskFile(char *fileName, int pageSize, int noOfPa
 	}
 	pageSize_=pageSize;
 	noOfPages_=noOfPages;
+	delete writeNull;
 	close(fd_);
 	ret: return fd_;
 }
