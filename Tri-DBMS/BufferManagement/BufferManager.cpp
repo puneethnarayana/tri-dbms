@@ -481,6 +481,7 @@ int BufferManager::getHitRate(){
 	return SUCCESS;
 }
 int BufferManager::hexDump(char *pageContent){
+	int noOfLinesDisplayed=0;
 	cout <<"\n";
 	cout <<
 			"Address               Hexadecimal values                    Printable\n";
@@ -494,6 +495,16 @@ int BufferManager::hexDump(char *pageContent){
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
+		if(noOfLinesDisplayed==20){
+			cout << endl << "===============================================================================" <<endl ;
+			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
+			char c;
+			cin >> c;
+			cout <<  "===============================================================================" <<endl <<endl;
+			if(c!='c'){
+				break;
+			}
+		}
 		int nread=0;
 		char *buf=new char[16];
 
@@ -526,6 +537,7 @@ int BufferManager::hexDump(char *pageContent){
 		}
 
 		cout << "\n";
+		noOfLinesDisplayed++;
 		address += 16;
 
 	}
@@ -533,7 +545,7 @@ int BufferManager::hexDump(char *pageContent){
 }
 
 int BufferManager::hexDump(int cd,int pageNumber){
-
+	int noOfLinesDisplayed=0;
 	if(cd<0 || cd>=noOfDBsOpened_){
 		cout << "DATABASE_NOT_OPEN" << endl;
 		return -1;
@@ -560,6 +572,16 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
+		if(noOfLinesDisplayed==20){
+			cout << endl << "===============================================================================" <<endl ;
+			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:"<<endl;
+			char c;
+			cin >> c;
+			cout <<  "===============================================================================" <<endl<<endl; ;
+			if(c!='c'){
+				break;
+			}
+		}
 		int nread=0;
 		char *buf=new char[16];
 
@@ -592,6 +614,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 		}
 
 		cout << "\n";
+		noOfLinesDisplayed++;
 		address += 16;
 		delete[] buf;
 	}
