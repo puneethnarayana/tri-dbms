@@ -279,5 +279,3 @@ vector<string> IndexCatalog::getIndexNamesFromTableName(char *tableName){
 	delete indexCatalogPage;
 	return indexNames;
 }
-
-
