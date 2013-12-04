@@ -25,6 +25,7 @@ public:
 	vector<string> getIndexCatalogVectorFromIndexAttr(char *indexName);
 	int getIndexHeaderPageNumberUsingAttr(char *indexAttr);
 	vector<string> getIndexNamesFromTableName(char *tableName);
+	int setUseIndexForGivenIndex(char *indexName,bool useIndex);
 private:
 
 	        int fd_;
