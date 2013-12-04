@@ -148,7 +148,21 @@ int DatabaseOperations::closeDatabase(int fd){
 	buffManager_->closeDatabase(fd);
 	return SUCCESS;
 }
+int DatabaseOperations::dropDatabase(char *databaseName){
+	char *dbName=new char[MAX_FILE_NAME_LENGTH+MAX_FILE_NAME_LENGTH];
+	strcpy(dbName,databaseName);
+	strcpy(databaseName,"./DatabaseFiles/");
+	strcat(databaseName,dbName);
+	strcat(databaseName,".db");
+	//cout <<"in open db:"<< databaseName <<endl;
+	strcpy(openDatabaseName_,databaseName);
+	isDatabaseOpen_=true;
+	fd_=buffManager_->dropDatabase(databaseName);
 
+
+	delete[] dbName;
+	return SUCCESS;
+}
 int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList,vector<string> columnSizeList){
 
 
@@ -580,8 +594,8 @@ int DatabaseOperations::dropTable(char *tableName){
 	vector<string> indices = indexCatalog_->getIndexNamesFromTableName(tableName);
 	cout << "indices :"<<indices.size()<<endl;
 	for(unsigned i=0;i<indices.size();i++){
-		cout << "in delete index loop :"<<endl;
-		cout << "in delete index loop :"<<(char *)indices[i].c_str()<<endl;
+		//cout << "in delete index loop :"<<endl;
+		//cout << "in delete index loop :"<<(char *)indices[i].c_str()<<endl;
 		deleteIndex((char *)indices[i].c_str());
 	}
 
