@@ -18,6 +18,7 @@ using namespace std;
 #include "Utils/CommonUtil.h"
 #include "Global/globalDefines.h"
 #include "BufferManagement/BufferManager.h"
+#include "Index/IndexUI.h"
 
 // #include "Parser/heading.h"
 // prototype of bison-generated parser function
@@ -225,7 +226,22 @@ void cacheConsole(){
 }
 
 void indexConsole(){
-
+	IndexUI *indui= new IndexUI();
+	int fan, choice;
+	while(1){
+		cout<<"1. Create\n2. Open\n";
+		cin>>choice;
+		if(choice==1){
+			cout<<"Enter fan out for the index  ";
+			cin>>fan;
+			indui->CreateIndexDB(fan);
+		}
+		else if(choice ==2){
+			indui->OpenIndexDB();
+		}
+		else
+				return;
+	};
 }
 
 int main(int argc, char* argv[] ){
@@ -251,7 +267,7 @@ int main(int argc, char* argv[] ){
                         else if((strcmp(buffer,"cache off;")==0) || (strcmp(buffer,"CACHE OFF;")==0)){
                                 prompt="SQL> ";
                         }
-                        else if((strcmp(buffer,"index on;")==0) || (strcmp(buffer,"INDEX ON;")==0)){
+                        else if((strcmp(buffer,"index mode;")==0) || (strcmp(buffer,"INDEX MODE;")==0)){
                                 parse_mode=INDEX_MODE;
                                 strcpy(buffer,"");
                                 indexConsole();
