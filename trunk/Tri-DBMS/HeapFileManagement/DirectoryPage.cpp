@@ -85,7 +85,7 @@ int DirectoryPage::searchForSlotEntry(int sizeRequired){
 				(i*DirectoryEntry::getDirectoryEntrySize());
 		memcpy(&dirEntry->directoryEntry_,&pageData_[offset],DirectoryEntry::getDirectoryEntrySize());
 		if(dirEntry->directoryEntry_.freeSpace_>=sizeRequired){
-
+			//cout << "slot entry number" << i << endl;
 			updateSlotEntry(i,dirEntry->directoryEntry_.freeSpace_-sizeRequired);
 			return i;
 		}
@@ -163,7 +163,7 @@ int DirectoryPage::deleteDirectoryPage(){
 
 	}
 	memset(pageData_,0,DEFAULT_PAGE_SIZE);
-	cout << "deleted dir pageNo :"<<pageNumber_<<endl;
+	//cout << "deleted dir pageNo :"<<pageNumber_<<endl;
 	buffManager_->writePage(fd_,pageNumber_,pageData_);
 	FreePageManager *freePageManager=new FreePageManager(fd_,1);
 	freePageManager->freePage(pageNumber_);
