@@ -290,6 +290,9 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	//	strcpy((char *)whereExpr.literalValue.c_str(),"35");
 	//	strcpy((char *)whereExpr.operatorValue.c_str(),">");
 	//	whereExpressions.push_back(whereExpr);
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
@@ -317,6 +320,10 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	delete sysTableCatalog_;
 	sysColumnCatalog_->getTableSchema(tableName,schema);
 	delete sysColumnCatalog_;
+
+	if(columnList.size()==0){
+		columnList=schema.columnNames;
+	}
 	/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
 		for(int i=0;i<schema.columnNames.size();i++){
 			cout << schema.columnNames[i].c_str() << endl;
@@ -328,6 +335,14 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 
 	//loop the following for all the directory pages of table;
+	stringstream columnStream,tempStream;
+	for(unsigned c=0;c<columnList.size();c++){
+		columnStream<<"||\t '"<<columnList[c].c_str()<<"' \t";
+		tempStream<< "============================";
+	}
+	cout << endl <<tempStream.str() << endl;
+	cout << columnStream.str() <<"||\t"<< endl;
+	cout << tempStream.str() <<endl;
 	while(dirPageNumber_!=-1){
 		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
 		DirectoryEntry::DirectoryEntryStruct dirEntry_;
@@ -361,13 +376,13 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 							pos= schema.getColumnNum(columnList[c].c_str());
 							if(schema.fieldTypes[pos]==TYPE_BOOL) {
 								if(strcmp(recordVector[pos].c_str(),"1")==0)
-									recordStream<< " 'TRUE' ";
+									recordStream<< "||\t 'TRUE' \t";
 								else
-									recordStream<< " 'FALSE' ";
+									recordStream<< "||\t 'FALSE' \t";
 							}
 							else
 
-								recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
+								recordStream<< "||\t '"<<recordVector[pos].c_str()<<"' \t";
 						}
 						if(whereExpressions.size()>0){
 							PostFixEvaluator postFixEval(recordWhere);
@@ -375,14 +390,16 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 							if(postFixEval.evaluate(whereExpressions)==true){
 
 								//cout << "after postfix eval"<<  j << endl;
-								cout << recordStream.str() << endl;
+								noOfRecordsEffected++;
+								cout <<recordStream.str() <<"\t||\t"<< endl;
 								//recordStream.clear();
 								//recordsVector.push_back(recordStream.str());
 							}
 
 						}
 						else{
-							cout << recordStream.str() << endl;
+							noOfRecordsEffected++;
+							cout<< recordStream.str() <<"||\t"<< endl;
 						}
 
 						delete[] recordString;
@@ -404,6 +421,10 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	//		}
 	delete dirHeaderPage_;
 	//return recordsVector;
+	cout << tempStream.str() <<endl;
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
@@ -771,10 +792,10 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 	IndexHeader *indexHeader=new IndexHeader(fd_,indexHeaderPageNumber_);
 	indexHeader->createIndexHeaderPage(columnList.size(),colTypes,colSizes,keySizeForIndex);
 	if(columnList.size()==1){
-		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_SIMPLE_KEY,keySizeForIndex,indexHeaderPageNumber_,1);
+		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_SIMPLE_KEY,keySizeForIndex,indexHeaderPageNumber_,0);
 	}
 	else{
-		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_COMPOSITE_KEY,keySizeForIndex,indexHeaderPageNumber_,1);
+		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_COMPOSITE_KEY,keySizeForIndex,indexHeaderPageNumber_,0);
 	}
 
 	cout << "1" <<endl;
@@ -977,7 +998,7 @@ int DatabaseOperations::listIndex(){
 	//cout << "fd is:(2)" <<fd_<<" indexCatalog :"<<indexCatalogPageNumber<<endl;
 	DataPage *indexCatalog=new DataPage(fd_,indexCatalogPageNumber);
 	cout << endl<<endl;
-	cout << "||\tIndex Name\t||\tKey Type\t\t||\tSize\t||IndexHeaderPage||  RootPage  ||\tTable\t||\tIndex Attribute\t" <<endl;
+	cout << "||\tIndex Name\t||\tKey Type\t\t||\tSize\t||IndexHeaderPage||  RootPage  ||\tTable\t||Index Attribute|| UseIndex?" <<endl;
 	for(int i=0;i<indexCatalog->getNoOfRecords();i++){
 		recordString=new char[DEFAULT_PAGE_SIZE];
 		indexCatalog->getRecord(i,recordString,&recordLength);
@@ -1016,6 +1037,33 @@ int DatabaseOperations::listIndex(){
 	delete indexCatalog;
 
 	delete record;
+	return SUCCESS;
+}
+
+
+
+
+int DatabaseOperations::useIndex(char *indexName){
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
+	delete dbMainHeader_;
+	IndexCatalog *indexCatalogPage_=new IndexCatalog(fd_,indexCatalogPageNumber);
+	indexCatalogPage_->setUseIndexForGivenIndex(indexName,1);
+	delete indexCatalogPage_;
+	return SUCCESS;
+}
+int DatabaseOperations::unUseIndex(char *indexName){
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
+	delete dbMainHeader_;
+	IndexCatalog *indexCatalogPage_=new IndexCatalog(fd_,indexCatalogPageNumber);
+	indexCatalogPage_->setUseIndexForGivenIndex(indexName,0);
+	delete indexCatalogPage_;
+	return SUCCESS;
+}
+
+int DatabaseOperations::setIndexSwitch(bool indexSwitch){
+	indexSwitch_=indexSwitch;
 	return SUCCESS;
 }
 

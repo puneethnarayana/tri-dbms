@@ -46,6 +46,9 @@ public:
 	int createIndex(char *indexName,char *tableName,vector<string> columnList);
 	int listIndex();
 	int deleteIndex(char *indexName);
+	int useIndex(char *indexName);
+	int unUseIndex(char *indexName);
+	int setIndexSwitch(bool indexSwitch);
 
 private:
 	BufferManager *buffManager_;
@@ -54,6 +57,7 @@ private:
 	bool isDatabaseOpen_;
 	char *openDatabaseName_;
 	DBMainHeaderPage *dbMainHeader_;
+	bool indexSwitch_;
 	//FreePageManager *freePageManager_;
 	SysTablesCatalog *sysTableCatalog_;
 	SysColumnsCatalog *sysColumnCatalog_;
