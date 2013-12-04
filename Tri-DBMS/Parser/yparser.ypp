@@ -550,8 +550,12 @@ db_name:
 
 		
 describe_statement:
-		DESC table
-	|	DESCRIBE table {cout<<"DESCRIBE TABLE "<<endl<<endl;}
+		DESC table{
+			dbOps->describeTable($2);
+		}
+	|	DESCRIBE table {
+			dbOps->describeTable($2);
+		}
 	;
 
 show_databases:
@@ -579,9 +583,6 @@ use_db:
 	if(mode==SQL_MODE){
 		dbOps->openDatabase($2);
 		}
-	else if(mode==CACHE_MODE){
-		buffManager->openDatabase($2);
-	}
 	else
 		cout<<"Action not permitted in this mode"<<endl;
 	}
@@ -597,7 +598,6 @@ exit_stmt:
 close_db:
 	CLOSE db_name{
 	if(mode==SQL_MODE){
-		buffManager->commitCache();
 		dbOps->closeDatabase();
 		cout<<$2<<" database committed to disk"<<endl;
 		}
@@ -633,6 +633,8 @@ index_off:
 		cout<<"Index mode off"<<endl;
 	}
 	;
+	
+
 
 %%
 
