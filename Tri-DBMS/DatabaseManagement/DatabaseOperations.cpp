@@ -37,7 +37,7 @@
 #include "../Index/BPlusTree.h"
 #include "../Utils/WhereExpressionElement.h"
 
-extern int indexHeaderPageNo;
+//extern int indexHeaderPageNo;
 
 using namespace std;
 DatabaseOperations::DatabaseOperations() {
@@ -137,15 +137,15 @@ int DatabaseOperations::openDatabase(char *databaseName){
         delete[] dbName;
         return fd_;
 }
-int DatabaseOperations::closeDatabase(int fd){
-        if(fd!=fd_ || isDatabaseOpen_==false){
+int DatabaseOperations::closeDatabase(){
+        if(isDatabaseOpen_==false){
                 return ERR_DATABASE_NOT_OPEN;
         }
         isDatabaseOpen_=false;
         openDatabaseName_=new char[MAX_FILE_NAME_LENGTH];
 
         buffManager_->commitCache();
-        buffManager_->closeDatabase(fd);
+        buffManager_->closeDatabase(fd_);
         return SUCCESS;
 }
 int DatabaseOperations::dropDatabase(char *databaseName){
@@ -562,6 +562,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
                         //cout << dirPageNumber_ << endl;
                 }
                 endTime=clock();
+                cout<<"record vector size "<<recordsVector.size()<<endl;
                 for(int l=0;l<recordsVector.size();l++){
                         cout << recordsVector[l].c_str() << endl;
                 }
@@ -992,7 +993,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
         cout << "index Attr :"<<indexAttribute.str()<<endl;
         int indexHeaderPageNumber_=fpMgr_->getFreePage();
         delete fpMgr_;
-        indexHeaderPageNo=indexHeaderPageNumber_;
+        //indexHeaderPageNo=indexHeaderPageNumber_;
         //cout<< "indexHeader page :"<< indexHeaderPageNumber_<<endl;
 
         IndexHeader *indexHeader=new IndexHeader(fd_,indexHeaderPageNumber_);

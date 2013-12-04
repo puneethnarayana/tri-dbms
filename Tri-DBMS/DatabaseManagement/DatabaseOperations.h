@@ -31,7 +31,7 @@ public:
 	int createDatabase(char *databaseName);
 	int createDatabase(char *databaseName,int databaseSize);
 	int openDatabase(char *databaseName);
-	int closeDatabase(int fd);
+	int closeDatabase();
 	int dropDatabase(char *databaseName);
 	int createTable(char *tableName, vector<string> columnList, vector<string> columnTypeList,vector<string> columnSizeList);
 	int insertIntoTable(char *tableName, vector<string> insertValues);
