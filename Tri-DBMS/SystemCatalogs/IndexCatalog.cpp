@@ -88,7 +88,7 @@ int IndexCatalog::insertIndexEntry(char *indexName, char *tableName, char *index
 int IndexCatalog::deleteIndexEntryForTable(char *indexName){
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 	int recordLen=0;
-	cout << "in dlete entry index:"<<fd_<<pageNumber_<<endl;
+	//cout << "in dlete entry index:"<<fd_<<pageNumber_<<endl;
 	Record *record=new Record();
 	//cout << "1"<<endl;
 	vector<string> recordVector,nullVector;
@@ -96,7 +96,7 @@ int IndexCatalog::deleteIndexEntryForTable(char *indexName){
 	//cout << "in dlete entry index:"<<fd_<<" "<<pageNumber_<<endl;
 	DataPage *indexCatalogPage=new DataPage(fd_,pageNumber_);
 	//cout <<indexCatalogPage->getNoOfRecords();
-	cout << " hey"<<endl;
+	//cout << " hey"<<endl;
 	for(int i=0;i< indexCatalogPage->getNoOfRecords();i++){
 		//recordString=new char[DEFAULT_PAGE_SIZE];
 		indexCatalogPage->getRecord(i,recordString,&recordLen);
@@ -113,7 +113,7 @@ int IndexCatalog::deleteIndexEntryForTable(char *indexName){
 		}
 
 	}
-	cout << "after delete in index catalog:"<<indexCatalogPage->getNoOfRecords()<<endl;
+	//cout << "after delete in index catalog:"<<indexCatalogPage->getNoOfRecords()<<endl;
 	delete[] recordString;
 	delete record;
 	delete indexCatalogPage;
