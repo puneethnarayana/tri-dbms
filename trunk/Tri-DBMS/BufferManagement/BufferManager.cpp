@@ -134,6 +134,7 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 			frameNo=pinAndGetPageForRead(fd,pageNumber,pageContent);
 			BufferPool_[frameNo]->pageNumber_=pageNumber;
 			BufferPool_[frameNo]->fd_=fd;
+			memcpy(BufferPool_[frameNo]->priorityType_,&pageContent[sizeof(int)],sizeof(int));
 			//cout << pageContent << endl;
 			//numberOfDiskAccesses_++;
 			//cout << "page content after pin and get page(read page): "<< pageContent << endl;
@@ -233,6 +234,7 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 		t = std::time(0);
 		BufferPool_[frameNo]->fd_=fd;
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
+		memcpy(BufferPool_[frameNo]->priorityType_,&newPageContent[sizeof(int)],sizeof(int));
 		BufferPool_[frameNo]->pinCount_ = 0;
 		BufferPool_[frameNo]->dirtyFlag_=true;
 
@@ -435,7 +437,7 @@ int BufferManager::getFreeFrame(){
 
 int BufferManager::displayBufferList(){
 	cout << "\n=======================================================================================================================" << endl;
-	cout << "||Frame No.||      cd    ||\t\tFile Name\t||   Page No.   ||   Dirty Flag  || Priority Value  ||" << endl;
+	cout << "||Frame No.||      cd    ||\t\tFile Name\t||   Page No.   ||   Dirty Flag  || Priority Value  || Page Type ||" << endl;
 	cout << "\n=======================================================================================================================" << endl;
 	for(int i=0;i<numberOfFrames_;i++){
 		if(BufferPool_[i]->pinCount_!=-1){
@@ -445,6 +447,7 @@ int BufferManager::displayBufferList(){
 			cout <<"        " <<BufferPool_[i]->pageNumber_ <<"     ||";
 			cout <<"         "<<BufferPool_[i]->dirtyFlag_ <<"     ||";
 			cout <<"     "<<BufferPool_[i]->priority_ <<"    ||";
+			cout << "     "<<BufferPool_[i]->priorityType_ <<"   ||"<< endl;
 			cout << endl;
 		}
 	}
