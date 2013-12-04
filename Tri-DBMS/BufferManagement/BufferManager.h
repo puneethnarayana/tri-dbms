@@ -30,7 +30,7 @@ public:
 	int readPage(int cd, int pageNumber, char*& pageContent);
 	int writePage(int cd, int pageNumber, char *pageContent);
 	int closeDatabase(int fd);
-	int dropDatabase();
+	int dropDatabase(char *databaseName);
 	int commitCache();
 	int resetCache();
 	int displayBufferList();
