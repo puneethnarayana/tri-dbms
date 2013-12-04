@@ -117,11 +117,15 @@ query_list:
 
 create_statement:
 		CREATE TABLE table '(' base_table_element_commalist ')' {
+		if(mode==SQL_MODE){
 			dbOps->createTable($3,globalColumnNameList,globalColumnDatatypeList,globalColumnDatasizeList);
 			cout<<"Table "<<$3<<" created successfully with "<<globalColumnNameList.size()<<" column(s)!"<<endl;
 			globalColumnNameList.clear();
 			globalColumnDatatypeList.clear();
 			globalColumnDatasizeList.clear();
+			}
+			else
+		cout<<"Action not permitted in this mode"<<endl;
 		}
 	;
 
@@ -203,6 +207,7 @@ data_type:
 
 createdb_statement:
 		CREATE DATABASE db_name	opt_db_size{
+		if(mode==SQL_MODE){
 		if(dbSize==0)
 			dbOps->createDatabase($3);
 		else
@@ -210,15 +215,22 @@ createdb_statement:
 		cout<<"Database created successfully!"<<endl;
 		dbSize=0;
 		}
+		else
+		cout<<"Action not permitted in this mode"<<endl;
+		}
 	;
 
 opt_db_size:
 		/* Empty*/
-	|	INTNUM {
+	|	db_size
+	;
+	
+db_size:
+	INTNUM {
 		dbSize=CommonUtil::string_to_int($1);
 		}
 	;
-
+	
 create_index:
 		CREATE INDEX index_name ON table opt_column_commalist {
 			dbOps->createIndex($3,$5,globalColumnNameList);
@@ -238,9 +250,13 @@ show_index:
 
 insert_statement:
 		INSERT INTO table opt_column_commalist values_or_query_spec {
+			if(mode==SQL_MODE){
 			dbOps->insertIntoTable($3,globalColumnValueList); 
 			cout<<"Inserted 1 row successfully!"<<endl;
         	globalColumnValueList.clear();
+        	}
+       	else
+		cout<<"Action not permitted in this mode"<<endl;
 		}
 	;
 
@@ -298,11 +314,12 @@ where_literal:
 
 delete_statement:
 	DELETE FROM table opt_where_clause {
+	if(mode==SQL_MODE){
 		dbOps->deleteFromTable($3,globalWhereList); 
-       	globalColumnNameList.clear();
-       	globalColumnValueList.clear();
 		globalWhereList.clear();
-		
+		}
+	else
+		cout<<"Action not permitted in this mode"<<endl;
 	} 
 	;
 
@@ -412,10 +429,14 @@ scalar_exp_commalist:
 
 update_statement:
 		UPDATE table SET assignment_commalist opt_where_clause {
+			if(mode==SQL_MODE){
 			dbOps->updateTable($2,globalColumnNameList,globalColumnValueList,globalWhereList);
         	globalColumnNameList.clear();
         	globalColumnValueList.clear();
 			globalWhereList.clear();
+			}
+		else
+		cout<<"Action not permitted in this mode"<<endl;
 		}
 	;
 
@@ -447,10 +468,13 @@ value_exp_commalist:
 
 select_statement:
 		SELECT opt_all_distinct selection FROM table table_exp{
+		if(mode==SQL_MODE){
 			dbOps->selectAllFromTable($5,globalColumnNameList,globalWhereList);
         	globalColumnNameList.clear();
-        	globalColumnValueList.clear();
 			globalWhereList.clear();
+			}
+		else
+		cout<<"Action not permitted in this mode"<<endl;
 		}
 	;
 
@@ -503,10 +527,18 @@ drop_statement:
 		
 db_struct:
 		DATABASE db_name{
+		if(mode==SQL_MODE){
 			dbOps->dropDatabase($2);
+			}
+		else
+			cout<<"Action not permitted in this mode"<<endl;
 		}
 	|	TABLE table  {
+		if(mode==SQL_MODE){
 			dbOps->dropTable($2);
+			}
+		else
+			cout<<"Action not permitted in this mode"<<endl;
 		}
 	|	INDEX index_name {
 			dbOps->deleteIndex($2);
@@ -523,16 +555,35 @@ describe_statement:
 	;
 
 show_databases:
-	SHOW DATABASES {dbOps->listDatabases();}
+	SHOW DATABASES {
+	if(mode==SQL_MODE){
+		dbOps->listDatabases();
+		}
+	else
+		cout<<"Action not permitted in this mode"<<endl;
+	}
 	;
 
 show_tables:
-	SHOW TABLES {dbOps->listTables();}
+	SHOW TABLES {
+	if(mode==SQL_MODE){
+		dbOps->listTables();
+		}
+	else
+		cout<<"Action not permitted in this mode"<<endl;
+	}
 	;
 
 use_db:
 	USE db_name {
+	if(mode==SQL_MODE){
 		dbOps->openDatabase($2);
+		}
+	else if(mode==CACHE_MODE){
+		buffManager->openDatabase($2);
+	}
+	else
+		cout<<"Action not permitted in this mode"<<endl;
 	}
 	;
 
@@ -542,7 +593,19 @@ exit_stmt:
 		exit(-1);
 	}
 	;
-	
+
+close_db:
+	CLOSE db_name{
+	if(mode==SQL_MODE){
+		buffManager->commitCache();
+		dbOps->closeDatabase();
+		cout<<$2<<" database committed to disk"<<endl;
+		}
+	else
+		cout<<"Action not permitted in this mode"<<endl;
+	}
+	;
+
 cache_on:
 	CACHE ON{
 		buffManager->setInitCache(true);
@@ -568,13 +631,6 @@ index_off:
 	INDEX OFF{
 		dbOps->setIndexSwitch(false);
 		cout<<"Index mode off"<<endl;
-	}
-	;
-	
-close_db:
-	CLOSE db_name{
-		buffManager->commitCache();
-		cout<<$2<<" database committed to disk"<<endl;
 	}
 	;
 
