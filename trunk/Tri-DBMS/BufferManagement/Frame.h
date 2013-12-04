@@ -19,9 +19,11 @@ public:
 	bool dirtyFlag_;
 	int pinCount_;
 	unsigned long priority_;
-	char *priorityType_; 	/* main header page,dir page, index root, index leaf,
+	//char *priorityType_;
+	/* main header page,dir page, index root, index leaf,
 							* index intermediate, data page etc.,
 							*/
+	int pageType;
 	int pageNumber_;
 	char *pageData_;
 };

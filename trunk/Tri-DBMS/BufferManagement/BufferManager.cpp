@@ -19,6 +19,8 @@
 #include "../Global/globalStructures.h"
 #include "../Global/globalVariables.h"
 #include "../diskManagement/BasicDiskOperations.h"
+#include "../Utils/CommonUtil.h"
+
 using namespace std;
 BufferManager::BufferManager() {
 	// TODO Auto-generated constructor stub
@@ -134,7 +136,8 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 			frameNo=pinAndGetPageForRead(fd,pageNumber,pageContent);
 			BufferPool_[frameNo]->pageNumber_=pageNumber;
 			BufferPool_[frameNo]->fd_=fd;
-			memcpy(BufferPool_[frameNo]->priorityType_,&pageContent[sizeof(int)],sizeof(int));
+			memcpy(BufferPool_[frameNo]->pageData_,pageContent,DEFAULT_PAGE_SIZE);
+			memcpy(&BufferPool_[frameNo]->pageType,&pageContent[sizeof(int)],sizeof(int));
 			//cout << pageContent << endl;
 			//numberOfDiskAccesses_++;
 			//cout << "page content after pin and get page(read page): "<< pageContent << endl;
@@ -151,9 +154,11 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 
 
 		t = std::time(0);
+		memcpy(&BufferPool_[frameNo]->pageType,&pageContent[sizeof(int)],sizeof(int));
 
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
 		BufferPool_[frameNo]->pinCount_ = 0;
+
 		//cout << "page content at end of read page(read page): "<< pageContent << endl;
 	}
 	else{
@@ -234,7 +239,8 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 		t = std::time(0);
 		BufferPool_[frameNo]->fd_=fd;
 		BufferPool_[frameNo]->priority_ = t;//LRUReplacement->getMaximumPriority()+ 1;//use time-stamp
-		memcpy(BufferPool_[frameNo]->priorityType_,&newPageContent[sizeof(int)],sizeof(int));
+
+		memcpy(&BufferPool_[frameNo]->pageType,&newPageContent[sizeof(int)],sizeof(int));
 		BufferPool_[frameNo]->pinCount_ = 0;
 		BufferPool_[frameNo]->dirtyFlag_=true;
 
@@ -288,7 +294,7 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 	delete[] newPageContent;
 }
 
-void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNumber,char *newPageContent){
+void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNumber,char * &newPageContent){
 
 	//Use time-stamp as priority, and different types of pages as priority types.
 
@@ -437,7 +443,7 @@ int BufferManager::getFreeFrame(){
 
 int BufferManager::displayBufferList(){
 	cout << "\n=======================================================================================================================" << endl;
-	cout << "||Frame No.||      cd    ||\t\tFile Name\t||   Page No.   ||   Dirty Flag  || Priority Value  || Page Type ||" << endl;
+	cout << "||Frame No.||      cd    ||\t\tFile Name\t||   Page No.   ||   Dirty Flag  || Priority Value  || \t Page Type \t ||" << endl;
 	cout << "\n=======================================================================================================================" << endl;
 	for(int i=0;i<numberOfFrames_;i++){
 		if(BufferPool_[i]->pinCount_!=-1){
@@ -447,7 +453,7 @@ int BufferManager::displayBufferList(){
 			cout <<"        " <<BufferPool_[i]->pageNumber_ <<"     ||";
 			cout <<"         "<<BufferPool_[i]->dirtyFlag_ <<"     ||";
 			cout <<"     "<<BufferPool_[i]->priority_ <<"    ||";
-			cout << "     "<<BufferPool_[i]->priorityType_ <<"   ||"<< endl;
+			cout << "     "<<CommonUtil::getPageType(BufferPool_[i]->pageType) <<"   ||"<< endl;
 			cout << endl;
 		}
 	}
@@ -463,7 +469,7 @@ int BufferManager::viewFrameBuffer(int frameNumber){
 	cout << "File Name is: " << cacheIndex[getCd(BufferPool_[frameNumber]->fd_)].fileName_<< endl;
 	cout << "page Number is: " << BufferPool_[frameNumber]->pageNumber_ << endl;
 	cout << "dirty flag is: " << BufferPool_[frameNumber]->dirtyFlag_ << endl;
-	cout << "priority type is: " << BufferPool_[frameNumber]->priorityType_ << endl;
+	cout << "page type is: " << CommonUtil::getPageType(BufferPool_[frameNumber]->pageType)<< endl;
 	cout << "priority value is: " << BufferPool_[frameNumber]->priority_ << endl;
 	cout << "page Content is:\n" << endl;
 	hexDump(BufferPool_[frameNumber]->pageData_);
@@ -499,6 +505,7 @@ int BufferManager::hexDump(char *pageContent){
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
+
 //		if(noOfLinesDisplayed==20){
 //			cout << endl << "===============================================================================" <<endl ;
 //			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
@@ -509,6 +516,7 @@ int BufferManager::hexDump(char *pageContent){
 //				break;
 //			}
 //		}
+
 		int nread=0;
 		char *buf=new char[16];
 
@@ -576,6 +584,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
+
 //		if(noOfLinesDisplayed==20){
 //			cout << endl << "===============================================================================" <<endl ;
 //			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:"<<endl;
@@ -586,6 +595,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 //				break;
 //			}
 //		}
+
 		int nread=0;
 		char *buf=new char[16];
 
@@ -625,3 +635,10 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	delete[] pageContent;
 	return SUCCESS;
 }
+
+int BufferManager::memoryUsage(){
+	cout <<"Memory used by cache is: " << numberOfFrames_*(DEFAULT_PAGE_SIZE+24) << "Bytes"<<endl;
+	return SUCCESS;
+}
+
+

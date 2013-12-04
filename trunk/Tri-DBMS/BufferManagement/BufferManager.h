@@ -38,7 +38,7 @@ public:
 	int pinAndGetPageForRead(int fd,int pageNumber,char*& pageContent);
 	int pinAndGetPageForWrite(int fd,int pageNumber);
 	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber);
-	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber, char *newPageContent);
+	void replaceFrameWithAnother(int fd,int frameNumber, int pageNumber, char * &newPageContent);
 	void flushAllPagesToDisk();
 	void flushPageToDisk(int fd,int pageNumber);
 	int getFrameNumber(int fd,int pageNumber);
@@ -49,7 +49,7 @@ public:
 	int hexDump(int fd,int pageNumber);
 	int hexDump(char *pageContent);
 	bool isInitCache() const;
-
+	int	memoryUsage();
 	void setInitCache(bool initCache);
 
 	LRUPageReplacement *LRUReplacement;
