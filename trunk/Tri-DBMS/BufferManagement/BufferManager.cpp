@@ -94,9 +94,7 @@ int BufferManager::createDatabase(char *fileName, int pageSize, int noOfPages){
 int BufferManager::openDatabase(char *fileName){
 	openedFileName_=fileName;
 	long int fd;
-	cout << "in buffer mgr open db:"<<fileName<<endl;
 	fd=diskManager_->openDiskFile(fileName);
-	cout << "fd in bfr mgf :"<<fd<<endl;
 	totalNumberOfRequests_++;
 	numberOfDiskAccesses_++;
 	if(fd!=-1){
