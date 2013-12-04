@@ -389,32 +389,32 @@ int main(){
 	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
 	//	dbOps->listIndex();
 	//dbOps->dropTable(tablename);
-	dbOps->listIndex();
-	dbOps->listTables();
-	//buffManager->hexDump(fd,4);
-	dbOps->listIndex();
-	dbOps->useIndex(indexName);
-	//buffManager->hexDump(fd,4);
-	dbOps->listIndex();
-	dbOps->unUseIndex(indexName);
-	//buffManager->hexDump(fd,4);
-	dbOps->listIndex();
+//	dbOps->listIndex();
+//	dbOps->listTables();
+//	//buffManager->hexDump(fd,4);
+//	dbOps->listIndex();
+//	dbOps->useIndex(indexName);
+//	//buffManager->hexDump(fd,4);
+//	dbOps->listIndex();
+//	dbOps->unUseIndex(indexName);
+//	//buffManager->hexDump(fd,4);
+//	dbOps->listIndex();
 
 
-	dbOps->selectAllFromTable(tablename,whereList,whereExpressions);
-	whereList.clear();
+//	dbOps->selectAllFromTable(tablename,whereList,whereExpressions);
+//	whereList.clear();
 	vector<string> columnsSelect;
-	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
-
-	dbOps->useIndex(indexName);
+//	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+//
+//	dbOps->useIndex(indexName);
 	whereExpressions.clear();
 	WhereExpressionElement whereExpr10(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
 	whereExpressions.push_back(whereExpr10);
 	WhereExpressionElement whereExpr11(WhereExpressionElement::LITERAL_TYPE,"34");
 	whereExpressions.push_back(whereExpr11);
-	WhereExpressionElement whereExpr12(WhereExpressionElement::OPERATOR_TYPE,"<");
+	WhereExpressionElement whereExpr12(WhereExpressionElement::OPERATOR_TYPE,"=");
 	whereExpressions.push_back(whereExpr12);
-	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+	//dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
 
 	//whereExpressions.clear();
 	//dbOps->deleteFromTable(tablename,whereExpressions);
@@ -427,28 +427,39 @@ int main(){
 	//dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
 
 
+	dbOps->closeDatabase(fd);
+	strcpy(dbname,"db1");
+	dbOps->openDatabase(dbname);
+	strcpy(tablename,"newTable");
+	dbOps->createTable(tablename,colNames,colTypes,colSizes);
+	dbOps->listTables();
 
 
-	dbOps->setIndexSwitch(true);
-	dbOps->listIndex();
-	dbOps->setIndexSwitch(false);
-	for(unsigned i=0;i<50000;i++){
-		dbOps->insertIntoTable(tablename,insertValues_);
-	}
-	buffManager->commitCache();
-	buffManager->getHitRate();
-	buffManager->setInitCache(false);
-	whereExpressions.clear();
-	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
-	buffManager->getHitRate();
-	cout<< "=============== select all with cache off ============="<<endl;
-	buffManager->setInitCache(true);
-	whereExpressions.clear();
-	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
-	buffManager->getHitRate();
 
-	cout<< "=============== select all with cache on ============="<<endl;
-	//buffManager->hexDump(fd,13);
+//	for(unsigned i=0;i<100000;i++){
+//		dbOps->insertIntoTable(tablename,insertValues_);
+//		//cout << "end of insert: "<<i<<endl;
+//	}
+//	dbOps->setIndexSwitch(true);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->listIndex();
+////	buffManager->commitCache();
+////	buffManager->setInitCache(false);
+//	//whereExpressions.clear();
+//	cout << "after create index"<<endl;
+//	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+//	dbOps->useIndex(indexName);
+//	dbOps->listIndex();
+////	buffManager->getHitRate();
+////	cout<< "=============== select all with cache off ============="<<endl;
+////	buffManager->setInitCache(true);
+////	whereExpressions.clear();
+//	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+//	dbOps->listIndex();
+//	//buffManager->getHitRate();
+//
+//	cout<< "=============== select all with cache on ============="<<endl;
+//	//buffManager->hexDump(fd,13);
 	//	strcpy(dbname,"db1");
 	//	dbOps->dropDatabase(dbname);
 	//	dbOps->listDatabases();
@@ -1025,8 +1036,8 @@ int main(){
 	endTime=clock();
 	cout << endl <<double( endTime - startTime )/1000  << " milliseconds." << endl;
 	 */
+/*
 
-	/*
 	while(1){
 		cout << endl << endl <<"Cache-Console>>";
 		query_string=new char[100];
@@ -1208,8 +1219,8 @@ int main(){
 
 
 	}
-	 */
 
+*/
 
 	/*
 	cout << "Enter the database name:";
