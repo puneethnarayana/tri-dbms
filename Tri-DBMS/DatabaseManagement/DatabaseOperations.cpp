@@ -239,6 +239,12 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
         //      int noOfColumns_=3;
         dbMainHeader_=new DBMainHeaderPage(fd_,0);
         sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+        vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+        if(tableEntry.size()==0){
+        	cout << tableName << " does not exist in the current Database!" << endl;
+        	return -1;
+        }
+
         int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
         //int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
         DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
@@ -259,9 +265,9 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
         memset(recordString,0,DEFAULT_PAGE_SIZE);
         record->getRecordString(insertValues,recordString,&recordLength);
-        cout << dirPage_->getMaxFreeSpace() << " "<< recordLength <<endl;
+        //cout << dirPage_->getMaxFreeSpace() << " "<< recordLength <<endl;
         while(dirPage_->getNoOfDirectoryEntries()>=dirPage_->getMaxNoOfDirectoryEntries()){
-                cout << "come here"<<endl;
+                //cout << "come here"<<endl;
                 dirPageNumber_=dirPage_->getNextPageNumber();
                 if(dirPageNumber_!=-1){
                         delete dirPage_;
@@ -335,7 +341,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
@@ -562,7 +568,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
                         //cout << dirPageNumber_ << endl;
                 }
                 endTime=clock();
-                cout<<"record vector size "<<recordsVector.size()<<endl;
+                //cout<<"record vector size "<<recordsVector.size()<<endl;
                 for(int l=0;l<recordsVector.size();l++){
                         cout << recordsVector[l].c_str() << endl;
                 }
@@ -572,7 +578,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 
         }
 
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
         return SUCCESS;
 }
@@ -639,7 +645,7 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
@@ -778,7 +784,7 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
         delete sysTableCatalog_;
         delete sysColumnCatalog_;
         endTime=clock();
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 
         return SUCCESS;
@@ -792,7 +798,7 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
@@ -906,7 +912,7 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
         delete sysColumnCatalog_;
 
         endTime=clock();
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
         return SUCCESS;
 }
@@ -929,14 +935,14 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
         if(indexSwitch_==false){
                 cout << "INDEX_IS_NOT_ON"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
@@ -1084,7 +1090,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
         delete indexCatalog;
 
         endTime=clock();
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
         //return recordsVector;
         return SUCCESS;
@@ -1099,14 +1105,14 @@ int DatabaseOperations::deleteIndex(char *indexName){
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
         if(indexSwitch_==false){
                 cout << "INDEX_IS_NOT_ON"<<endl;
                 endTime=clock();
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
         }
@@ -1169,7 +1175,7 @@ int DatabaseOperations::listDatabases(){
 
         cout <<"=====================================";
 
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         endTime=clock();
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
         delete[] dbName;
@@ -1183,7 +1189,7 @@ int DatabaseOperations::listTables(){
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
 
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 endTime=clock();
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
@@ -1222,7 +1228,7 @@ int DatabaseOperations::listTables(){
         }
         cout <<"===========================================================================================";
 
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         endTime=clock();
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 
@@ -1245,7 +1251,7 @@ int DatabaseOperations::listIndex(){
         if(isDatabaseOpen_==false){
                 cout << "ERR_DATABASE_NOT_OPEN"<<endl;
 
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 endTime=clock();
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
                 return -1;
@@ -1253,7 +1259,7 @@ int DatabaseOperations::listIndex(){
 
         if(indexSwitch_==false){
                 cout << "INDEX_IS_NOT_ON"<<endl;
-                cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+                cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
                 endTime=clock();
                 cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 
@@ -1313,7 +1319,7 @@ int DatabaseOperations::listIndex(){
         }
         cout <<"==========================================================================================="
                         "============================================================="<<endl;
-        cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+        cout << endl<< "Number of records affected :" << noOfRecordsEffected << endl;
         endTime=clock();
         cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 
