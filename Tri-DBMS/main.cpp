@@ -151,7 +151,7 @@ int main(){
 		for(unsigned i=0;i<resultRids.size();i++){
 			cout << " in search :"<<resultRids.at(i).pageNumber<<" "<< resultRids.at(i).slotNumber<< endl;
 		}
-*/
+	 */
 
 	//		buffManager->commitCache();
 	//		buffManager->hexDump(fd,indexHeaderPageNo);
@@ -301,22 +301,22 @@ int main(){
 	strcpy(indexName,"testIndex2Cols");
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
-//	buffManager->commitCache();
-//	buffManager->hexDump(fd,8);
-//	buffManager->hexDump(fd,9);
+	//	buffManager->commitCache();
+	//	buffManager->hexDump(fd,8);
+	//	buffManager->hexDump(fd,9);
 
-//	cout << "next free page after 1st create index:"<< fpm->getFreePage()<<endl;
-//	BPlusTree *bpTree=new BPlusTree(fd,indexHeaderPageNo);
-//	vector<RIDStruct> searchResRids;
-//	cout << "index header page no:"<<indexHeaderPageNo<<endl;
-//	char *key=new char[MAX_FILE_NAME_LENGTH];
-//	strcpy(key,"83Puneeth");
-//	cout << "page no for key :"<< bpTree->searchInBPlusTree(key)<<endl;
-//	bpTree->searchKeyInBPlusTree(key,searchResRids);
-//
-//	for(unsigned i=0;i<searchResRids.size();i++){
-//		cout << " Rid is :"<<searchResRids[i].pageNumber << " "<< searchResRids[i].slotNumber<<endl;
-//	}
+	//	cout << "next free page after 1st create index:"<< fpm->getFreePage()<<endl;
+	//	BPlusTree *bpTree=new BPlusTree(fd,indexHeaderPageNo);
+	//	vector<RIDStruct> searchResRids;
+	//	cout << "index header page no:"<<indexHeaderPageNo<<endl;
+	//	char *key=new char[MAX_FILE_NAME_LENGTH];
+	//	strcpy(key,"83Puneeth");
+	//	cout << "page no for key :"<< bpTree->searchInBPlusTree(key)<<endl;
+	//	bpTree->searchKeyInBPlusTree(key,searchResRids);
+	//
+	//	for(unsigned i=0;i<searchResRids.size();i++){
+	//		cout << " Rid is :"<<searchResRids[i].pageNumber << " "<< searchResRids[i].slotNumber<<endl;
+	//	}
 	cout << "after search"<<endl;
 
 
@@ -327,41 +327,41 @@ int main(){
 	colNamesIndex.push_back("col3");
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
-//	buffManager->commitCache();
-//	buffManager->hexDump(fd,1);
+	//	buffManager->commitCache();
+	//	buffManager->hexDump(fd,1);
 	cout << "after 2nd create index"<<endl;
 
 	strcpy(indexName,"testIndex2Col3c1");
 	colNamesIndex.clear();
-	colNamesIndex.push_back("col3");
+	//colNamesIndex.push_back("col3");
 	colNamesIndex.push_back("c1");
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
 
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
 	dbOps->closeDatabase(fd);
 
-//	buffManager->commitCache();
-//	buffManager->hexDump(fd,4);
-//
-//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
-//	strcpy(dbname,"myNewDatabase");
-//	dbOps->createDatabase(dbname,1);
-//	fd=dbOps->openDatabase(dbname);
-//	dbOps->closeDatabase(fd);
-//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
-//	strcpy(dbname,"myOldDB");
-//	dbOps->createDatabase(dbname,1);
-//	fd=dbOps->openDatabase(dbname);
-//		dbOps->closeDatabase(fd);
-//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
-//	strcpy(dbname,"db1");
+	//	buffManager->commitCache();
+	//	buffManager->hexDump(fd,4);
+	//
+	//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+	//	strcpy(dbname,"myNewDatabase");
+	//	dbOps->createDatabase(dbname,1);
+	//	fd=dbOps->openDatabase(dbname);
+	//	dbOps->closeDatabase(fd);
+	//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+	//	strcpy(dbname,"myOldDB");
+	//	dbOps->createDatabase(dbname,1);
+	//	fd=dbOps->openDatabase(dbname);
+	//		dbOps->closeDatabase(fd);
+	//	memset(dbname,0,MAX_FILE_NAME_LENGTH);
+	//	strcpy(dbname,"db1");
 
 	memset(dbname,0,MAX_FILE_NAME_LENGTH);
 	strcpy(dbname,"db1");
@@ -370,24 +370,24 @@ int main(){
 	dbOps->listIndex();
 	dbOps->listTables();
 	//buffManager->commitCache();
-//	buffManager->hexDump(fd,0);
-//	buffManager->hexDump(fd,1);
+	//	buffManager->hexDump(fd,0);
+	//	buffManager->hexDump(fd,1);
 
-//	cout << "before reset cache:"<<endl;
-//	dbOps->listIndex();
-//	strcpy(indexName,"testIndex2Cols");
-//	dbOps->deleteIndex(indexName);
-//	cout << "after 1st delete "<<endl;
-//	dbOps->listIndex();
-//	cout << "before 2nd delete"<<endl;
+	//	cout << "before reset cache:"<<endl;
+	//	dbOps->listIndex();
+	//	strcpy(indexName,"testIndex2Cols");
+	//	dbOps->deleteIndex(indexName);
+	//	cout << "after 1st delete "<<endl;
+	//	dbOps->listIndex();
+	//	cout << "before 2nd delete"<<endl;
 	strcpy(indexName,"testIndex1Col");
-//	dbOps->deleteIndex(indexName);
-//	cout << "after 2nd delete "<<endl;
-//	strcpy(indexName,"testIndex1Col");
-//	dbOps->deleteIndex(indexName);
-//	dbOps->listIndex();
-//	dbOps->createIndex(indexName,tablename,colNamesIndex);
-//	dbOps->listIndex();
+	//	dbOps->deleteIndex(indexName);
+	//	cout << "after 2nd delete "<<endl;
+	//	strcpy(indexName,"testIndex1Col");
+	//	dbOps->deleteIndex(indexName);
+	//	dbOps->listIndex();
+	//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+	//	dbOps->listIndex();
 	//dbOps->dropTable(tablename);
 	dbOps->listIndex();
 	dbOps->listTables();
@@ -407,27 +407,56 @@ int main(){
 	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
 
 	dbOps->useIndex(indexName);
-//	whereExpressions.clear();
-//	WhereExpressionElement whereExpr10(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
-//	whereExpressions.push_back(whereExpr10);
-//	WhereExpressionElement whereExpr11(WhereExpressionElement::LITERAL_TYPE,"34");
-//	whereExpressions.push_back(whereExpr11);
-//	WhereExpressionElement whereExpr12(WhereExpressionElement::OPERATOR_TYPE,"=");
-//	whereExpressions.push_back(whereExpr12);
+	whereExpressions.clear();
+	WhereExpressionElement whereExpr10(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+	whereExpressions.push_back(whereExpr10);
+	WhereExpressionElement whereExpr11(WhereExpressionElement::LITERAL_TYPE,"34");
+	whereExpressions.push_back(whereExpr11);
+	WhereExpressionElement whereExpr12(WhereExpressionElement::OPERATOR_TYPE,"<");
+	whereExpressions.push_back(whereExpr12);
 	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+
+	//whereExpressions.clear();
+	//dbOps->deleteFromTable(tablename,whereExpressions);
+	//	WhereExpressionElement whereExpr13(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+	//	whereExpressions.push_back(whereExpr13);
+	//	WhereExpressionElement whereExpr14(WhereExpressionElement::LITERAL_TYPE,"48");
+	//	whereExpressions.push_back(whereExpr14);
+	//	WhereExpressionElement whereExpr15(WhereExpressionElement::OPERATOR_TYPE,">");
+	//	whereExpressions.push_back(whereExpr15);
+	//dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+
+
+
+
+	dbOps->setIndexSwitch(true);
 	dbOps->listIndex();
+	dbOps->setIndexSwitch(false);
+	for(unsigned i=0;i<50000;i++){
+		dbOps->insertIntoTable(tablename,insertValues_);
+	}
+	buffManager->commitCache();
+	buffManager->getHitRate();
+	buffManager->setInitCache(false);
+	whereExpressions.clear();
+	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+	buffManager->getHitRate();
+	cout<< "=============== select all with cache off ============="<<endl;
+	buffManager->setInitCache(true);
+	whereExpressions.clear();
+	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+	buffManager->getHitRate();
 
-
-	cout<< "===============End of Main============="<<endl;
+	cout<< "=============== select all with cache on ============="<<endl;
 	//buffManager->hexDump(fd,13);
-	strcpy(dbname,"db1");
-	dbOps->dropDatabase(dbname);
-	dbOps->listDatabases();
+	//	strcpy(dbname,"db1");
+	//	dbOps->dropDatabase(dbname);
+	//	dbOps->listDatabases();
 
-//	buffManager->hexDump(fd,1);
-//	buffManager->hexDump(pageContent);
-//	dbOps->setIndexSwitch(false);
-//	dbOps->listIndex();
+	//	buffManager->hexDump(fd,1);
+	//	buffManager->hexDump(pageContent);
+	//	dbOps->setIndexSwitch(false);
+	//	dbOps->listIndex();
 	//cout << "After select!! Please print this line" << endl;
 	//buffManager->commitCache();
 	//buffManager->hexDump(fd,1);
@@ -477,7 +506,7 @@ int main(){
 	//cout << "next free page :"<<freePageManager_->getFreePage()<<endl;
 
 
-	*/
+	 */
 	/*buffManager->commitCache();
 				buffManager->hexDump(fd,2);
 				buffManager->hexDump(fd,3);
