@@ -879,7 +879,7 @@ int LeafNode::searchKeyInLeafNode(const char* key, std::vector<
 		memcpy(tempKey, &pageData_[offset], indexHeader_->getKeySize());
 		//			dummyKeyCompare(tempKey, key);
 		int comp = BPlusTreeUtil::keyCompare(tempKey, key, indexHeader_);
-		//cout << "temp key & key & comp are :" << tempKey << " " <<key << " "<<comp<< endl;
+		cout << "temp key & key & comp are :" << tempKey << " " <<key << " "<<comp<< endl;
 
 		if (comp == 0) {
 			//cout << "found =1"<<endl;

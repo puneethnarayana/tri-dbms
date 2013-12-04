@@ -172,10 +172,14 @@ int BPlusTree::searchKeyInBPlusTree(const char *key, std::vector<
 		cout << "BPLUS TREE IS NOT YET CREATED" << endl;
 		return SUCCESS;
 	}
+	cout<<"Key is"<<key<<endl;
 	int rootPageNumber = indexHeaderPage_->getRootPageNumber();
+	cout<<"Inside search Root: "<<rootPageNumber<<endl;
 	int heightOfTree = indexHeaderPage_->getHeightOfTree();
+	cout<<"Inside search, height :"<<heightOfTree<<endl;
 	if (heightOfTree == 0) {
 		LeafNode leafNode(fd_,indexHeaderPage_, rootPageNumber);
+		cout<<"GOing into search leafnode"<<endl;
 		leafNode.searchKeyInLeafNode(key, RIDVector);
 	} else {
 		//			IndexNode indexNode(indexHeaderPage_,rootPageNumber);
