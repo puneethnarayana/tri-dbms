@@ -15,13 +15,13 @@
 class FieldLengthLookup{
 public:
 	static int getType(char *fieldLengthString){
-		if(strcmp(fieldLengthString,"INTEGER")==0){
+		if(strcmp(fieldLengthString,"INTEGER")==0 || strcmp(fieldLengthString,"integer")==0){
 			return SIZE_INT;
-		}else if(strcmp(fieldLengthString,"VARCHAR")==0){
+		}else if(strcmp(fieldLengthString,"VARCHAR")==0 || strcmp(fieldLengthString,"varchar")==0){
 			return SIZE_CHAR;
-		}else if(strcmp(fieldLengthString,"BOOL")==0){
+		}else if(strcmp(fieldLengthString,"BOOL")==0 || strcmp(fieldLengthString,"bool")==0){
 			return SIZE_BOOL;
-		}else if(strcmp(fieldLengthString,"DATE")==0){
+		}else if(strcmp(fieldLengthString,"DATE")==0 || strcmp(fieldLengthString,"date")==0){
 			return SIZE_DATE;
 		}
 

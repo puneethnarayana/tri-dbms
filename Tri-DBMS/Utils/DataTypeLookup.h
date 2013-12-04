@@ -12,13 +12,13 @@
 class DataTypeLookup {
 public:
 	static int getType(char *dataTypeString) {
-		if (strcmp(dataTypeString, "INTEGER") == 0) {
+		if (strcmp(dataTypeString, "INTEGER") == 0 || strcmp(dataTypeString, "integer") == 0) {
 			return TYPE_INT;
-		}else if (strcmp(dataTypeString, "VARCHAR") == 0) {
+		}else if (strcmp(dataTypeString, "VARCHAR") == 0 || strcmp(dataTypeString, "varchar") == 0) {
 			return TYPE_VARCHAR;
-		}else if (strcmp(dataTypeString, "BOOL") == 0) {
+		}else if (strcmp(dataTypeString, "BOOL") == 0 || strcmp(dataTypeString, "bool") == 0) {
 			return TYPE_BOOL;
-		}else if (strcmp(dataTypeString, "DATE") == 0) {
+		}else if (strcmp(dataTypeString, "DATE") == 0 || strcmp(dataTypeString, "date") == 0) {
 			return TYPE_DATE;
 		}
 		return -1;
