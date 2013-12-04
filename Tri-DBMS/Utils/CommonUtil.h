@@ -60,6 +60,39 @@ public:
 		string res(var);
 		return res;
 	}
+
+static string getPageType(int pageType) {
+		switch (pageType) {
+		case DATA_PAGE:
+			return "DATA_PAGE";
+		case DIRECTORY_HEADER_PAGE:
+			return "DIRECTORY_HEADER_PAGE";
+		case DIRECTORY_PAGE:
+			return "DIRECTORY_PAGE";
+		case SYS_TABLES_PAGE:
+			return "SYS_TABLES_PAGE";
+		case SYS_COLUMNS_PAGE:
+			return "SYS_COLUMNS_PAGE";
+		case INDEX_CATALOG_PAGE:
+			return "INDEX_CATALOG_PAGE";
+		case FREE_PAGE_MANAGER_PAGE:
+			return "FREE_PAGE_MANAGER_PAGE";
+		case INDEX_HEADER_PAGE:
+			return "INDEX_HEADER_PAGE";
+		case INDEX_INTERNAL_PAGE:
+			return "INDEX_INTERNAL_PAGE";
+		case INDEX_LEAF_PAGE:
+			return "INDEX_LEAF_PAGE";
+		case INDEX_ROOT_PAGE:
+			return "INDEX_ROOT_PAGE";
+		case DB_MAIN_HEADER_PAGE:
+			return "DB_MAIN_HEADER_PAGE";
+		default:
+			break;
+		}
+		return "UNKNOWN_DATA_TYPE";
+	}
+
 };
 
 
