@@ -104,9 +104,12 @@ query_list:
 	|	show_tables
 	|	use_db
 	|	create_index
+	|	show_index
 	|	exit_stmt
 	|	cache_on
 	|	cache_off
+	|	index_on
+	|	index_off
 	;
 
 	
@@ -216,21 +219,24 @@ opt_db_size:
 	;
 
 create_index:
-		CREATE INDEX index_name ON table opt_column_commalist {cout<<"CREATE INDEX "<<endl<<endl;}
+		CREATE INDEX index_name ON table opt_column_commalist {
+			dbOps->createIndex($3,$5,globalColumnNameList);
+			globalColumnNameList.clear();
+		}
 	;
 
 index_name:
-		NAME { cout<<"index name = "<< $1 <<endl ;}
+		NAME 
 	;
+
 		
+show_index:
+		SHOW INDEX {
+			dbOps->listIndex();
+		}
 
 insert_statement:
 		INSERT INTO table opt_column_commalist values_or_query_spec {
-			cout<<endl<<"VALUES inserted"<<endl;
-				for(unsigned ii=0; ii < globalColumnValueList.size(); ii++)
-    		    {
-                cout << globalColumnValueList[ii];
-        		}
 			dbOps->insertIntoTable($3,globalColumnValueList); 
 			cout<<"Inserted 1 row successfully!"<<endl;
         	globalColumnValueList.clear();
@@ -291,10 +297,6 @@ where_literal:
 
 delete_statement:
 	DELETE FROM table opt_where_clause {
-		for(unsigned ii=0; ii < globalWhereList.size(); ii++)
-    		    {
-                cout << "1. "<<globalWhereList[ii].identifierValue<<" 2. "<<globalWhereList[ii].literalValue<<" 3. "<<globalWhereList[ii].operatorValue<<endl ;
-        		}
 		dbOps->deleteFromTable($3,globalWhereList); 
        	globalColumnNameList.clear();
        	globalColumnValueList.clear();
@@ -409,21 +411,6 @@ scalar_exp_commalist:
 
 update_statement:
 		UPDATE table SET assignment_commalist opt_where_clause {
-			cout<<endl<<"NAMES part"<<endl;
-			for(unsigned ii=0; ii < globalColumnNameList.size(); ii++)
-    		    {
-                cout << globalColumnNameList[ii];
-        		}
-			cout<<endl<<"VALUES part"<<endl;
-				for(unsigned ii=0; ii < globalColumnValueList.size(); ii++)
-    		    {
-                cout << globalColumnValueList[ii];
-        		}
-			cout<<endl<<"WHERE part"<<endl;
-		for(unsigned ii=0; ii < globalWhereList.size(); ii++)
-    		    {
-                cout << "1. "<<globalWhereList[ii].identifierValue<<" 2. "<<globalWhereList[ii].literalValue<<" 3. "<<globalWhereList[ii].operatorValue<<endl ;
-        		}
 			dbOps->updateTable($2,globalColumnNameList,globalColumnValueList,globalWhereList);
         	globalColumnNameList.clear();
         	globalColumnValueList.clear();
@@ -459,16 +446,6 @@ value_exp_commalist:
 
 select_statement:
 		SELECT opt_all_distinct selection FROM table table_exp{
-			cout<<endl<<"NAMES part"<<endl;
-			for(unsigned ii=0; ii < globalColumnNameList.size(); ii++)
-    		    {
-                cout << globalColumnNameList[ii];
-        		}
-			cout<<endl<<"WHERE part"<<endl;
-		for(unsigned ii=0; ii < globalWhereList.size(); ii++)
-    		    {
-                cout << "1. "<<globalWhereList[ii].identifierValue<<" 2. "<<globalWhereList[ii].literalValue<<" 3. "<<globalWhereList[ii].operatorValue<<endl ;
-        		}
 			dbOps->selectAllFromTable($5,globalColumnNameList,globalWhereList);
         	globalColumnNameList.clear();
         	globalColumnValueList.clear();
@@ -528,6 +505,9 @@ db_struct:
 	|	TABLE table  {
 			dbOps->dropTable($2);
 		}
+	|	INDEX index_name {
+			dbOps->deleteIndex($2);
+		}
 
 db_name:
 		NAME 
@@ -571,6 +551,20 @@ cache_off:
 	CACHE OFF{
 		buffManager->setInitCache(false);
 		cout<<"Cache mode off"<<endl;
+	}
+	;
+	
+index_on:
+	INDEX ON{
+		dbOps->setIndexSwitch(true);
+		cout<<"Index mode on"<<endl;
+	}
+	;
+	
+index_off:
+	INDEX OFF{
+		dbOps->setIndexSwitch(false);
+		cout<<"Index mode off"<<endl;
 	}
 	;
 	
