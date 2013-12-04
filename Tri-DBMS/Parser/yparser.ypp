@@ -6,6 +6,7 @@ extern int yylex();
 extern void yyerror(const char *s);
 
 DatabaseOperations *dbOps= new DatabaseOperations();
+BufferManager *buffManager=BufferManager::getInstance();
 %}
 
 %union YYSTYPE{
@@ -22,12 +23,12 @@ DatabaseOperations *dbOps= new DatabaseOperations();
 %token CURSOR DATABASE DECIMAL DECLARE DEFAULT DELETE DESC DESCRIBE DISTINCT DOUBLE DROP
 %token ESCAPE EXISTS FETCH FLOAT FOR FOREIGN FOUND FROM 
 %token GRANT GROUP HAVING IN INDEX INDICATOR INSERT INTEGER INTO
-%token IS KEY LANGUAGE LIKE MODULE NOT NULLX NUMERIC OF ON OR
+%token IS KEY LANGUAGE LIKE MODULE NOT NULLX NUMERIC OFF ON OR
 %token OPEN OPTION ORDER PRECISION PRIMARY PRIVILEGES PROCEDURE
 %token PUBLIC REAL REFERENCES ROLLBACK SCHEMA SELECT SET SHOW
 %token SMALLINT SOME SQLCODE SQLERROR TABLE TABLES TO UNION
 %token UNIQUE UPDATE USER VALUES VARCHAR VIEW WHENEVER WHERE WITH WORK
-%token C DATABASES USE QUERY EXIT
+%token C DATABASES USE QUERY EXIT CACHE
 
 	/* operators */
 
@@ -70,13 +71,19 @@ DatabaseOperations *dbOps= new DatabaseOperations();
 %type<sval> BOOL
 %type<sval> DATE
 %type<sval> EXIT
+%type<sval> ON
+%type<sval> OFF
+%type<sval> CACHE
 
 %start list
 %%
 
 list:
 
-	|list query ';'
+	|	list query ';'
+	|	list error ';'{
+			yyclearin;
+		}
 	;
 
 query:
@@ -92,23 +99,22 @@ query_list:
 	|	drop_statement
 	|	describe_statement
 	|	createdb_statement
+	|	close_db
 	|	show_databases
 	|	show_tables
 	|	use_db
 	|	create_index
 	|	exit_stmt
+	|	cache_on
+	|	cache_off
 	;
 
 	
 
 create_statement:
 		CREATE TABLE table '(' base_table_element_commalist ')' {
-			globalStatementType=CREATE_TABLE_STATEMENT;
-			globalTableName=CommonUtil::char_to_string($3) ;
-			char *tableName= new char[globalTableName.length()+1];
-			strcpy(tableName,globalTableName.c_str() );
-			dbOps->createTable(tableName,globalColumnNameList,globalColumnDatatypeList,globalColumnDatasizeList);
-			cout<<"Table "<<tableName<<" created successfully with "<<globalColumnNameList.size()<<" column(s)!"<<endl;
+			dbOps->createTable($3,globalColumnNameList,globalColumnDatatypeList,globalColumnDatasizeList);
+			cout<<"Table "<<$3<<" created successfully with "<<globalColumnNameList.size()<<" column(s)!"<<endl;
 			globalColumnNameList.clear();
 			globalColumnDatatypeList.clear();
 			globalColumnDatasizeList.clear();
@@ -193,20 +199,18 @@ data_type:
 
 createdb_statement:
 		CREATE DATABASE db_name	opt_db_size{
-			globalStatementType=CREATE_DATABASE_STATEMENT;
-			globalDatabaseName=CommonUtil::char_to_string($3) ;
-			char *databaseName= new char[globalDatabaseName.length()+1];
-			strcpy(databaseName,globalDatabaseName.c_str() );
-			if(dbSize==0)
-				dbOps->createDatabase(databaseName);
-			else
-				dbOps->createDatabase(databaseName, dbSize);
-			cout<<"Database created successfully!"<<endl;
+		if(dbSize==0)
+			dbOps->createDatabase($3);
+		else
+			{dbOps->createDatabase($3,dbSize);}
+		cout<<"Database created successfully!"<<endl;
+		dbSize=0;
 		}
 	;
 
 opt_db_size:
-		INTNUM {
+		/* Empty*/
+	|	INTNUM {
 		dbSize=CommonUtil::string_to_int($1);
 		}
 	;
@@ -222,17 +226,14 @@ index_name:
 
 insert_statement:
 		INSERT INTO table opt_column_commalist values_or_query_spec {
-			globalStatementType=INSERT_STATEMENT;
-			globalTableName=CommonUtil::char_to_string($3) ;
-			char *tableName= new char[globalTableName.length()+1];
-			strcpy(tableName,globalTableName.c_str() );
-			/* dbOps->insertIntoTable(tableName,globalColumnValueList); */
-			cout<<"Inserted 1 row successfully!"<<endl;
-			for(unsigned ii=0; ii < globalColumnValueList.size(); ii++)
+			cout<<endl<<"VALUES inserted"<<endl;
+				for(unsigned ii=0; ii < globalColumnValueList.size(); ii++)
     		    {
-                cout << globalColumnValueList[ii]<<" " ;
+                cout << globalColumnValueList[ii];
         		}
-			globalColumnValueList.clear();
+			dbOps->insertIntoTable($3,globalColumnValueList); 
+			cout<<"Inserted 1 row successfully!"<<endl;
+        	globalColumnValueList.clear();
 		}
 	;
 
@@ -290,18 +291,15 @@ where_literal:
 
 delete_statement:
 	DELETE FROM table opt_where_clause {
-		globalStatementType=DELETE_STATEMENT;
-		globalTableName=CommonUtil::char_to_string($3) ;
-		char *tableName= new char[globalTableName.length()+1];
-		strcpy(tableName,globalTableName.c_str() );
-		/* dbOps->deleteFromTable(tableName,globalWhereList); */
 		for(unsigned ii=0; ii < globalWhereList.size(); ii++)
     		    {
-                cout << globalWhereList[ii].identifierValue<<" "<<globalWhereList[ii].literalValue<<" "<<globalWhereList[ii].operatorValue<<endl ;
+                cout << "1. "<<globalWhereList[ii].identifierValue<<" 2. "<<globalWhereList[ii].literalValue<<" 3. "<<globalWhereList[ii].operatorValue<<endl ;
         		}
-        	globalColumnNameList.clear();
-        	globalColumnValueList.clear();
-			globalWhereList.clear();
+		dbOps->deleteFromTable($3,globalWhereList); 
+       	globalColumnNameList.clear();
+       	globalColumnValueList.clear();
+		globalWhereList.clear();
+		
 	} 
 	;
 
@@ -341,11 +339,11 @@ predicate:
 	;
 
 comparison_predicate:
-		scalar_exp COMPARISON scalar_exp{
+		column_ref COMPARISON scalar_exp{
 			WhereExpressionElement whereExpr(WhereExpressionElement::OPERATOR_TYPE,$2);
 			globalWhereList.push_back(whereExpr);
 		}
-	|	scalar_exp COMPARISON subquery{
+	|	column_ref COMPARISON subquery{
 			WhereExpressionElement whereExpr(WhereExpressionElement::OPERATOR_TYPE,$2);
 			globalWhereList.push_back(whereExpr);
 		}
@@ -411,11 +409,6 @@ scalar_exp_commalist:
 
 update_statement:
 		UPDATE table SET assignment_commalist opt_where_clause {
-			globalStatementType=UPDATE_STATEMENT;
-			globalTableName=CommonUtil::char_to_string($2) ;
-			char *tableName= new char[globalTableName.length()+1];
-			strcpy(tableName,globalTableName.c_str() );
-			/* dbOps->updateTable(tableName,globalColumnNameList,globalColumnValueList,globalWhereList); */
 			cout<<endl<<"NAMES part"<<endl;
 			for(unsigned ii=0; ii < globalColumnNameList.size(); ii++)
     		    {
@@ -427,10 +420,11 @@ update_statement:
                 cout << globalColumnValueList[ii];
         		}
 			cout<<endl<<"WHERE part"<<endl;
-			for(unsigned ii=0; ii < globalWhereList.size(); ii++)
+		for(unsigned ii=0; ii < globalWhereList.size(); ii++)
     		    {
-                cout << globalWhereList[ii].identifierValue<<" "<<globalWhereList[ii].literalValue<<" "<<globalWhereList[ii].operatorValue<<endl ;
+                cout << "1. "<<globalWhereList[ii].identifierValue<<" 2. "<<globalWhereList[ii].literalValue<<" 3. "<<globalWhereList[ii].operatorValue<<endl ;
         		}
+			dbOps->updateTable($2,globalColumnNameList,globalColumnValueList,globalWhereList);
         	globalColumnNameList.clear();
         	globalColumnValueList.clear();
 			globalWhereList.clear();
@@ -465,21 +459,17 @@ value_exp_commalist:
 
 select_statement:
 		SELECT opt_all_distinct selection FROM table table_exp{
-			globalStatementType=SELECT_STATEMENT;
-			globalTableName=CommonUtil::char_to_string($5) ;
-			char *tableName= new char[globalTableName.length()+1];
-			strcpy(tableName,globalTableName.c_str() );
-			/* dbOps->updateTable(tableName,globalColumnNameList,globalColumnValueList,globalWhereList); */
 			cout<<endl<<"NAMES part"<<endl;
 			for(unsigned ii=0; ii < globalColumnNameList.size(); ii++)
     		    {
                 cout << globalColumnNameList[ii];
         		}
 			cout<<endl<<"WHERE part"<<endl;
-			for(unsigned ii=0; ii < globalWhereList.size(); ii++)
+		for(unsigned ii=0; ii < globalWhereList.size(); ii++)
     		    {
-                cout << globalWhereList[ii].identifierValue<<" "<<globalWhereList[ii].literalValue<<" "<<globalWhereList[ii].operatorValue<<endl ;
+                cout << "1. "<<globalWhereList[ii].identifierValue<<" 2. "<<globalWhereList[ii].literalValue<<" 3. "<<globalWhereList[ii].operatorValue<<endl ;
         		}
+			dbOps->selectAllFromTable($5,globalColumnNameList,globalWhereList);
         	globalColumnNameList.clear();
         	globalColumnValueList.clear();
 			globalWhereList.clear();
@@ -495,7 +485,7 @@ opt_all_distinct:
 
 selection:
 		column_commalist
-	|	'*'{cout<<"SELECT * "<<endl<<endl;}
+	|	'*'
 	;
 
 table_exp:
@@ -504,23 +494,6 @@ table_exp:
 	|	opt_having_clause
 	;
 
-from_clause:
-		FROM table_ref_commalist
-	;
-
-table_ref_commalist:
-		table_ref
-	|	table_ref_commalist ',' table_ref
-	;
-
-table_ref:
-		table 
-	|	table range_variable
-	;
-
-range_variable:
-		NAME
-	;
 
 opt_group_by_clause:
 		/* empty */
@@ -553,10 +526,7 @@ drop_statement:
 db_struct:
 		DATABASE db_name
 	|	TABLE table  {
-			globalTableName=CommonUtil::char_to_string($2) ;
-			char *tableName= new char[globalTableName.length()+1];
-			strcpy(tableName,globalTableName.c_str() );
-			dbOps->dropTable(tableName);
+			dbOps->dropTable($2);
 		}
 
 db_name:
@@ -570,27 +540,46 @@ describe_statement:
 	;
 
 show_databases:
-	SHOW DATABASES {listDatabases();}
+	SHOW DATABASES {dbOps->listDatabases();}
 	;
 
 show_tables:
-	SHOW TABLES {listTables();}
+	SHOW TABLES {dbOps->listTables();}
 	;
 
 use_db:
 	USE db_name {
-		globalTableName=CommonUtil::char_to_string($2) ;
-		char *tableName= new char[globalTableName.length()+1];
-		strcpy(tableName,globalTableName.c_str() );
-		dbOps->openDatabase(tableName);
+		dbOps->openDatabase($2);
 	}
 	;
 
 exit_stmt:
 	EXIT {
-	cout<<"Exiting..."<<endl;
-	exit(-1);
+		cout<<"Exiting..."<<endl;
+		exit(-1);
 	}
+	;
+	
+cache_on:
+	CACHE ON{
+		buffManager->setInitCache(true);
+		cout<<"Cache mode on"<<endl;
+	}
+	;
+	
+cache_off:
+	CACHE OFF{
+		buffManager->setInitCache(false);
+		cout<<"Cache mode off"<<endl;
+	}
+	;
+	
+close_db:
+	CLOSE db_name{
+		buffManager->commitCache();
+		cout<<$2<<" database committed to disk"<<endl;
+	}
+	;
 
 %%
 

@@ -1,10 +1,12 @@
-create table asd(Name VARCHAR(5), Age integer, Pass bool);
-INSERT INTO asd VALUES ("Qwerty",34,"True");
-delete from qw where (Age<21 OR Pass=False);
-update qwe set Age=2 where Age=10;
-select a,s,d from qwe where Age=2;
-
-CREATE INDEX new_key ON asd;
-DROP TABLE asd;
-show DATABASES;
-use qwe;
+create database st 1;
+use st;
+create table students(Name VARCHAR(25), Age integer, Pass bool);
+INSERT INTO students VALUES ("Alka",23,"True");
+INSERT INTO students VALUES ("Rav",21,"False");
+select * from students;
+delete from students where (Age<21 OR Pass=False);
+select Name from students where Age=21;
+select Name from students where Age=23;
+close st;
+use st;
+select * from students;

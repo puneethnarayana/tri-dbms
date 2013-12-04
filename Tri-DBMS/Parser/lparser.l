@@ -7,7 +7,7 @@ void yyerror(char *s);
 int lineno = 1;
 %}
 
-%option noyywrap case-insensitive
+%option noyywrap case-insensitive interactive
 %e 1200
 %%
 
@@ -32,6 +32,7 @@ AUTHORIZATION	{ return AUTHORIZATION; }
 BETWEEN		{ return BETWEEN; }
 BY		{ return BY; }
 C		{ return C; }
+CACHE		{ return CACHE; }
 CHAR(ACTER)?	{ yylval.sval = strdup(yytext);return CHARACTER; }
 CHECK		{ return CHECK; }
 CLOSE		{ return CLOSE; }
@@ -75,7 +76,7 @@ MODULE		{ return MODULE; }
 NOT		{ yylval.sval = strdup(yytext);return NOT; }
 NULL		{ yylval.sval = strdup(yytext);return NULLX; }
 NUMERIC		{ return NUMERIC; }
-OF		{ return OF; }
+OFF		{ return OFF; }
 ON		{ return ON; }
 OPEN		{ return OPEN; }
 OPTION		{ return OPTION; }
