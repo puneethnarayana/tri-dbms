@@ -33,6 +33,7 @@ public:
 	int openDatabase(char *databaseName);
 	int closeDatabase();
 	int dropDatabase(char *databaseName);
+	int describeTable(char *tableName);
 	int createTable(char *tableName, vector<string> columnList, vector<string> columnTypeList,vector<string> columnSizeList);
 	int insertIntoTable(char *tableName, vector<string> insertValues);
 	int selectAllFromTable(char *tableName, vector<string> columnList,vector<WhereExpressionElement> whereExpressions);

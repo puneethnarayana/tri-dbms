@@ -36,7 +36,7 @@
 #include "../Index/IndexHeader.h"
 #include "../Index/BPlusTree.h"
 #include "../Utils/WhereExpressionElement.h"
-
+#include "../Utils/DataTypeLookup.h"
 //extern int indexHeaderPageNo;
 
 using namespace std;
@@ -134,7 +134,7 @@ int DatabaseOperations::openDatabase(char *databaseName){
         //freePageManager_=new FreePageManager(fd_,1);
         //sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
         //sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
-        delete[] dbName;
+        //delete[] dbName;
         return fd_;
 }
 int DatabaseOperations::closeDatabase(){
@@ -162,6 +162,46 @@ int DatabaseOperations::dropDatabase(char *databaseName){
 
         delete[] dbName;
         return SUCCESS;
+}
+int DatabaseOperations::describeTable(char *tableName){
+	time_t startTime,endTime;
+	startTime= clock();
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	if(tableEntry.size()==0){
+		cout << tableName << " does not exist in the current Database!" << endl;
+		return -1;
+	}
+
+	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
+	Schema schema;
+	sysColumnCatalog_->getTableSchema(tableName,schema);
+	delete sysColumnCatalog_;
+	stringstream schemaStream;
+	cout << endl<<endl;
+	cout << "==========================================================================================="<<endl;
+	cout << "||\tColumn Name\t||\tColumn Type\t\t||\tColumn Size\t||\tColumn Position\t||" <<endl;
+	cout << "==========================================================================================="<<endl;
+
+	for(unsigned i=0;i<schema.columnNames.size();i++){
+		schemaStream<< "||\t"<<schema.columnNames[i]<<"\t";
+		schemaStream<< "||\t"<<DataTypeLookup::getTypeDesc(schema.fieldTypes[i])<<"\t";
+		schemaStream<< "||\t"<<schema.fieldLengths[i]<<"\t";
+		schemaStream<< "||\t"<<schema.fieldPosition[i]<<"\t";
+		cout << schemaStream.str()<<endl;
+	}
+	cout << "==========================================================================================="<<endl;
+
+
+
+	return SUCCESS;
 }
 int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList,vector<string> columnSizeList){
 
