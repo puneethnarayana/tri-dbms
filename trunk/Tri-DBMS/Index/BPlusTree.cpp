@@ -76,7 +76,7 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		//		memset(newKey, '\0', );
 		//		strncpy(newKey, key, strlen(key));
 		leafNode.insertIntoLeafPage(key, rid);
-		cout << "after insert into leafpage" << endl;
+		//cout << "after insert into leafpage" << endl;
 		indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys()
 				+ 1);
 		//cout<< "after set no of keys"<<endl;
