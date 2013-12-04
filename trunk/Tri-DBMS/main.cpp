@@ -331,18 +331,19 @@ int main(){
 //	buffManager->hexDump(fd,1);
 	cout << "after 2nd create index"<<endl;
 
-	strcpy(indexName,"testIndex1Col");
+	strcpy(indexName,"testIndex2Col3c1");
 	colNamesIndex.clear();
+	colNamesIndex.push_back("col3");
 	colNamesIndex.push_back("c1");
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
 
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
 
 	dbOps->closeDatabase(fd);
 
@@ -379,14 +380,14 @@ int main(){
 //	cout << "after 1st delete "<<endl;
 //	dbOps->listIndex();
 //	cout << "before 2nd delete"<<endl;
-	strcpy(indexName,"testIndex3Cols");
+	strcpy(indexName,"testIndex1Col");
 //	dbOps->deleteIndex(indexName);
 //	cout << "after 2nd delete "<<endl;
 //	strcpy(indexName,"testIndex1Col");
 //	dbOps->deleteIndex(indexName);
-	dbOps->listIndex();
-	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	dbOps->listIndex();
+//	dbOps->listIndex();
+//	dbOps->createIndex(indexName,tablename,colNamesIndex);
+//	dbOps->listIndex();
 	//dbOps->dropTable(tablename);
 	dbOps->listIndex();
 	dbOps->listTables();
@@ -404,9 +405,24 @@ int main(){
 	whereList.clear();
 	vector<string> columnsSelect;
 	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+
+	dbOps->useIndex(indexName);
+//	whereExpressions.clear();
+//	WhereExpressionElement whereExpr10(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+//	whereExpressions.push_back(whereExpr10);
+//	WhereExpressionElement whereExpr11(WhereExpressionElement::LITERAL_TYPE,"34");
+//	whereExpressions.push_back(whereExpr11);
+//	WhereExpressionElement whereExpr12(WhereExpressionElement::OPERATOR_TYPE,"=");
+//	whereExpressions.push_back(whereExpr12);
+	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
 	dbOps->listIndex();
 
+
 	cout<< "===============End of Main============="<<endl;
+	//buffManager->hexDump(fd,13);
+	strcpy(dbname,"db1");
+	dbOps->dropDatabase(dbname);
+	dbOps->listDatabases();
 
 //	buffManager->hexDump(fd,1);
 //	buffManager->hexDump(pageContent);
