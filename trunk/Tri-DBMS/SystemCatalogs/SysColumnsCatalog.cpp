@@ -67,9 +67,9 @@ int SysColumnsCatalog::insertSysColumnEntry(char *columnName, char *tableName, i
 	isSysColumnChanged_=true;
 
 	delete[] recordString;
-	delete sysColumnPage;
 	delete record;
-	values.clear();
+	delete sysColumnPage;
+
 	return SUCCESS;
 }
 
@@ -111,6 +111,7 @@ int SysColumnsCatalog::getTableSchema(char *tableName,Schema& schema){
 	int noOfCols=0;
 	Record *record=new Record();
 	vector<string> recordVector;
+	strcpy((char *)schema.tableName.c_str(),tableName);
 	DataPage *sysColumnPage=new DataPage(fd_,pageNumber_);
 	//cout <<sysColumnPage->getNoOfRecords();
 	for(int i=0;i< sysColumnPage->getNoOfRecords();i++){
