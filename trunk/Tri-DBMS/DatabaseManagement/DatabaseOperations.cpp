@@ -336,7 +336,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
                         delete dirPage_;
                         dirPage_=new DirectoryPage(fd_,dirPageNumber_);
                         dirPage_->createDirectoryPage(dirPageNumber_);
-                        cout << "dirPageNumber : "<< dirPageNumber_ << endl;
+                        //cout << "dirPageNumber : "<< dirPageNumber_ << endl;
                 }
         }
         DirectoryEntry::DirectoryEntryStruct dirSlotEntry;
