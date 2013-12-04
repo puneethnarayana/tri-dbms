@@ -26,7 +26,7 @@ BufferManager::BufferManager() {
 	//bufferSizeInMB_=1;
 	initCache_=false;
 	noOfDBsOpened_=0;
-	numberOfFrames_=50;
+	numberOfFrames_=300;
 
 	LRUReplacement = new LRUPageReplacement();
 	diskManager_ = new BasicDiskOperations();
@@ -43,9 +43,9 @@ bool BufferManager::isInitCache() const {
 
 void BufferManager::setInitCache(bool initCache) {
 	initCache_ = initCache;
-//	if(initCache==false){
-//		delete[] BufferPool_;
-//	}
+	if(initCache==false){
+		//commitCache();
+	}
 }
 
 BufferManager* BufferManager::BufferManagerInstance_= NULL;
