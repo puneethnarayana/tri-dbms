@@ -46,7 +46,7 @@ DatabaseOperations::DatabaseOperations() {
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	openDatabaseName_=new char[MAX_FILE_NAME_LENGTH];
 	buffManager_=BufferManager::getInstance();
-	indexSwitch_=true; //index is on by default;
+	indexSwitch_=false; //index is on by default;
 	isDatabaseOpen_=false;
 }
 
@@ -369,6 +369,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 		cout << endl <<tempStream.str() << endl;
 		cout << columnStream.str() <<"||\t"<< endl;
 		cout << tempStream.str() <<endl;
+		//cout << "rid list in select all dbops"<< ridList.size() <<endl;
 		for(unsigned i=0;i<ridList.size();i++){
 			dataPage=new DataPage(fd_,ridList[i].pageNumber);
 			recordString=new char[DEFAULT_PAGE_SIZE];
@@ -393,17 +394,10 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 						recordStream<< "||\t '"<<recordVector[pos].c_str()<<"' \t";
 				}
 				if(whereExpressions.size()>0){
-					PostFixEvaluator postFixEval(recordWhere);
 					//cout << "inside where expr size > 0" << endl;
-					if(postFixEval.evaluate(whereExpressions)==true){
-
-						//cout << "after postfix eval"<<  j << endl;
+						//cout << "after postfix eval"<< endl;
 						noOfRecordsEffected++;
 						cout <<recordStream.str() <<"\t||\t"<< endl;
-						//recordStream.clear();
-						//recordsVector.push_back(recordStream.str());
-					}
-
 				}
 				else{
 					noOfRecordsEffected++;
@@ -521,7 +515,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 
 									//cout << "after postfix eval"<<  j << endl;
 									noOfRecordsEffected++;
-									cout <<recordStream.str() <<"\t||\t"<< endl;
+									//cout <<recordStream.str() <<"\t||\t"<< endl;
 									//recordStream.clear();
 									//recordsVector.push_back(recordStream.str());
 								}
@@ -529,7 +523,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 							}
 							else{
 								noOfRecordsEffected++;
-								cout<< recordStream.str() <<"||\t"<< endl;
+								//cout<< recordStream.str() <<"||\t"<< endl;
 							}
 
 							delete[] recordString;
@@ -626,30 +620,35 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 		return -1;
 	}
-
-	//vector<WhereExpressionElement> whereExpressions;
-
-	/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
-		whereExpressions.push_back(whereExpr);
-		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
-		whereExpressions.push_back(whereExpr1);
-		WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
-		whereExpressions.push_back(whereExpr2);
-		WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
-		whereExpressions.push_back(whereExpr4);
-		WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"83");
-		whereExpressions.push_back(whereExpr5);
-		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
-		whereExpressions.push_back(whereExpr6);
-		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
-		whereExpressions.push_back(whereExpr3);
-	 */
-
-
-
+	stringstream indexKeyStream,searchKeyStream;
+	bool indexUsed=true;
+	for(unsigned i=0;i<whereExpressions.size();i++){
+		if(whereExpressions[i].type_==WhereExpressionElement::IDENTIFIER_TYPE){
+			indexKeyStream<<whereExpressions[i].identifierValue;
+			searchKeyStream<<whereExpressions[i+1].literalValue;
+		}
+		if(whereExpressions[i].type_==WhereExpressionElement::OPERATOR_TYPE && strcmp(whereExpressions[i].operatorValue.c_str(),"OR")==0){
+			indexUsed=false;
+		}
+	}
+	RIDStruct ridForDelete;
+	dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	indexCatalog_ = new IndexCatalog(fd_,dbMainHeader_->getIndexCatalogHeaderPageNumber());
+	int indexHeaderPageNumber_=indexCatalog_->getIndexHeaderPageNumberUsingAttr((char *)indexKeyStream.str().c_str());
+	delete dbMainHeader_;
+	delete indexCatalog_;
+	//buffManager_->hexDump(fd_,4);
+	cout << "index key :"<< (char *)indexKeyStream.str().c_str() <<endl;
+	cout << " index header page :"<< indexHeaderPageNumber_<<endl;
+	BPlusTree *bplusTree;
+	if(indexSwitch_==true && whereExpressions.size()>0 && indexHeaderPageNumber_ !=-1 && indexUsed){
+		cout << "bplus tree object is created :" << indexHeaderPageNumber_ <<endl;
+		bplusTree=new BPlusTree(fd_,indexHeaderPageNumber_);
+	}
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
+	indexCatalog_=new IndexCatalog(fd_,dbMainHeader_->getIndexCatalogHeaderPageNumber());
 	delete dbMainHeader_;
 	Schema schema;
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
@@ -657,7 +656,14 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 		cout << tableName << " does not exist in the current Database!" << endl;
 		return -1;
 	}
+	cout << "before where expr size check "<<endl;
 	if(whereExpressions.size()==0){ // for delete * from table;
+		cout << "where expression size =0 "<<endl;
+		vector<string> indexNames=indexCatalog_->getIndexNamesFromTableName(tableName);
+		for(unsigned i=0;i<indexNames.size();i++){
+			deleteIndex((char *)indexNames[i].c_str());
+		}
+
 		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 		int dirPageNumber_=dirHeaderPage_->getNextPageNumber();
@@ -724,6 +730,12 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 							//cout << "inside where expr size == true" << endl;
 							noOfRecordsEffected++;
 							dataPage->freeSlotDirectoryEntry(j);
+							if(indexSwitch_==true && whereExpressions.size()>0 && indexHeaderPageNumber_ !=-1 && indexUsed){
+								ridForDelete.pageNumber=dataPageNumber;
+								ridForDelete.slotNumber=j;
+								bplusTree->deleteFromBPlusTree((char *)searchKeyStream.str().c_str(),ridForDelete);
+								cout << "deleted Rid :" << ridForDelete.pageNumber << " "<< ridForDelete.slotNumber <<endl;
+							}
 						}
 
 						delete[] recordString;
@@ -762,23 +774,6 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 		return -1;
 	}
 
-
-	//vector<WhereExpressionElement> whereExpressions;
-
-	/*	WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
-		whereExpressions.push_back(whereExpr);
-		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
-		whereExpressions.push_back(whereExpr1);
-		WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
-		whereExpressions.push_back(whereExpr2);
-		WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"co2");
-		whereExpressions.push_back(whereExpr4);
-		WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"Alka");
-		whereExpressions.push_back(whereExpr5);
-		WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
-		whereExpressions.push_back(whereExpr6);
-		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
-		whereExpressions.push_back(whereExpr3);*/
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
