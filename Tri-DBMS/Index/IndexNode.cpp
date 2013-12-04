@@ -21,7 +21,6 @@
 #include <sstream>
 #include "../HeapFileManagement/FreePageManager.h"
 using namespace std;
-extern int noOfIndexPages;
 IndexNode::IndexNode(int fd) {
 	// TODO Auto-generated constructor stub
 	indexHeaderObjCreatedHere = false;
@@ -80,7 +79,6 @@ int IndexNode::createIndexNode(IndexHeader* indexHeaderPage) {
 	bufMgr_ = BufferManager::getInstance();
 	//Where does newPageNumber come from
 	int newPageNumber;
-	noOfIndexPages++;
 	FreePageManager *freePageMgr=new FreePageManager(fd_,1);
 	newPageNumber=freePageMgr->getFreePage();
 	pagenumber_=newPageNumber;
