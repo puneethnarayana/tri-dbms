@@ -83,6 +83,7 @@ list:
 	|	list query ';'
 	|	list error ';'{
 			yyclearin;
+			yyerrok;
 		}
 	;
 
@@ -501,7 +502,9 @@ drop_statement:
 	;
 		
 db_struct:
-		DATABASE db_name
+		DATABASE db_name{
+			dbOps->dropDatabase($2);
+		}
 	|	TABLE table  {
 			dbOps->dropTable($2);
 		}
