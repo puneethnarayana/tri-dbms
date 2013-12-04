@@ -161,7 +161,7 @@ vector<string> IndexCatalog::getIndexCatalogVectorFromIndexName(char *indexName)
 
 
 
-vector<string> IndexCatalog::getIndexCatalogVectorFromIndexAttr(char *indexName){
+vector<string> IndexCatalog::getIndexCatalogVectorFromIndexAttr(char *indexAttr){
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
 	int recordLen=0,flag=1;
 	Record *record=new Record();
@@ -175,7 +175,7 @@ vector<string> IndexCatalog::getIndexCatalogVectorFromIndexAttr(char *indexName)
 			recordVector=record->getvectorFromRecord(recordString,7);
 
 			//cout << recordVector[1].c_str() << " " << tableName << endl;
-			if(strcmp(recordVector[0].c_str(),indexName)==0){
+			if(strcmp(recordVector[5].c_str(),indexAttr)==0){
 				delete record;
 				delete[] recordString;
 				delete indexCatalogPage;

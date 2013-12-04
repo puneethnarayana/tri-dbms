@@ -22,7 +22,7 @@ public:
 	int deleteIndexEntryForTable(char *indexName);
 	vector<string> getIndexCatalogVectorFromIndexName(char *tableName);
 	int getIndexHeaderPageNumberUsingIndexName(char *indexName);
-	vector<string> getIndexCatalogVectorFromIndexAttr(char *indexName);
+	vector<string> getIndexCatalogVectorFromIndexAttr(char *indexAttr);
 	int getIndexHeaderPageNumberUsingAttr(char *indexAttr);
 	vector<string> getIndexNamesFromTableName(char *tableName);
 	int setUseIndexForGivenIndex(char *indexName,bool useIndex);
