@@ -46,6 +46,7 @@ DatabaseOperations::DatabaseOperations() {
 	pageData_=new char[DEFAULT_PAGE_SIZE];
 	openDatabaseName_=new char[MAX_FILE_NAME_LENGTH];
 	buffManager_=BufferManager::getInstance();
+	indexSwitch_=true; //index is on by default;
 	isDatabaseOpen_=false;
 }
 
@@ -102,8 +103,8 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
 	dbMainHeader_->setIndexCatalogHeaderPageNumber(indexCatalogPageNumber_);
 	dbMainHeader_->setNoOfPagesUsed(dbMainHeader_->getNoOfPagesUsed()+3);
 
-//	buffManager_->commitCache();
-//	buffManager_->hexDump(fd_,1);
+	//	buffManager_->commitCache();
+	//	buffManager_->hexDump(fd_,1);
 
 	buffManager_->closeDatabase(fd_);
 
@@ -149,6 +150,17 @@ int DatabaseOperations::closeDatabase(int fd){
 }
 
 int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList,vector<string> columnSizeList){
+
+
+
+	time_t startTime,endTime;
+		startTime= clock();
+		if(isDatabaseOpen_==false){
+			cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+			endTime=clock();
+			cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+			return -1;
+		}
 	int i,colPos,colSize;
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
@@ -185,10 +197,23 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 	delete sysTableCatalog;
 	delete sysColumnCatalog;
 	delete dirPage_;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+
 	return SUCCESS;
 }
 
 int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertValues){
+
+
+	time_t startTime,endTime;
+		startTime= clock();
+		if(isDatabaseOpen_==false){
+			cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+			endTime=clock();
+			//cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+			return -1;
+		}
 	//we need schema to convert "insert into .." statement to insertvalues vector;
 	int dirPageNumber_=-1,dirEntryNumber=-1;
 	int recordLength;
@@ -261,12 +286,24 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	delete record;
 	delete dataPage;
 	//insertValues.clear();
-
+	endTime=clock();
+	//cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
 int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> columnList,vector<WhereExpressionElement> whereExpressions){
 
+
+	time_t startTime,endTime;
+		startTime= clock();
+		int noOfRecordsEffected=0;
+		if(isDatabaseOpen_==false){
+			cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+			endTime=clock();
+			cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+			cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+			return -1;
+		}
 	//vector<WhereExpressionElement> whereExpressions;
 
 	/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
@@ -290,9 +327,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	//	strcpy((char *)whereExpr.literalValue.c_str(),"35");
 	//	strcpy((char *)whereExpr.operatorValue.c_str(),">");
 	//	whereExpressions.push_back(whereExpr);
-	time_t startTime,endTime;
-	startTime= clock();
-	int noOfRecordsEffected=0;
+
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
@@ -422,24 +457,40 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	delete dirHeaderPage_;
 	//return recordsVector;
 	cout << tempStream.str() <<endl;
-	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
 	endTime=clock();
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
 	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
 
 int DatabaseOperations::dropTable(char *tableName){
+	time_t startTime,endTime;
+	startTime= clock();
 
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	indexCatalog_ = new IndexCatalog(fd_,dbMainHeader_->getIndexCatalogHeaderPageNumber());
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+
 	if(tableEntry.size()==0){
 		cout << tableName << " does not exist in the current Database!" << endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		delete sysTableCatalog_;
+		delete sysColumnCatalog_;
+		delete indexCatalog_;
+		delete dbMainHeader_;
 		return -1;
 	}
+
 	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
 	sysTableCatalog_->deleteSysTableEntry(tableName);
 	sysColumnCatalog_->deleteSysColumnEntryForTable(tableName);
@@ -459,6 +510,8 @@ int DatabaseOperations::dropTable(char *tableName){
 	delete sysColumnCatalog_;
 	delete indexCatalog_;
 	delete dirHeaderPage_;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
@@ -466,9 +519,20 @@ int DatabaseOperations::dropTable(char *tableName){
 
 int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionElement> whereExpressions){
 
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+
 	//vector<WhereExpressionElement> whereExpressions;
 
-			/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+	/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
 		whereExpressions.push_back(whereExpr);
 		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
 		whereExpressions.push_back(whereExpr1);
@@ -482,7 +546,7 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 		whereExpressions.push_back(whereExpr6);
 		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
 		whereExpressions.push_back(whereExpr3);
-			 */
+	 */
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
@@ -558,25 +622,11 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 						//cout << "inside where expr size > 0" << endl;
 						if(postFixEval.evaluate(whereExpressions)==true){
 							//cout << "inside where expr size == true" << endl;
+							noOfRecordsEffected++;
 							dataPage->freeSlotDirectoryEntry(j);
 						}
 
 						delete[] recordString;
-
-						//						int pos;
-						//						for(unsigned c=0;c<columnList.size();c++){
-						//							pos= schema.getColumnNum(columnList[c].c_str());
-						//							if(schema.fieldTypes[pos]==TYPE_BOOL) {
-						//								if(strcmp(recordVector[pos].c_str(),"1")==0)
-						//									recordStream<< " 'TRUE' ";
-						//								else
-						//									recordStream<< " 'FALSE' ";
-						//							}
-						//							else
-						//
-						//								recordStream<< " '"<<recordVector[pos].c_str()<<"' ";
-						//						}
-						//cout << recordStream.str() << endl;
 					}
 					delete dataPage;
 				}
@@ -592,16 +642,30 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 	}
 	delete sysTableCatalog_;
 	delete sysColumnCatalog_;
+	endTime=clock();
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+
 	return SUCCESS;
 }
 
 
 int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,vector<string> updateValues,vector<WhereExpressionElement> whereExpressions){
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 
 
 	//vector<WhereExpressionElement> whereExpressions;
 
-		/*	WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
+	/*	WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
 		whereExpressions.push_back(whereExpr);
 		WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"34");
 		whereExpressions.push_back(whereExpr1);
@@ -684,11 +748,12 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 									pos= schema.getColumnNum(columnList[c].c_str());
 									//cout << "c :" << c << " pos :" << pos << endl;
 									recordVector[pos]=updateValues[c];
-//									for (unsigned i=0;i<recordVector.size();i++){
-//										cout << recordVector[i] <<", " ;
-//									}
-//									cout << endl;
+									//									for (unsigned i=0;i<recordVector.size();i++){
+									//										cout << recordVector[i] <<", " ;
+									//									}
+									//									cout << endl;
 								}
+								noOfRecordsEffected++;
 								insertIntoTable(tableName,recordVector);
 							}
 						}
@@ -700,6 +765,7 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 								pos= schema.getColumnNum(columnList[c].c_str());
 								recordVector[pos]=updateValues[c];
 							}
+							noOfRecordsEffected++;
 							insertIntoTable(tableName,recordVector);
 						}
 						delete[] recordString;
@@ -720,6 +786,10 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 	}
 	delete sysTableCatalog_;
 	delete sysColumnCatalog_;
+
+	endTime=clock();
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
@@ -734,6 +804,25 @@ int DatabaseOperations::updateTable(char *tableName,vector<string> columnList,ve
 
 
 int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<string> columnList){
+
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+	if(indexSwitch_==false){
+		cout << "INDEX_IS_NOT_ON"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
@@ -749,7 +838,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
 	delete dbMainHeader_;
 	IndexCatalog *indexCatalog=new IndexCatalog(fd_,indexCatalogPageNumber);
-	cout << "index cat page no:" <<indexCatalogPageNumber<<endl;
+	//cout << "index cat page no:" <<indexCatalogPageNumber<<endl;
 	vector<string> recordVector;
 	//vector<string> recordsVector;
 	int dirPageNumber_=-1;
@@ -783,11 +872,11 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 		indexAttribute<<columnList[c].c_str();
 
 	}
-	cout << "index Attr :"<<indexAttribute.str()<<endl;
+	//cout << "index Attr :"<<indexAttribute.str()<<endl;
 	int indexHeaderPageNumber_=fpMgr_->getFreePage();
 	delete fpMgr_;
 	indexHeaderPageNo=indexHeaderPageNumber_;
-	cout<< "indexHeader page :"<< indexHeaderPageNumber_<<endl;
+	//cout<< "indexHeader page :"<< indexHeaderPageNumber_<<endl;
 
 	IndexHeader *indexHeader=new IndexHeader(fd_,indexHeaderPageNumber_);
 	indexHeader->createIndexHeaderPage(columnList.size(),colTypes,colSizes,keySizeForIndex);
@@ -798,7 +887,6 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 		indexCatalog->insertIndexEntry(indexName,tableName,(char *)indexAttribute.str().c_str(),INDEX_COMPOSITE_KEY,keySizeForIndex,indexHeaderPageNumber_,0);
 	}
 
-	cout << "1" <<endl;
 
 	BPlusTree *bplusTree=new BPlusTree(fd_,indexHeaderPageNumber_);
 	/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
@@ -810,7 +898,6 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 			}*/
 	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
 	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
-	cout << "2" <<endl;
 	//loop the following for all the directory pages of table;
 	while(dirPageNumber_!=-1){
 		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
@@ -847,7 +934,9 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 
 						}
 						//cout << recordStream.str() <<endl;
-						ridForIndex={dataPageNumber,j};
+						ridForIndex.pageNumber=dataPageNumber;
+						ridForIndex.slotNumber=j;
+						noOfRecordsEffected++;
 						bplusTree->insertIntoBPlusTree(recordStream.str().c_str(),ridForIndex);
 						//cout << "index root page :"<<indexHeader->getRootPageNumber();
 						delete[] recordString;
@@ -875,30 +964,48 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 
 	delete indexCatalog;
 
-
+	endTime=clock();
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	//return recordsVector;
 	return SUCCESS;
 
 }
 
 int DatabaseOperations::deleteIndex(char *indexName){
+
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+	if(indexSwitch_==false){
+		cout << "INDEX_IS_NOT_ON"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
 	delete dbMainHeader_;
-	cout << "indexCatalog page no:"<<indexCatalogPageNumber<<endl;
 	IndexCatalog *indexCatalog=new IndexCatalog(fd_,indexCatalogPageNumber);
 	int indexHeaderPagenumber=indexCatalog->getIndexHeaderPageNumberUsingIndexName(indexName);
-	cout << "indexCatalog page no:"<<indexHeaderPagenumber<<endl;
-	IndexHeader *indexHeaderPage=new IndexHeader(fd_,indexHeaderPagenumber);
+	//IndexHeader *indexHeaderPage=new IndexHeader(fd_,indexHeaderPagenumber);
 	BPlusTree *bplusTree=new BPlusTree(fd_,indexHeaderPagenumber);
 	bplusTree->deleteIndex(indexHeaderPagenumber);
-	cout << "3"<<endl;
 	indexCatalog->deleteIndexEntryForTable(indexName);
-	cout << "4"<<endl;
 	delete indexCatalog;
 	delete bplusTree;
 
-
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
@@ -906,40 +1013,62 @@ int DatabaseOperations::deleteIndex(char *indexName){
 
 
 int DatabaseOperations::listDatabases(){
-
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
 	DIR *dir;
 	char *dbName=new char[MAX_FILE_NAME_LENGTH];
 
 	struct dirent *ent;
-	cout << "List of Databases in the System:"<<endl;
+	cout <<endl<<endl<<"====================================="<<endl;
+	cout << "|| List of Databases in the System ||"<<endl;
+	cout <<"====================================="<<endl;
 	if ((dir = opendir ("/home/ravin/workspace/Tri-DBMS/DatabaseFiles")) != NULL) {
-	  /* print all the files and directories within directory */
-	int countdb=0;
-	  while ((ent = readdir (dir)) != NULL) {
-		  if(strlen(ent->d_name) >= strlen(".db"))
-		      {
-		          if(!strcmp(ent->d_name + strlen(ent->d_name) - strlen(".db"), ".db"))
-		          {
-		        	  memset(dbName,0,MAX_FILE_NAME_LENGTH);
-		        	  strncpy(dbName,ent->d_name,strlen(ent->d_name)-2);
-		        	  dbName[strlen(dbName)-1]='\0';
-		        	  countdb++;
-		        	  cout<< "Database"<<countdb<<" ||\t"<<dbName<<"\t||"<<endl;
-		          }
-		      }
+		/* print all the files and directories within directory */
+		int countdb=0;
+		while ((ent = readdir (dir)) != NULL) {
+			if(strlen(ent->d_name) >= strlen(".db"))
+			{
+				if(!strcmp(ent->d_name + strlen(ent->d_name) - strlen(".db"), ".db"))
+				{
+					memset(dbName,0,MAX_FILE_NAME_LENGTH);
+					strncpy(dbName,ent->d_name,strlen(ent->d_name)-2);
+					dbName[strlen(dbName)-1]='\0';
+					countdb++;
+					cout<< "|| Database-"<<countdb<<"\t-->\t"<<dbName<<"\t||"<<endl;
+					noOfRecordsEffected++;
+				}
+			}
 
-	  }
-	  closedir (dir);
+		}
+		closedir (dir);
 	} else {
-	  /* could not open directory */
-	  perror ("");
-	  return EXIT_FAILURE;
+		/* could not open directory */
+		perror ("");
+		return EXIT_FAILURE;
 	}
+
+	cout <<"=====================================";
+
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	delete[] dbName;
 	return SUCCESS;
 
 }
 int DatabaseOperations::listTables(){
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 
 	Schema schema;
 	char *recordString;
@@ -951,7 +1080,9 @@ int DatabaseOperations::listTables(){
 	delete dbMainHeader_;
 	DataPage *sysTableCatalog=new DataPage(fd_,sysTablePageNumber);
 	cout << endl<<endl;
+	cout << "==========================================================================================="<<endl;
 	cout << "||\tTable Name\t||  Max Record Size  ||  No of Columns  ||  DBChain Header Page No\t" <<endl;
+	cout << "==========================================================================================="<<endl;
 	for(int i=0;i<sysTableCatalog->getNoOfRecords();i++){
 		recordString=new char[DEFAULT_PAGE_SIZE];
 		sysTableCatalog->getRecord(i,recordString,&recordLength);
@@ -961,16 +1092,21 @@ int DatabaseOperations::listTables(){
 			stringstream recordStream;
 			recordVector=record->getvectorFromRecord(recordString,4);
 			for(unsigned j=0;j<recordVector.size();j++){
-					recordStream<<"||\t" <<recordVector[j].c_str()<<"\t\t";
+				recordStream<<"||\t" <<recordVector[j].c_str()<<"\t\t";
 			}
-
+			noOfRecordsEffected++;
 			cout << recordStream.str()<<endl;
 			recordVector.clear();
 		}
 		delete[] recordString;
 
 	}
-	cout << endl<<endl;
+	cout <<"===========================================================================================";
+
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+
 	delete sysTableCatalog;
 
 	delete record;
@@ -984,7 +1120,26 @@ int DatabaseOperations::listTables(){
 
 
 int DatabaseOperations::listIndex(){
+	time_t startTime,endTime;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
 
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+
+	if(indexSwitch_==false){
+		cout << "INDEX_IS_NOT_ON"<<endl;
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+
+		return -1;
+	}
 	Schema schema;
 	char *recordString;
 	int recordLength;
@@ -998,7 +1153,11 @@ int DatabaseOperations::listIndex(){
 	//cout << "fd is:(2)" <<fd_<<" indexCatalog :"<<indexCatalogPageNumber<<endl;
 	DataPage *indexCatalog=new DataPage(fd_,indexCatalogPageNumber);
 	cout << endl<<endl;
+	cout << "==========================================================================================="
+			"============================================================="<<endl;
 	cout << "||\tIndex Name\t||\tKey Type\t\t||\tSize\t||IndexHeaderPage||  RootPage  ||\tTable\t||Index Attribute|| UseIndex?" <<endl;
+	cout << "==========================================================================================="
+			"============================================================="<<endl;
 	for(int i=0;i<indexCatalog->getNoOfRecords();i++){
 		recordString=new char[DEFAULT_PAGE_SIZE];
 		indexCatalog->getRecord(i,recordString,&recordLength);
@@ -1026,14 +1185,19 @@ int DatabaseOperations::listIndex(){
 
 
 			}
-
+			noOfRecordsEffected++;
 			cout << recordStream.str()<<endl;
 			recordVector.clear();
 		}
 		delete[] recordString;
 
 	}
-	cout << endl<<endl;
+	cout <<"==========================================================================================="
+			"============================================================="<<endl;
+	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+
 	delete indexCatalog;
 
 	delete record;
@@ -1044,26 +1208,60 @@ int DatabaseOperations::listIndex(){
 
 
 int DatabaseOperations::useIndex(char *indexName){
+	time_t startTime,endTime;
+	startTime= clock();
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
+
+	if(indexSwitch_==false){
+		cout << "INDEX_IS_NOT_ON"<<endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
 	delete dbMainHeader_;
 	IndexCatalog *indexCatalogPage_=new IndexCatalog(fd_,indexCatalogPageNumber);
 	indexCatalogPage_->setUseIndexForGivenIndex(indexName,1);
 	delete indexCatalogPage_;
+	cout << endl<<endl<<"********Index with IndexName - \""<<indexName<<"\" is set to USED ********"<<endl<<endl;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 int DatabaseOperations::unUseIndex(char *indexName){
+	time_t startTime,endTime;
+	startTime= clock();
+	if(indexSwitch_==false){
+		cout << "INDEX_IS_NOT_ON"<<endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	int indexCatalogPageNumber=dbMainHeader_->getIndexCatalogHeaderPageNumber();
 	delete dbMainHeader_;
 	IndexCatalog *indexCatalogPage_=new IndexCatalog(fd_,indexCatalogPageNumber);
 	indexCatalogPage_->setUseIndexForGivenIndex(indexName,0);
 	delete indexCatalogPage_;
+	cout << endl<<endl<<"********Index with IndexName - \""<<indexName<<"\" is set to NOT_USED ********"<<endl<<endl;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
 int DatabaseOperations::setIndexSwitch(bool indexSwitch){
+	time_t startTime,endTime;
+	startTime= clock();
 	indexSwitch_=indexSwitch;
+	endTime=clock();
+	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
 }
 
