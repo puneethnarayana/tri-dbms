@@ -26,7 +26,7 @@ BufferManager::BufferManager() {
 	//bufferSizeInMB_=1;
 	initCache_=false;
 	noOfDBsOpened_=0;
-	numberOfFrames_=300;
+	numberOfFrames_=50;
 
 	LRUReplacement = new LRUPageReplacement();
 	diskManager_ = new BasicDiskOperations();
@@ -60,13 +60,13 @@ BufferManager* BufferManager::getInstance() {
 
 BufferManager::~BufferManager() {
 	// TODO Auto-generated destructor stub
-//	delete LRUReplacement;
-//	//delete diskManager_;
-//	delete[] openedFileName_;
-//	for (int i = 0; i < numberOfFrames_; i++) {
-//		delete[] BufferPool_[i]->pageData_;
-//	}
-//	delete[] BufferPool_;
+	//	delete LRUReplacement;
+	//	//delete diskManager_;
+	//	delete[] openedFileName_;
+	//	for (int i = 0; i < numberOfFrames_; i++) {
+	//		delete[] BufferPool_[i]->pageData_;
+	//	}
+	//	delete[] BufferPool_;
 }
 int BufferManager::initializeCache(int noOfPages){
 
@@ -80,7 +80,7 @@ int BufferManager::initializeCache(int noOfPages){
 	numberOfDiskAccesses_=0;
 	BufferPool_= new Frame *[numberOfFrames_];
 	for (int i = 0; i < numberOfFrames_; i++) {
-			BufferPool_[i] = new Frame(pageSize_);
+		BufferPool_[i] = new Frame(pageSize_);
 	}
 	initCache_=true;
 	return SUCCESS;
@@ -156,11 +156,11 @@ int BufferManager::readPage(int cd, int pageNumber, char*& pageContent){
 		//cout << "page content at end of read page(read page): "<< pageContent << endl;
 	}
 	else{
-			//cout << "cache off" << endl;
-			retVal=diskManager_->readDiskFile(fd,pageNumber,pageSize_,pageContent);
-			numberOfDiskAccesses_++;
-			goto ret;
-		}
+		//cout << "cache off" << endl;
+		retVal=diskManager_->readDiskFile(fd,pageNumber,pageSize_,pageContent);
+		numberOfDiskAccesses_++;
+		goto ret;
+	}
 	retVal=SUCCESS;
 	ret: return retVal;
 }
@@ -171,8 +171,8 @@ int BufferManager::pinAndGetPageForRead(int fd,int pageNumber,char*& pageContent
 	diskManager_->readDiskFile(fd,pageNumber,pageSize_,pageContent);
 
 	numberOfDiskAccesses_++;
-//	long int fd;
-//	fd=cacheIndex[cd].fd_;
+	//	long int fd;
+	//	fd=cacheIndex[cd].fd_;
 	//cout << "please print this line "<<fd<< endl;
 
 	//cout <<" ******************* *********" << pageContent << "********** *******************" << endl;
@@ -239,11 +239,11 @@ int BufferManager::writePage(int cd, int pageNumber, char *newPageContent){
 		retVal = SUCCESS;// change to status code which says success or buffer used.
 	}
 	else{
-			//cout << "cache off" << endl;
-			retVal=diskManager_->writeDiskFile(fd,pageNumber,pageSize_,newPageContent);
-			numberOfDiskAccesses_++;
-			goto ret;
-		}
+		//cout << "cache off" << endl;
+		retVal=diskManager_->writeDiskFile(fd,pageNumber,pageSize_,newPageContent);
+		numberOfDiskAccesses_++;
+		goto ret;
+	}
 	//delete[] pageContent;
 	ret: return retVal;
 }
@@ -253,8 +253,8 @@ int BufferManager::pinAndGetPageForWrite(int fd,int pageNumber){
 	int freeFrame=getFreeFrame();
 	//cout << freeFrame << endl;
 	numberOfDiskAccesses_++;
-//	long int fd;
-//	fd=cacheIndex[cd].fd_;
+	//	long int fd;
+	//	fd=cacheIndex[cd].fd_;
 	//cout << "please print this line "<<fd<< endl;
 
 	//cout <<" ******************* *********" << pageContent << "********** *******************" << endl;
@@ -276,9 +276,9 @@ int BufferManager::pinAndGetPageForWrite(int fd,int pageNumber){
 
 
 void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNumber){
-//	long int fd;
-//
-//	fd=cacheIndex[cd].fd_;
+	//	long int fd;
+	//
+	//	fd=cacheIndex[cd].fd_;
 	char *newPageContent=new char[DEFAULT_PAGE_SIZE];
 	//numberOfDiskAccesses_++;
 	diskManager_->readDiskFile(fd,newPageNumber,pageSize_,newPageContent); //read the page content into newPageContent using newPageNumber.
@@ -299,10 +299,10 @@ void BufferManager::replaceFrameWithAnother(int fd,int frameNumber,int newPageNu
 	 * 		}
 	 * 	}
 	 */
-//	long int fd;
-//
-//	fd=cacheIndex[cd].fd_;
-		if (BufferPool_[frameNumber]->dirtyFlag_ == true) {
+	//	long int fd;
+	//
+	//	fd=cacheIndex[cd].fd_;
+	if (BufferPool_[frameNumber]->dirtyFlag_ == true) {
 
 		/*write content in (frameNumber)th frame into (pageNumber)th page in DB and
 		 * change current frame fields
@@ -358,10 +358,10 @@ int BufferManager::commitCache(){
 }
 int BufferManager::resetCache(){
 	flushAllPagesToDisk();
-//	for (int i = 0; i < numberOfFrames_; i++) {
-//		delete[] BufferPool_[i]->pageData_;
-//	}
-//	delete[] BufferPool_;
+	//	for (int i = 0; i < numberOfFrames_; i++) {
+	//		delete[] BufferPool_[i]->pageData_;
+	//	}
+	//	delete[] BufferPool_;
 	//initializeCache(numberOfFrames_);
 	numberOfFramesUsed_=0;
 	bufferSizeInMB_=numberOfFrames_*pageSize_/(1024*1024);
@@ -374,8 +374,8 @@ int BufferManager::resetCache(){
 
 void BufferManager::flushAllPagesToDisk(){
 	for(int i=0;i<numberOfFramesUsed_;i++){
-			flushPageToDisk(BufferPool_[i]->fd_,BufferPool_[i]->pageNumber_);
-			//cout << "frame No :" << i << " " << BufferPool_[i]->fd_ << " " << BufferPool_[i]->pageNumber_<< endl;
+		flushPageToDisk(BufferPool_[i]->fd_,BufferPool_[i]->pageNumber_);
+		//cout << "frame No :" << i << " " << BufferPool_[i]->fd_ << " " << BufferPool_[i]->pageNumber_<< endl;
 	}
 }
 void BufferManager::flushPageToDisk(int fd,int pageNumber){
@@ -417,13 +417,13 @@ int BufferManager::getCd(int fd){
 }
 
 int BufferManager::getFreeFrame(){
-//	for(int i=0;i<numberOfFrames_;i++){
-//		//cout << "===============" <<BufferPool_[i]->pinCount_<<endl;
-//		if(BufferPool_[i]->pinCount_==-1){
-//
-//			return i;
-//		}
-//	}
+	//	for(int i=0;i<numberOfFrames_;i++){
+	//		//cout << "===============" <<BufferPool_[i]->pinCount_<<endl;
+	//		if(BufferPool_[i]->pinCount_==-1){
+	//
+	//			return i;
+	//		}
+	//	}
 	if(numberOfFramesUsed_ < numberOfFrames_){
 		numberOfFramesUsed_++;
 		//cout << numberOfFramesUsed_ << endl;
@@ -435,7 +435,8 @@ int BufferManager::getFreeFrame(){
 
 int BufferManager::displayBufferList(){
 	cout << "\n=======================================================================================================================" << endl;
-	cout << "||Frame No.||      cd    ||   File Name   ||   Page No.   ||   Dirty Flag  ||    Priority Type  || Priority Value  ||" << endl;
+	cout << "||Frame No.||      cd    ||\t\tFile Name\t||   Page No.   ||   Dirty Flag  || Priority Value  ||" << endl;
+	cout << "\n=======================================================================================================================" << endl;
 	for(int i=0;i<numberOfFrames_;i++){
 		if(BufferPool_[i]->pinCount_!=-1){
 			cout << "||    " <<i <<"    ||";
@@ -443,7 +444,6 @@ int BufferManager::displayBufferList(){
 			cout << "      "<<cacheIndex[getCd(BufferPool_[i]->fd_)].fileName_<< "   ||" ;
 			cout <<"        " <<BufferPool_[i]->pageNumber_ <<"     ||";
 			cout <<"         "<<BufferPool_[i]->dirtyFlag_ <<"     ||";
-			cout <<"       "<<BufferPool_[i]->priorityType_ <<"   ||";
 			cout <<"     "<<BufferPool_[i]->priority_ <<"    ||";
 			cout << endl;
 		}
@@ -462,7 +462,8 @@ int BufferManager::viewFrameBuffer(int frameNumber){
 	cout << "dirty flag is: " << BufferPool_[frameNumber]->dirtyFlag_ << endl;
 	cout << "priority type is: " << BufferPool_[frameNumber]->priorityType_ << endl;
 	cout << "priority value is: " << BufferPool_[frameNumber]->priority_ << endl;
-	cout << "page Content is:\n" << BufferPool_[frameNumber]->pageData_ << endl;
+	cout << "page Content is:\n" << endl;
+	hexDump(BufferPool_[frameNumber]->pageData_);
 	cout << "\n=====================================================================================\n";
 	return SUCCESS;
 }
@@ -499,10 +500,10 @@ int BufferManager::hexDump(char *pageContent){
 			cout << endl << "===============================================================================" <<endl ;
 			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
 			char c;
-			cin >> c;
+			//cin >> c;
 			cout <<  "===============================================================================" <<endl <<endl;
 			if(c!='c'){
-				break;
+				//break;
 			}
 		}
 		int nread=0;
@@ -562,7 +563,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	//char c;
 	int ptr=0;
 	char *pageContent=new char[DEFAULT_PAGE_SIZE];
-	memset(pageContent,0,DEFAULT_PAGE_SIZE);
+	memset(pageContent,'0',DEFAULT_PAGE_SIZE);
 	//int err=diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
 	int err=readPage(cd,pageNumber,pageContent);
 	if(err==-1){
@@ -579,7 +580,7 @@ int BufferManager::hexDump(int cd,int pageNumber){
 			cin >> c;
 			cout <<  "===============================================================================" <<endl<<endl; ;
 			if(c!='c'){
-				break;
+				//break;
 			}
 		}
 		int nread=0;
