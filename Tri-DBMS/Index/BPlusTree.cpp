@@ -194,6 +194,7 @@ int BPlusTree::searchKeyInBPlusTree(const char *key, std::vector<
 		leafNode.searchKeyInLeafNode(key, RIDVector);
 		//cout<<"Seraching DOne"<<endl;
 	}
+	cout << "rid vector in search bplus tree :" << RIDVector.size()<<endl;
 	if(RIDVector.size()==0){
 		cout << "KEY NOT FOUND"<<endl;
 	}
