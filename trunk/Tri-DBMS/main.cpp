@@ -343,7 +343,6 @@ int main(){
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
 	dbOps->createIndex(indexName,tablename,colNamesIndex);
-	cout << "done!!"<<endl;
 
 	dbOps->closeDatabase(fd);
 
@@ -363,17 +362,12 @@ int main(){
 //	memset(dbname,0,MAX_FILE_NAME_LENGTH);
 //	strcpy(dbname,"db1");
 
-	cout << "after close"<<endl;
 	memset(dbname,0,MAX_FILE_NAME_LENGTH);
 	strcpy(dbname,"db1");
 	fd=dbOps->openDatabase(dbname);
-	cout << "fd is(in main):" <<fd<<endl;
 	dbOps->listDatabases();
-	cout << "fd after list db :"<<fd<<endl;
 	dbOps->listIndex();
-	cout << "fd after list index :"<<fd<<endl;
 	dbOps->listTables();
-	cout << "fd after list tables :"<<fd<<endl;
 	//buffManager->commitCache();
 //	buffManager->hexDump(fd,0);
 //	buffManager->hexDump(fd,1);
@@ -396,13 +390,13 @@ int main(){
 	//dbOps->dropTable(tablename);
 	dbOps->listIndex();
 	dbOps->listTables();
-	buffManager->hexDump(fd,4);
+	//buffManager->hexDump(fd,4);
 	dbOps->listIndex();
 	dbOps->useIndex(indexName);
-	buffManager->hexDump(fd,4);
+	//buffManager->hexDump(fd,4);
 	dbOps->listIndex();
 	dbOps->unUseIndex(indexName);
-	buffManager->hexDump(fd,4);
+	//buffManager->hexDump(fd,4);
 	dbOps->listIndex();
 	cout<< "after reset cache"<<endl;
 
@@ -411,6 +405,9 @@ int main(){
 	whereList.clear();
 	vector<string> columnsSelect;
 	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
+	dbOps->listIndex();
+//	dbOps->setIndexSwitch(false);
+//	dbOps->listIndex();
 	//cout << "After select!! Please print this line" << endl;
 	//buffManager->commitCache();
 	//buffManager->hexDump(fd,1);
