@@ -220,19 +220,19 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertValues){
 
 
-	time_t startTime,endTime;
-	startTime= clock();
+	//time_t startTime,endTime;
+	//startTime= clock();
 	if(isDatabaseOpen_==false){
 		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
-		endTime=clock();
+		//endTime=clock();
 		//cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 		return -1;
 	}
 	//we need schema to convert "insert into .." statement to insertvalues vector;
-	int dirPageNumber_=-1,dirEntryNumber=-1;
+	int dirPageNumber_,dirEntryNumber;
 	int recordLength;
 	char *recordString=new char[DEFAULT_PAGE_SIZE];
-	FreePageManager * freePageManager_=new FreePageManager(fd_,1);
+	FreePageManager *freePageManager_;
 	DataPage *dataPage;
 	Record *record=new Record();
 	//	int dpChainHeader_=5;
@@ -249,35 +249,55 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 	}
 	else{
+		freePageManager_=new FreePageManager(fd_,1);
 		dirPageNumber_=freePageManager_->getFreePage();
+		delete freePageManager_;
 		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
 		dirPage_->createDirectoryPage(dirPageNumber_);
 		dirHeaderPage_->setNextPageNumber(dirPageNumber_);
 	}
 
-
+	memset(recordString,0,DEFAULT_PAGE_SIZE);
 	record->getRecordString(insertValues,recordString,&recordLength);
-
-	while(dirPage_->getMaxFreeSpace()<recordLength){
+	cout << dirPage_->getMaxFreeSpace() << " "<< recordLength <<endl;
+	while(dirPage_->getNoOfDirectoryEntries()>=dirPage_->getMaxNoOfDirectoryEntries()){
+		cout << "come here"<<endl;
 		dirPageNumber_=dirPage_->getNextPageNumber();
 		if(dirPageNumber_!=-1){
 			delete dirPage_;
 			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
 		}
 		else{
+			//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
+			freePageManager_=new FreePageManager(fd_,1);
 			dirPageNumber_=freePageManager_->getFreePage();
+			delete freePageManager_;
 			dirPage_->setNextPageNumber(dirPageNumber_);
 			delete dirPage_;
 			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
 			dirPage_->createDirectoryPage(dirPageNumber_);
-			//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
+			cout << "dirPageNumber : "<< dirPageNumber_ << endl;
 		}
 	}
+	DirectoryEntry::DirectoryEntryStruct dirSlotEntry;
 	//cout << "dirPageNumber : "<< dirPageNumber_ << endl;
-	DirectoryEntry::DirectoryEntryStruct dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize(),&dirEntryNumber);
+	//do{
+		dirSlotEntry=dirPage_->insertSlotEntry(recordLength+DataPage::getDataSlotEntrySize(),&dirEntryNumber);
+		//delete dirPage_;
+//		freePageManager_=new FreePageManager(fd_,1);
+//		dirPageNumber_=freePageManager_->getFreePage();
+//		delete freePageManager_;
+//		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+//		dirPage_->createDirectoryPage(dirPageNumber_);
+//
+//	}while(dirEntryNumber==-1);
 	//cout <<"-----------------"<<dirSlotEntry.pageNumber_<< endl;
+
+	delete dirPage_;
 	dataPage=new DataPage(fd_,dirSlotEntry.pageNumber_);
+	freePageManager_=new FreePageManager(fd_,1);
 	freePageManager_->setPage(dirSlotEntry.pageNumber_);
+	delete freePageManager_;
 	//cout << "data page is: " << dirSlotEntry.pageNumber_ << endl;
 	if(dirSlotEntry.freeSpace_ == DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()-recordLength-DataPage::getDataSlotEntrySize()){
 		//cout << "=================you will see this================="<<endl;
@@ -289,19 +309,20 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 	//buffManager_->hexDump(recordString);
 	//buffManager_->hexDump(fd_,7);
 	dataPage->insertRecord(recordString,recordLength);
+	delete dataPage;
 	//cout << "dirPage No:" << dirPageNumber_ << " dataPage No:"<<dirSlotEntry.pageNumber_<< endl;
 
 	delete dbMainHeader_;
 	delete sysTableCatalog_;
 	delete[] recordString;
-	delete freePageManager_;
 	delete dirHeaderPage_;
-	delete dirPage_;
+
 	delete record;
-	delete dataPage;
+
 	//insertValues.clear();
-	endTime=clock();
+	//endTime=clock();
 	//cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+
 	return SUCCESS;
 }
 
@@ -320,6 +341,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 	}
 	//char *indexKey=new char[MAX_FILE_NAME_LENGTH];
 	stringstream indexKeyStream,searchKeyStream;
+	vector<string> recordsVector;
 	bool indexUsed=true;
 	for(unsigned i=0;i<whereExpressions.size();i++){
 		if(whereExpressions[i].type_==WhereExpressionElement::IDENTIFIER_TYPE){
@@ -395,9 +417,9 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 				}
 				if(whereExpressions.size()>0){
 					//cout << "inside where expr size > 0" << endl;
-						//cout << "after postfix eval"<< endl;
-						noOfRecordsEffected++;
-						cout <<recordStream.str() <<"\t||\t"<< endl;
+					//cout << "after postfix eval"<< endl;
+					noOfRecordsEffected++;
+					cout <<recordStream.str() <<"\t||\t"<< endl;
 				}
 				else{
 					noOfRecordsEffected++;
@@ -414,7 +436,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 
 		delete record;
 		cout << tempStream.str() <<endl;
-
+		endTime=clock();
 	}
 	else{
 		dbMainHeader_=new DBMainHeaderPage(fd_,0);
@@ -513,17 +535,16 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 								//cout << "inside where expr size > 0" << endl;
 								if(postFixEval.evaluate(whereExpressions)==true){
 
-									//cout << "after postfix eval"<<  j << endl;
 									noOfRecordsEffected++;
 									//cout <<recordStream.str() <<"\t||\t"<< endl;
-									//recordStream.clear();
-									//recordsVector.push_back(recordStream.str());
+									recordsVector.push_back(recordStream.str());
 								}
 
 							}
 							else{
 								noOfRecordsEffected++;
 								//cout<< recordStream.str() <<"||\t"<< endl;
+								recordsVector.push_back(recordStream.str());
 							}
 
 							delete[] recordString;
@@ -540,15 +561,16 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 			delete record;
 			//cout << dirPageNumber_ << endl;
 		}
-		//		for(int l=0;l<recordsVector.size();l++){
-		//			//cout << recordsVector[l].c_str() << endl;
-		//		}
+		endTime=clock();
+		for(int l=0;l<recordsVector.size();l++){
+			cout << recordsVector[l].c_str() << endl;
+		}
 		delete dirHeaderPage_;
 		//return recordsVector;
 		cout << tempStream.str() <<endl;
 
 	}
-	endTime=clock();
+
 	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
 	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 	return SUCCESS;
@@ -967,7 +989,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 		indexAttribute<<columnList[c].c_str();
 
 	}
-	//cout << "index Attr :"<<indexAttribute.str()<<endl;
+	cout << "index Attr :"<<indexAttribute.str()<<endl;
 	int indexHeaderPageNumber_=fpMgr_->getFreePage();
 	delete fpMgr_;
 	indexHeaderPageNo=indexHeaderPageNumber_;
@@ -1032,6 +1054,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
 						ridForIndex.pageNumber=dataPageNumber;
 						ridForIndex.slotNumber=j;
 						noOfRecordsEffected++;
+						cout << ridForIndex.pageNumber << " "<<ridForIndex.slotNumber <<endl;
 						bplusTree->insertIntoBPlusTree(recordStream.str().c_str(),ridForIndex);
 						//cout << "index root page :"<<indexHeader->getRootPageNumber();
 						delete[] recordString;
