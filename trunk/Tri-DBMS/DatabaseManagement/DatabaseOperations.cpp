@@ -154,13 +154,13 @@ int DatabaseOperations::createTable(char *tableName,vector<string> columnList,ve
 
 
 	time_t startTime,endTime;
-		startTime= clock();
-		if(isDatabaseOpen_==false){
-			cout << "ERR_DATABASE_NOT_OPEN"<<endl;
-			endTime=clock();
-			cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
-			return -1;
-		}
+	startTime= clock();
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 	int i,colPos,colSize;
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	FreePageManager *freePageManager_=new FreePageManager(fd_,1);
@@ -207,13 +207,13 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
 
 
 	time_t startTime,endTime;
-		startTime= clock();
-		if(isDatabaseOpen_==false){
-			cout << "ERR_DATABASE_NOT_OPEN"<<endl;
-			endTime=clock();
-			//cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
-			return -1;
-		}
+	startTime= clock();
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		//cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
+		return -1;
+	}
 	//we need schema to convert "insert into .." statement to insertvalues vector;
 	int dirPageNumber_=-1,dirEntryNumber=-1;
 	int recordLength;
@@ -295,168 +295,251 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
 
 
 	time_t startTime,endTime;
-		startTime= clock();
-		int noOfRecordsEffected=0;
-		if(isDatabaseOpen_==false){
-			cout << "ERR_DATABASE_NOT_OPEN"<<endl;
-			endTime=clock();
-			cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
-			cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
-			return -1;
-		}
-	//vector<WhereExpressionElement> whereExpressions;
-
-	/*WhereExpressionElement whereExpr(WhereExpressionElement::IDENTIFIER_TYPE,"col3");
-	whereExpressions.push_back(whereExpr);
-	WhereExpressionElement whereExpr1(WhereExpressionElement::LITERAL_TYPE,"0");
-	whereExpressions.push_back(whereExpr1);
-	WhereExpressionElement whereExpr2(WhereExpressionElement::OPERATOR_TYPE,"=");
-	whereExpressions.push_back(whereExpr2);
-	WhereExpressionElement whereExpr4(WhereExpressionElement::IDENTIFIER_TYPE,"c1");
-	whereExpressions.push_back(whereExpr4);
-	WhereExpressionElement whereExpr5(WhereExpressionElement::LITERAL_TYPE,"34");
-	whereExpressions.push_back(whereExpr5);
-	WhereExpressionElement whereExpr6(WhereExpressionElement::OPERATOR_TYPE,"=");
-	whereExpressions.push_back(whereExpr6);
-	WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
-	whereExpressions.push_back(whereExpr3);*/
-
-
-
-	//	strcpy((char *)whereExpr.identifierValue.c_str(),"c1");
-	//	strcpy((char *)whereExpr.literalValue.c_str(),"35");
-	//	strcpy((char *)whereExpr.operatorValue.c_str(),">");
-	//	whereExpressions.push_back(whereExpr);
-
-	dbMainHeader_=new DBMainHeaderPage(fd_,0);
-	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
-	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
-	delete dbMainHeader_;
-	Schema schema;
-	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
-	if(tableEntry.size()==0){
-		cout << tableName << " does not exist in the current Database!" << endl;
+	startTime= clock();
+	int noOfRecordsEffected=0;
+	if(isDatabaseOpen_==false){
+		cout << "ERR_DATABASE_NOT_OPEN"<<endl;
+		endTime=clock();
+		cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
+		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 		return -1;
 	}
-	vector<string> recordVector;
-	//vector<string> recordsVector;
-	int dirPageNumber_=-1;
-	int recordLength;
-	int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
-	Record *record;
-	DirectoryPage *dirPage_;
-	char *recordString;
-	DataPage *dataPage;
-	//		int dpChainHeader_=5;
-	//		int noOfColumns_=3;
-
-	int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
-	int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
-	delete sysTableCatalog_;
-	sysColumnCatalog_->getTableSchema(tableName,schema);
-	delete sysColumnCatalog_;
-
-	if(columnList.size()==0){
-		columnList=schema.columnNames;
+	//char *indexKey=new char[MAX_FILE_NAME_LENGTH];
+	stringstream indexKeyStream,searchKeyStream;
+	bool indexUsed=true;
+	for(unsigned i=0;i<whereExpressions.size();i++){
+		if(whereExpressions[i].type_==WhereExpressionElement::IDENTIFIER_TYPE){
+			indexKeyStream<<whereExpressions[i].identifierValue;
+			searchKeyStream<<whereExpressions[i+1].literalValue;
+		}
+		if(whereExpressions[i].type_==WhereExpressionElement::OPERATOR_TYPE && strcmp(whereExpressions[i].operatorValue.c_str(),"OR")==0){
+			indexUsed=false;
+		}
 	}
-	/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
+	dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	indexCatalog_ = new IndexCatalog(fd_,dbMainHeader_->getIndexCatalogHeaderPageNumber());
+	int indexHeaderPageNumber_=indexCatalog_->getIndexHeaderPageNumberUsingAttr((char *)indexKeyStream.str().c_str());
+	delete dbMainHeader_;
+	delete indexCatalog_;
+	//buffManager_->hexDump(fd_,4);
+	cout << "index key :"<< (char *)indexKeyStream.str().c_str() <<endl;
+	cout << " index header page :"<< indexHeaderPageNumber_<<endl;
+
+	if(indexSwitch_==true && whereExpressions.size()>0 && indexHeaderPageNumber_ !=-1 && indexUsed){
+		cout << "index exists"<<endl;
+		dbMainHeader_=new DBMainHeaderPage(fd_,0);
+		sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+		sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
+		delete dbMainHeader_;
+		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+		delete sysTableCatalog_;
+		Schema schema;
+		sysColumnCatalog_->getTableSchema(tableName,schema);
+		delete sysColumnCatalog_;
+		if(columnList.size()==0){
+			columnList=schema.columnNames;
+		}
+		vector<RIDStruct> ridList;
+		DataPage *dataPage;
+		char *recordString;
+		int recordLength=0;
+		Record *record=new Record();
+		vector<string> recordVector;
+		BPlusTree *bplusTree=new BPlusTree(fd_,indexHeaderPageNumber_);
+		bplusTree->searchKeyInBPlusTree((char *)searchKeyStream.str().c_str(),ridList);
+		stringstream columnStream,tempStream;
+		for(unsigned c=0;c<columnList.size();c++){
+			columnStream<<"||\t '"<<columnList[c].c_str()<<"' \t";
+			tempStream<< "============================";
+		}
+		cout << endl <<tempStream.str() << endl;
+		cout << columnStream.str() <<"||\t"<< endl;
+		cout << tempStream.str() <<endl;
+		for(unsigned i=0;i<ridList.size();i++){
+			dataPage=new DataPage(fd_,ridList[i].pageNumber);
+			recordString=new char[DEFAULT_PAGE_SIZE];
+			dataPage->getRecord(ridList[i].slotNumber,recordString,&recordLength);
+			if(recordLength>0){
+				recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+
+				stringstream recordStream;
+				int pos;
+				Record recordWhere(schema,recordString,recordLength);
+
+				for(unsigned c=0;c<columnList.size();c++){
+					pos= schema.getColumnNum(columnList[c].c_str());
+					if(schema.fieldTypes[pos]==TYPE_BOOL) {
+						if(strcmp(recordVector[pos].c_str(),"1")==0)
+							recordStream<< "||\t 'TRUE' \t";
+						else
+							recordStream<< "||\t 'FALSE' \t";
+					}
+					else
+
+						recordStream<< "||\t '"<<recordVector[pos].c_str()<<"' \t";
+				}
+				if(whereExpressions.size()>0){
+					PostFixEvaluator postFixEval(recordWhere);
+					//cout << "inside where expr size > 0" << endl;
+					if(postFixEval.evaluate(whereExpressions)==true){
+
+						//cout << "after postfix eval"<<  j << endl;
+						noOfRecordsEffected++;
+						cout <<recordStream.str() <<"\t||\t"<< endl;
+						//recordStream.clear();
+						//recordsVector.push_back(recordStream.str());
+					}
+
+				}
+				else{
+					noOfRecordsEffected++;
+					cout<< recordStream.str() <<"||\t"<< endl;
+				}
+
+				delete[] recordString;
+			}
+			else{
+				delete[] recordString;
+			}
+			delete dataPage;
+		}
+
+		delete record;
+		cout << tempStream.str() <<endl;
+
+	}
+	else{
+		dbMainHeader_=new DBMainHeaderPage(fd_,0);
+		sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+		sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
+		delete dbMainHeader_;
+		Schema schema;
+		vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+		if(tableEntry.size()==0){
+			cout << tableName << " does not exist in the current Database!" << endl;
+			return -1;
+		}
+		vector<string> recordVector;
+		//vector<string> recordsVector;
+		int dirPageNumber_=-1;
+		int recordLength;
+		int dataPageNumber,noOfDirEntries,noOfRecordsInDataPage;
+		Record *record;
+		DirectoryPage *dirPage_;
+		char *recordString;
+		DataPage *dataPage;
+		//		int dpChainHeader_=5;
+		//		int noOfColumns_=3;
+
+		int dpChainHeader_=sysTableCatalog_->getDPChainHeaderPageNumber(tableName);
+		int noOfColumns_=sysTableCatalog_->getNoOfColumns(tableName);
+		delete sysTableCatalog_;
+		sysColumnCatalog_->getTableSchema(tableName,schema);
+		delete sysColumnCatalog_;
+
+		if(columnList.size()==0){
+			columnList=schema.columnNames;
+		}
+		/*		cout << "No of columns is: "<< schema.columnNames.size() << endl;
 		for(int i=0;i<schema.columnNames.size();i++){
 			cout << schema.columnNames[i].c_str() << endl;
 			cout << schema.fieldPosition[i] << endl;
 			cout << schema.fieldTypes[i] << endl;
 			cout << endl << endl;
 		}*/
-	DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
-	dirPageNumber_=dirHeaderPage_->getNextPageNumber();
+		DirectoryHeaderPage *dirHeaderPage_= new DirectoryHeaderPage(fd_,dpChainHeader_);
+		dirPageNumber_=dirHeaderPage_->getNextPageNumber();
 
-	//loop the following for all the directory pages of table;
-	stringstream columnStream,tempStream;
-	for(unsigned c=0;c<columnList.size();c++){
-		columnStream<<"||\t '"<<columnList[c].c_str()<<"' \t";
-		tempStream<< "============================";
-	}
-	cout << endl <<tempStream.str() << endl;
-	cout << columnStream.str() <<"||\t"<< endl;
-	cout << tempStream.str() <<endl;
-	while(dirPageNumber_!=-1){
-		dirPage_=new DirectoryPage(fd_,dirPageNumber_);
-		DirectoryEntry::DirectoryEntryStruct dirEntry_;
-		record=new Record();
-		noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
-		//cout <<" no of dir entries :" <<noOfDirEntries << endl;
-		for(int i=0;i<noOfDirEntries;i++){
-			dirEntry_=dirPage_->getDirectorySlot(i);
-			//cout << dirEntry_.pageNumber_  << " " << dirEntry_.freeSpace_<< endl;
-			if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
-				dataPageNumber=dirEntry_.pageNumber_;
-				//cout << dataPageNumber << endl;
-				dataPage=new DataPage(fd_,dataPageNumber);
-				noOfRecordsInDataPage=dataPage->getNoOfRecords();
-				//cout << noOfRecordsInDataPage << endl;
-				for(int j=0;j<noOfRecordsInDataPage;j++){
+		//loop the following for all the directory pages of table;
+		stringstream columnStream,tempStream;
+		for(unsigned c=0;c<columnList.size();c++){
+			columnStream<<"||\t '"<<columnList[c].c_str()<<"' \t";
+			tempStream<< "============================";
+		}
+		cout << endl <<tempStream.str() << endl;
+		cout << columnStream.str() <<"||\t"<< endl;
+		cout << tempStream.str() <<endl;
+		while(dirPageNumber_!=-1){
+			dirPage_=new DirectoryPage(fd_,dirPageNumber_);
+			DirectoryEntry::DirectoryEntryStruct dirEntry_;
+			record=new Record();
+			noOfDirEntries=dirPage_->getNoOfDirectoryEntries();
+			//cout <<" no of dir entries :" <<noOfDirEntries << endl;
+			for(int i=0;i<noOfDirEntries;i++){
+				dirEntry_=dirPage_->getDirectorySlot(i);
+				//cout << dirEntry_.pageNumber_  << " " << dirEntry_.freeSpace_<< endl;
+				if(dirEntry_.freeSpace_< DEFAULT_PAGE_SIZE-DataPage::getDataPageSize()){
+					dataPageNumber=dirEntry_.pageNumber_;
+					//cout << dataPageNumber << endl;
+					dataPage=new DataPage(fd_,dataPageNumber);
+					noOfRecordsInDataPage=dataPage->getNoOfRecords();
+					//cout << noOfRecordsInDataPage << endl;
+					for(int j=0;j<noOfRecordsInDataPage;j++){
 
-					//cout << "in j= " << j<<endl;
-					recordString=new char[DEFAULT_PAGE_SIZE];
-					dataPage->getRecord(j,recordString,&recordLength);
-					//buffManager_->hexDump(recordString);
-					if(recordLength>0){
-						//cout << "don't come here" << endl;
-						recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
+						//cout << "in j= " << j<<endl;
+						recordString=new char[DEFAULT_PAGE_SIZE];
+						dataPage->getRecord(j,recordString,&recordLength);
+						//buffManager_->hexDump(recordString);
+						if(recordLength>0){
+							//cout << "don't come here" << endl;
+							recordVector=record->getvectorFromRecord(recordString,noOfColumns_);
 
-						stringstream recordStream;
-						int pos;
-						Record recordWhere(schema,recordString,recordLength);
+							stringstream recordStream;
+							int pos;
+							Record recordWhere(schema,recordString,recordLength);
 
-						for(unsigned c=0;c<columnList.size();c++){
-							pos= schema.getColumnNum(columnList[c].c_str());
-							if(schema.fieldTypes[pos]==TYPE_BOOL) {
-								if(strcmp(recordVector[pos].c_str(),"1")==0)
-									recordStream<< "||\t 'TRUE' \t";
+							for(unsigned c=0;c<columnList.size();c++){
+								pos= schema.getColumnNum(columnList[c].c_str());
+								if(schema.fieldTypes[pos]==TYPE_BOOL) {
+									if(strcmp(recordVector[pos].c_str(),"1")==0)
+										recordStream<< "||\t 'TRUE' \t";
+									else
+										recordStream<< "||\t 'FALSE' \t";
+								}
 								else
-									recordStream<< "||\t 'FALSE' \t";
+
+									recordStream<< "||\t '"<<recordVector[pos].c_str()<<"' \t";
 							}
-							else
+							if(whereExpressions.size()>0){
+								PostFixEvaluator postFixEval(recordWhere);
+								//cout << "inside where expr size > 0" << endl;
+								if(postFixEval.evaluate(whereExpressions)==true){
 
-								recordStream<< "||\t '"<<recordVector[pos].c_str()<<"' \t";
-						}
-						if(whereExpressions.size()>0){
-							PostFixEvaluator postFixEval(recordWhere);
-							//cout << "inside where expr size > 0" << endl;
-							if(postFixEval.evaluate(whereExpressions)==true){
+									//cout << "after postfix eval"<<  j << endl;
+									noOfRecordsEffected++;
+									cout <<recordStream.str() <<"\t||\t"<< endl;
+									//recordStream.clear();
+									//recordsVector.push_back(recordStream.str());
+								}
 
-								//cout << "after postfix eval"<<  j << endl;
+							}
+							else{
 								noOfRecordsEffected++;
-								cout <<recordStream.str() <<"\t||\t"<< endl;
-								//recordStream.clear();
-								//recordsVector.push_back(recordStream.str());
+								cout<< recordStream.str() <<"||\t"<< endl;
 							}
 
+							delete[] recordString;
 						}
 						else{
-							noOfRecordsEffected++;
-							cout<< recordStream.str() <<"||\t"<< endl;
+							delete[] recordString;
 						}
-
-						delete[] recordString;
 					}
-					else{
-						delete[] recordString;
-					}
+					delete dataPage;
 				}
-				delete dataPage;
 			}
+			dirPageNumber_=dirPage_->getNextPageNumber();
+			delete dirPage_;
+			delete record;
+			//cout << dirPageNumber_ << endl;
 		}
-		dirPageNumber_=dirPage_->getNextPageNumber();
-		delete dirPage_;
-		delete record;
-		//cout << dirPageNumber_ << endl;
+		//		for(int l=0;l<recordsVector.size();l++){
+		//			//cout << recordsVector[l].c_str() << endl;
+		//		}
+		delete dirHeaderPage_;
+		//return recordsVector;
+		cout << tempStream.str() <<endl;
+
 	}
-	//		for(int l=0;l<recordsVector.size();l++){
-	//			//cout << recordsVector[l].c_str() << endl;
-	//		}
-	delete dirHeaderPage_;
-	//return recordsVector;
-	cout << tempStream.str() <<endl;
 	endTime=clock();
 	cout << endl<< "Number of records effected :" << noOfRecordsEffected << endl;
 	cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
@@ -547,6 +630,9 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
 		WhereExpressionElement whereExpr3(WhereExpressionElement::OPERATOR_TYPE,"OR");
 		whereExpressions.push_back(whereExpr3);
 	 */
+
+
+
 	dbMainHeader_=new DBMainHeaderPage(fd_,0);
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
