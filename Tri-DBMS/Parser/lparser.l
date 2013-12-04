@@ -113,6 +113,7 @@ WITH		{ return WITH; }
 WORK		{ return WORK; }
 DATABASES	{ return DATABASES;}
 USE		{ return USE;}
+EXIT 	{ return EXIT;}
 
 
 [(),*.;]		{ return yytext[0]; }
