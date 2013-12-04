@@ -496,16 +496,16 @@ int BufferManager::hexDump(char *pageContent){
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
-		if(noOfLinesDisplayed==20){
-			cout << endl << "===============================================================================" <<endl ;
-			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
-			char c;
-			//cin >> c;
-			cout <<  "===============================================================================" <<endl <<endl;
-			if(c!='c'){
-				//break;
-			}
-		}
+//		if(noOfLinesDisplayed==20){
+//			cout << endl << "===============================================================================" <<endl ;
+//			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
+//			char c;
+//			cin >> c;
+//			cout <<  "===============================================================================" <<endl <<endl;
+//			if(c!='c'){
+//				break;
+//			}
+//		}
 		int nread=0;
 		char *buf=new char[16];
 
@@ -573,16 +573,16 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	cout << hex << setfill('0');
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
-		if(noOfLinesDisplayed==20){
-			cout << endl << "===============================================================================" <<endl ;
-			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:"<<endl;
-			char c;
-			cin >> c;
-			cout <<  "===============================================================================" <<endl<<endl; ;
-			if(c!='c'){
-				//break;
-			}
-		}
+//		if(noOfLinesDisplayed==20){
+//			cout << endl << "===============================================================================" <<endl ;
+//			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:"<<endl;
+//			char c;
+//			cin >> c;
+//			cout <<  "===============================================================================" <<endl<<endl; ;
+//			if(c!='c'){
+//				break;
+//			}
+//		}
 		int nread=0;
 		char *buf=new char[16];
 
