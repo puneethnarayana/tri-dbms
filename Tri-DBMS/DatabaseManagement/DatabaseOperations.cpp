@@ -190,6 +190,7 @@ int DatabaseOperations::describeTable(char *tableName){
 	cout << "||\tColumn Name\t||\tColumn Type\t\t||\tColumn Size\t||\tColumn Position\t||" <<endl;
 	cout << "==========================================================================================="<<endl;
 
+	cout<<schema.tableName<<".........."<<schema.columnNames.size()<<endl;
 	for(unsigned i=0;i<schema.columnNames.size();i++){
 		schemaStream<< "||\t"<<schema.columnNames[i]<<"\t";
 		schemaStream<< "||\t"<<DataTypeLookup::getTypeDesc(schema.fieldTypes[i])<<"\t";
@@ -1188,7 +1189,7 @@ int DatabaseOperations::listDatabases(){
         cout <<endl<<endl<<"====================================="<<endl;
         cout << "|| List of Databases in the System ||"<<endl;
         cout <<"====================================="<<endl;
-        if ((dir = opendir ("/home/ravin/workspace/Tri-DBMS/DatabaseFiles")) != NULL) {
+        if ((dir = opendir ("./DatabaseFiles")) != NULL) {
                 /* print all the files and directories within directory */
                 int countdb=0;
                 while ((ent = readdir (dir)) != NULL) {
