@@ -398,7 +398,6 @@ int main(){
 	dbOps->unUseIndex(indexName);
 	//buffManager->hexDump(fd,4);
 	dbOps->listIndex();
-	cout<< "after reset cache"<<endl;
 
 
 	dbOps->selectAllFromTable(tablename,whereList,whereExpressions);
@@ -406,6 +405,11 @@ int main(){
 	vector<string> columnsSelect;
 	dbOps->selectAllFromTable(tablename,columnsSelect,whereExpressions);
 	dbOps->listIndex();
+
+	cout<< "===============End of Main============="<<endl;
+
+//	buffManager->hexDump(fd,1);
+//	buffManager->hexDump(pageContent);
 //	dbOps->setIndexSwitch(false);
 //	dbOps->listIndex();
 	//cout << "After select!! Please print this line" << endl;
