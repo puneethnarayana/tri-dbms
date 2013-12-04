@@ -52,9 +52,7 @@ int BasicDiskOperations::createDiskFile(char *fileName, int pageSize, int noOfPa
 }
 
 int BasicDiskOperations::openDiskFile(char *fileName){
-	cout << "in disk mngr :"<< fileName<< endl;
 	fd_=open(fileName,O_RDWR);
-	cout << "fd is :"<<fd_<<endl;
 	if(fd_==-1){
 		cout << strerror(errno);
 	}
