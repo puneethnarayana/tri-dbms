@@ -13,11 +13,13 @@
 #include <istream>
 #include <string>
 #include <stdlib.h>
+#include <vector>
 
 using namespace std;
 #include "../Utils/CommonUtil.h"
 #include "../Utils/DataTypeLookup.h"
 #include "../Utils/FieldLengthLookup.h"
+#include "../Utils/WhereExpressionElement.h"
 #include "../DatabaseManagement/DatabaseOperations.h"
 
 
@@ -28,10 +30,10 @@ vector<string> globalColumnNameList;
 vector<string> globalColumnValueList;
 vector<string> globalColumnDatatypeList;
 vector<string> globalColumnDatasizeList;
-vector<string> globalWhereList;
+vector<WhereExpressionElement> globalWhereList;
 
 int globalStatementType;
-
+int dbSize=0;
 
 static const int CREATE_DATABASE_STATEMENT = 0;
 static const int SHOW_DATABASES_STATEMENT = 1;
