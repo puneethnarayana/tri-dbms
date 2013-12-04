@@ -9,4 +9,6 @@ select Name from students where Age=21;
 select Name from students where Age=23;
 close st;
 use st;
+show tables;
+create table marks(Subject integer, Total integer);
 select * from students;
