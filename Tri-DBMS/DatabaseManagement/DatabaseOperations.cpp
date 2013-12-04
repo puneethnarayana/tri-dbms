@@ -113,7 +113,7 @@ int DatabaseOperations::createDatabase(char *databaseName,int databaseSize){
         delete sysTablePage_;
         delete sysColumnPage_;
         delete indexCatalogPage_;
-        delete[] dbName;
+        //delete[] dbName;
         //buffManager_->commitCache();
 
         return fd_;
@@ -144,7 +144,6 @@ int DatabaseOperations::closeDatabase(){
         isDatabaseOpen_=false;
         openDatabaseName_=new char[MAX_FILE_NAME_LENGTH];
 
-        buffManager_->commitCache();
         buffManager_->closeDatabase(fd_);
         return SUCCESS;
 }
@@ -172,9 +171,17 @@ int DatabaseOperations::describeTable(char *tableName){
 		cout << endl <<"Time taken :"<< double( endTime - startTime )/1000  << " milliseconds." << endl<< endl;
 		return -1;
 	}
+	//buffManager_->hexDump(fd_,3);
+	//cout << "fd is :" <<fd_<<endl;
 	DBMainHeaderPage *dbMainHeader_=new DBMainHeaderPage(fd_,0);
+	//cout << "fd is :" <<fd_<<endl;
+	//buffManager_->hexDump(fd_,3);
+	//cout << "sys table catalog: "<<dbMainHeader_->getSysTablesHeaderPageNumber()<<endl;
 	sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+
 	vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
+	delete sysTableCatalog_;
+
 	if(tableEntry.size()==0){
 		cout << tableName << " does not exist in the current Database!" << endl;
 		return -1;
@@ -182,26 +189,31 @@ int DatabaseOperations::describeTable(char *tableName){
 
 	sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
 	Schema schema;
+	//buffManager_->hexDump(fd_,3);
 	sysColumnCatalog_->getTableSchema(tableName,schema);
+	//buffManager_->hexDump(fd_,3);
+	//cout<<"sys table: "<<dbMainHeader_->getSysColumnHeaderPageNumber()<<schema.columnNames.size()<<endl;
 	delete sysColumnCatalog_;
-	stringstream schemaStream;
+
 	cout << endl<<endl;
 	cout << "==========================================================================================="<<endl;
-	cout << "||\tColumn Name\t||\tColumn Type\t\t||\tColumn Size\t||\tColumn Position\t||" <<endl;
+	cout << "||\tColumn Name\t|| Column Type || Column Size ||\tColumn Position\t||" <<endl;
 	cout << "==========================================================================================="<<endl;
 
-	cout<<schema.tableName<<".........."<<schema.columnNames.size()<<endl;
+	cout<<schema.tableName.c_str()<<".........."<<schema.columnNames.size()<<endl;
 	for(unsigned i=0;i<schema.columnNames.size();i++){
+		stringstream schemaStream;
 		schemaStream<< "||\t"<<schema.columnNames[i]<<"\t";
 		schemaStream<< "||\t"<<DataTypeLookup::getTypeDesc(schema.fieldTypes[i])<<"\t";
 		schemaStream<< "||\t"<<schema.fieldLengths[i]<<"\t";
 		schemaStream<< "||\t"<<schema.fieldPosition[i]<<"\t";
 		cout << schemaStream.str()<<endl;
+		schemaStream.clear();
 	}
 	cout << "==========================================================================================="<<endl;
 
 
-
+	delete dbMainHeader_;
 	return SUCCESS;
 }
 int DatabaseOperations::createTable(char *tableName,vector<string> columnList,vector<string> columnTypeList,vector<string> columnSizeList){
@@ -280,6 +292,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
         //      int noOfColumns_=3;
         dbMainHeader_=new DBMainHeaderPage(fd_,0);
         sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
+        delete dbMainHeader_;
         vector<string> tableEntry=sysTableCatalog_->getSysTableRecordAsVector(tableName);
         if(tableEntry.size()==0){
         	cout << tableName << " does not exist in the current Database!" << endl;
@@ -359,7 +372,7 @@ int DatabaseOperations::insertIntoTable(char *tableName, vector<string> insertVa
         delete dataPage;
         //cout << "dirPage No:" << dirPageNumber_ << " dataPage No:"<<dirSlotEntry.pageNumber_<< endl;
 
-        delete dbMainHeader_;
+
         delete sysTableCatalog_;
         delete[] recordString;
         delete dirHeaderPage_;
@@ -405,11 +418,11 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
         delete dbMainHeader_;
         delete indexCatalog_;
         //buffManager_->hexDump(fd_,4);
-        cout << "index key :"<< (char *)indexKeyStream.str().c_str() <<endl;
-        cout << " index header page :"<< indexHeaderPageNumber_<<endl;
+       // cout << "index key :"<< (char *)indexKeyStream.str().c_str() <<endl;
+        //cout << " index header page :"<< indexHeaderPageNumber_<<endl;
 
         if(indexSwitch_==true && whereExpressions.size()>0 && indexHeaderPageNumber_ !=-1 && indexUsed){
-                cout << "index exists"<<endl;
+                cout << "using index on attribute"<< (char *)indexKeyStream.str().c_str() <<endl;
                 dbMainHeader_=new DBMainHeaderPage(fd_,0);
                 sysTableCatalog_=new SysTablesCatalog(fd_,dbMainHeader_->getSysTablesHeaderPageNumber());
                 sysColumnCatalog_=new SysColumnsCatalog(fd_,dbMainHeader_->getSysColumnHeaderPageNumber());
@@ -515,6 +528,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
                 delete sysColumnCatalog_;
 
                 if(columnList.size()==0){
+                	//cout<<"Schema... "<<schema.columnNames.size();
                         columnList=schema.columnNames;
                 }
                 /*              cout << "No of columns is: "<< schema.columnNames.size() << endl;
@@ -583,14 +597,14 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
                                                                 if(postFixEval.evaluate(whereExpressions)==true){
 
                                                                         noOfRecordsEffected++;
-                                                                        //cout <<recordStream.str() <<"\t||\t"<< endl;
+                                                                       // cout <<recordStream.str() <<"\t||\t"<< endl;
                                                                         recordsVector.push_back(recordStream.str());
                                                                 }
 
                                                         }
                                                         else{
                                                                 noOfRecordsEffected++;
-                                                                //cout<< recordStream.str() <<"||\t"<< endl;
+                                                              //  cout<< recordStream.str() <<"||\t"<< endl;
                                                                 recordsVector.push_back(recordStream.str());
                                                         }
 
@@ -609,7 +623,7 @@ int DatabaseOperations::selectAllFromTable(char *tableName, vector<string> colum
                         //cout << dirPageNumber_ << endl;
                 }
                 endTime=clock();
-                //cout<<"record vector size "<<recordsVector.size()<<endl;
+               // cout<<"record vector size "<<recordsVector.size()<<endl;
                 for(int l=0;l<recordsVector.size();l++){
                         cout << recordsVector[l].c_str() << endl;
                 }
@@ -656,7 +670,7 @@ int DatabaseOperations::dropTable(char *tableName){
         sysTableCatalog_->deleteSysTableEntry(tableName);
         sysColumnCatalog_->deleteSysColumnEntryForTable(tableName);
         vector<string> indices = indexCatalog_->getIndexNamesFromTableName(tableName);
-        cout << "indices :"<<indices.size()<<endl;
+       // cout << "indices :"<<indices.size()<<endl;
         for(unsigned i=0;i<indices.size();i++){
                 //cout << "in delete index loop :"<<endl;
                 //cout << "in delete index loop :"<<(char *)indices[i].c_str()<<endl;
@@ -708,11 +722,11 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
         delete dbMainHeader_;
         delete indexCatalog_;
         //buffManager_->hexDump(fd_,4);
-        cout << "index key :"<< (char *)indexKeyStream.str().c_str() <<endl;
-        cout << " index header page :"<< indexHeaderPageNumber_<<endl;
+       // cout << "index key :"<< (char *)indexKeyStream.str().c_str() <<endl;
+        //cout << " index header page :"<< indexHeaderPageNumber_<<endl;
         BPlusTree *bplusTree;
         if(indexSwitch_==true && whereExpressions.size()>0 && indexHeaderPageNumber_ !=-1 && indexUsed){
-                cout << "bplus tree object is created :" << indexHeaderPageNumber_ <<endl;
+                //cout << "bplus tree object is created :" << indexHeaderPageNumber_ <<endl;
                 bplusTree=new BPlusTree(fd_,indexHeaderPageNumber_);
         }
         dbMainHeader_=new DBMainHeaderPage(fd_,0);
@@ -726,9 +740,9 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
                 cout << tableName << " does not exist in the current Database!" << endl;
                 return -1;
         }
-        cout << "before where expr size check "<<endl;
+       // cout << "before where expr size check "<<endl;
         if(whereExpressions.size()==0){ // for delete * from table;
-                cout << "where expression size =0 "<<endl;
+               // cout << "where expression size =0 "<<endl;
                 vector<string> indexNames=indexCatalog_->getIndexNamesFromTableName(tableName);
                 for(unsigned i=0;i<indexNames.size();i++){
                         deleteIndex((char *)indexNames[i].c_str());
@@ -804,7 +818,7 @@ int DatabaseOperations::deleteFromTable(char *tableName,vector<WhereExpressionEl
                                                                 ridForDelete.pageNumber=dataPageNumber;
                                                                 ridForDelete.slotNumber=j;
                                                                 bplusTree->deleteFromBPlusTree((char *)searchKeyStream.str().c_str(),ridForDelete);
-                                                                cout << "deleted Rid :" << ridForDelete.pageNumber << " "<< ridForDelete.slotNumber <<endl;
+                                                               // cout << "deleted Rid :" << ridForDelete.pageNumber << " "<< ridForDelete.slotNumber <<endl;
                                                         }
                                                 }
 
@@ -1037,7 +1051,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
                 indexAttribute<<columnList[c].c_str();
 
         }
-        cout << "index Attr :"<<indexAttribute.str()<<endl;
+        //cout << "index Attr :"<<indexAttribute.str()<<endl;
         int indexHeaderPageNumber_=fpMgr_->getFreePage();
         delete fpMgr_;
         //indexHeaderPageNo=indexHeaderPageNumber_;
@@ -1102,7 +1116,7 @@ int DatabaseOperations::createIndex(char *indexName,char *tableName,vector<strin
                                                 ridForIndex.pageNumber=dataPageNumber;
                                                 ridForIndex.slotNumber=j;
                                                 noOfRecordsEffected++;
-                                                cout << ridForIndex.pageNumber << " "<<ridForIndex.slotNumber <<endl;
+                                                //cout << ridForIndex.pageNumber << " "<<ridForIndex.slotNumber <<endl;
                                                 bplusTree->insertIntoBPlusTree(recordStream.str().c_str(),ridForIndex);
                                                 //cout << "index root page :"<<indexHeader->getRootPageNumber();
                                                 delete[] recordString;
