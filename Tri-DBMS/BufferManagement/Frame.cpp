@@ -20,10 +20,9 @@ Frame::Frame(int frameSize) {
 	dirtyFlag_=false;
 	pinCount_=-1;
 	priority_=0;
-	priorityType_=new char[2];	/* main header page,dir page, index root, index leaf,
+	pageType=DATA_PAGE;	/* main header page,dir page, index root, index leaf,
 								* index intermediate, data page etc.,
 								*/
-	strcpy(priorityType_,"DATA_PAGE");
 	pageData_=new char[frameSize];//page size=4KB
 	memset(pageData_,0,frameSize);
 
