@@ -68,10 +68,11 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		DEBUG_B(endl)
 	}*/
 	if (indexHeaderPage_->getRootPageNumber() == -1) {
+		//		cout<<"THe index header passed is:" <<indexHeaderPage_->getPageNumber()<<endl;
 		LeafNode leafNode(fd_);
-		//cout << "before create leaf page"<<endl ;
+		//		cout << "before create leaf page"<<leafNode.getPageNumber()<<endl ;
 		leafNode.createLeafPage(indexHeaderPage_);
-		//cout << "after create leaf page"<<endl ;
+		//		cout << "after create leaf page"<<leafNode.getPageNumber()<<endl ;
 		char newKey[indexHeaderPage_->getKeySize()];
 		//		memset(newKey, '\0', );
 		//		strncpy(newKey, key, strlen(key));
@@ -99,22 +100,22 @@ int BPlusTree::insertIntoBPlusTree(const char* key, RIDStruct &rid) {
 		indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys()
 				+ 1);
 		//cout << "indexHeaderPage no of keys:" << indexHeaderPage_->getNoOfKeys()<<endl;
-//		bufMgr_->commitCache();
-//					bufMgr_->hexDump(fd_,10);
-//					bufMgr_->hexDump(fd_,6);
-//					bufMgr_->hexDump(fd_,7);
-//					bufMgr_->hexDump(fd_,8);
+		//		bufMgr_->commitCache();
+		//					bufMgr_->hexDump(fd_,10);
+		//					bufMgr_->hexDump(fd_,6);
+		//					bufMgr_->hexDump(fd_,7);
+		//					bufMgr_->hexDump(fd_,8);
 
 	}
 
 	//DEBUG_B("ROOT PAGE "<<indexHeaderPage_->getRootPage())
-		//indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys() + 1);
+	//indexHeaderPage_->setNoOfKeys(indexHeaderPage_->getNoOfKeys() + 1);
 
 	//cout << "before success insert"<< endl;
 	return SUCCESS;
 }
 int BPlusTree::deleteFromBPlusTree(const char* key, RIDStruct &rid) {
-/*	if (BPLUSTREE_DEBUG == true) {
+	/*	if (BPLUSTREE_DEBUG == true) {
 		BPlusTreeUtil::displayKey(key, indexHeaderPage_);
 	}*/
 	if (indexHeaderPage_->getRootPageNumber() == -1) {
@@ -172,21 +173,17 @@ int BPlusTree::searchKeyInBPlusTree(const char *key, std::vector<
 		cout << "BPLUS TREE IS NOT YET CREATED" << endl;
 		return SUCCESS;
 	}
-	cout<<"Key is"<<key<<endl;
 	int rootPageNumber = indexHeaderPage_->getRootPageNumber();
-	cout<<"Inside search Root: "<<rootPageNumber<<endl;
 	int heightOfTree = indexHeaderPage_->getHeightOfTree();
-	cout<<"Inside search, height :"<<heightOfTree<<endl;
 	if (heightOfTree == 0) {
 		LeafNode leafNode(fd_,indexHeaderPage_, rootPageNumber);
-		cout<<"GOing into search leafnode"<<endl;
 		leafNode.searchKeyInLeafNode(key, RIDVector);
 	} else {
 		//			IndexNode indexNode(indexHeaderPage_,rootPageNumber);
 		int leafPageNumber = searchInBPlusTree(key);
 		//			DEBUG_B("leaf page "<<leafPageNumber)
-				//cout << " is it here? leaf page number " << leafPageNumber << endl;
-				//cout << " key : "<<key <<endl;
+		//cout << " is it here? leaf page number " << leafPageNumber << endl;
+		//cout << " key : "<<key <<endl;
 
 		LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
 		//cout << " key : "<<key <<endl;
@@ -194,7 +191,6 @@ int BPlusTree::searchKeyInBPlusTree(const char *key, std::vector<
 		leafNode.searchKeyInLeafNode(key, RIDVector);
 		//cout<<"Seraching DOne"<<endl;
 	}
-	cout << "rid vector in search bplus tree :" << RIDVector.size()<<endl;
 	if(RIDVector.size()==0){
 		cout << "KEY NOT FOUND"<<endl;
 	}
@@ -219,37 +215,34 @@ int BPlusTree::display() {
 		LeafNode leafNode(fd_,indexHeaderPage_, indexHeaderPage_->getRootPageNumber());
 		leafNode.display();
 	}
-	//	DEBUG_B("HEIGHT OF BPLUS TREE "<<indexHeaderPage_->getHeightOfTheTree())
-	//	DEBUG_B("@@@@@@@@@@@@@@@@@@@ END OF DISPLAY @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 }
 int BPlusTree::userInterface(int indexHeaderPageNumber) {
 	char check = 'y';
 	while (check == 'y') {
-		cout << "\n PLEASE CHOOSE FOLLOWING INPUT \n" << endl;
-		cout << "2. Display IndexHeaderStructure\n";
-		cout << "3. Display IndexNode or LeafNode\n";
+		cout << "\n B+ Tree Index Implementation: \n" << endl;
+		cout << "2. Show the Index Headers: \n";
+		cout << "3. Show the Nodes\n";
 		cout << "4. Insert a Record\n";
-		cout << "5. Insert a Range\n";
-		cout << "6. Searching Bplustree\n";
-		cout << "7. Delete a key\n";
-		cout << "8. Delete a range\n";
-		cout << "9. Set debug flag\n";
-		cout << "10. Exit\n";
+		cout << "5. Insert a Range of Values\n";
+		cout << "6. Search the B-Plus Tree\n";
+		cout << "7. Hex-Dump\n";
+		cout << "8. Delete Key\n";
+		cout << "10. Close Index\n";
 		cout << "\n\n Please Enter Input >";
 		int input;
 		cin >> input;
 		switch (input) {
 		case 1:
-			cout << "NEED TO DECIDE " << endl;
+			cout << "Please Choose An Option " << endl;
 			break;
-		case 2: {
-			cout << "\nSelected Displaying Index Header Structure\n";
+		case 2:{
+			cout << "\n Index Header for the current Index:\n";
 			IndexHeader indexHeaderPage1(fd_,indexHeaderPageNumber);
 			indexHeaderPage1.UIIndexHeaderPage();
-			break;
-		}
+			break;}
+
 		case 3:
-			cout << "\n Selected Display Index node or Leaf node" << endl;
+			cout << "\n Displaying Nodes" << endl;
 			UIIndexOrLeafNode();
 			break;
 		case 4: {
@@ -270,13 +263,30 @@ int BPlusTree::userInterface(int indexHeaderPageNumber) {
 			break;
 		}
 		case 6: {
-			cout << "\n SEARCHING IN BPLUS TREE " << endl;
+			cout << "\n In the Search Mode:" << endl;
 			UISearching();
 			break;
 		}
+		case 7:{
+			int pageNo;
+			cout << "Enter the Page Number to HexDump " <<endl;
+			cin>>pageNo;
+			BufferManager::getInstance()->hexDump(fd_,pageNo);
+			break;
+
+		}
+		case 8:{
+			cout << "In the Delete Key Section " <<endl;
+			UIDeleteKey();
+			BufferManager::getInstance()->closeDatabase(fd_);
+			break;
+
+		}
 		case 10:
-			cout << "\n\t\t\tEXIT\n" << endl;
+			cout << "Closing the index" << endl;
+			BufferManager::getInstance()->closeDatabase(fd_);
 			check = 'n';
+
 			break;
 		default:
 			cout << "\n Please choose the option correctly" << endl;
@@ -287,9 +297,12 @@ int BPlusTree::userInterface(int indexHeaderPageNumber) {
 			cout << "\n You want to check options again (y/n)" << endl;
 			cin >> check;
 		} else {
+
 			break;
 		}
+
 	}
+	BufferManager::getInstance()->closeDatabase(fd_);
 	return 0;
 }
 
@@ -311,16 +324,16 @@ void BPlusTree::bplusTreeUILeafNode(int pageNumber) {
 			pageNumber = leafNode.getLeftPageNumber();
 			if (pageNumber == -1) {
 				cout
-						<< "\tSORRY NO MORE LEFT PAGES BECAUSE LEFT PAGE NUMBER IS -1"
-						<< endl;
+				<< "\tSORRY NO MORE LEFT PAGES BECAUSE LEFT PAGE NUMBER IS -1"
+				<< endl;
 			}
 			break;
 		case 2:
 			pageNumber = leafNode.getRightPageNumber();
 			if (pageNumber == -1) {
 				cout
-						<< "\tSORRY NO MORE RIGHT PAGES BECAUSE RIGHT PAGE NUMBER IS -1"
-						<< endl;
+				<< "\tSORRY NO MORE RIGHT PAGES BECAUSE RIGHT PAGE NUMBER IS -1"
+				<< endl;
 			}
 
 			break;
@@ -350,16 +363,16 @@ void BPlusTree::bplusTreeUIIndexNode(int pageNumber) {
 			pageNumber = indexNode.getLeftPageNumberOfIndexNode();
 			if (pageNumber == -1) {
 				cout
-						<< "\tSORRY NO MORE LEFT PAGES BECAUSE LEAF PAGE NUMBER IS -1"
-						<< endl;
+				<< "\tSORRY NO MORE LEFT PAGES BECAUSE LEAF PAGE NUMBER IS -1"
+				<< endl;
 			}
 			break;
 		case 2:
 			pageNumber = indexNode.getRightPageNumber();
 			if (pageNumber == -1) {
 				cout
-						<< "\tSORRY NO MORE RIGHT PAGES BECUASE RIGHT PAGE NUMBER IS -1"
-						<< endl;
+				<< "\tSORRY NO MORE RIGHT PAGES BECUASE RIGHT PAGE NUMBER IS -1"
+				<< endl;
 			}
 
 			break;
@@ -434,15 +447,15 @@ void BPlusTree::UIIndexOrLeafNode() {
 
 		int valid;
 		do {
-			cout << " Please select following " << endl;
-			cout << "1. Index Node display\t" << endl;
-			cout << "2. Leaf Node display\t" << endl;
+			cout << " Choose Amongst The Following: " << endl;
+			cout << "1. Index Nodes\t" << endl;
+			cout << "2. Leaf Nodes\t" << endl;
 			cout << "3. Exit" << endl;
 			cout << "\n Input >";
 			cin >> inputIndexLeaf;
 			cin.ignore(numeric_limits<int>::max(), '\n');
 			if (!cin || cin.gcount() != 1) {
-				cout << "\n\tPLEASE ENTER VALID INPUT (INTEGER ONLY)" << endl;
+				cout << "\n\tPLEASE ENTER VALID INPUT--INTEGERs ONLY" << endl;
 				cin.clear();
 				cin.ignore(1000, '\n');
 				valid = 0;
@@ -461,13 +474,13 @@ void BPlusTree::UIIndexOrLeafNode() {
 			if (indexPageVector.size() >= 1) {
 				do {
 					do {
-						cout << "Enter Index Node page number : ";
+						cout << "Enter Index Node Page No. : ";
 						cin >> pageNumber;
 						cin.ignore(numeric_limits<int>::max(), '\n');
 						if (!cin || cin.gcount() != 1) {
 							cout
-									<< "\n\tPLEASE ENTER VALID INPUT (INTEGER ONLY)"
-									<< endl;
+							<< "\n\tPLEASE ENTER VALID INPUT (INTEGER ONLY)"
+							<< endl;
 							cin.clear();
 							cin.ignore(1000, '\n');
 							valid = 0;
@@ -479,8 +492,8 @@ void BPlusTree::UIIndexOrLeafNode() {
 					status = findInIndexPages(indexPageVector, pageNumber);
 					if (status == 0) {
 						cout
-								<< "\tGIVEN PAGE NUMBER IS NOT AN INDEX PAGE. TRY AGAIN"
-								<< endl;
+						<< "\tGIVEN PAGE NUMBER IS NOT AN INDEX PAGE. TRY AGAIN"
+						<< endl;
 					}
 				} while (status == 0);
 				bplusTreeUIIndexNode(pageNumber);
@@ -491,13 +504,13 @@ void BPlusTree::UIIndexOrLeafNode() {
 			if (leafPageVector.size() >= 1) {
 				do {
 					do {
-						cout << "Enter Leaf Node page number : ";
+						cout << "Enter Leaf Node Page No. : ";
 						cin >> pageNumber;
 						cin.ignore(numeric_limits<int>::max(), '\n');
 						if (!cin || cin.gcount() != 1) {
 							cout
-									<< "\n\tPLEASE ENTER VALID INPUT (INTEGER ONLY)"
-									<< endl;
+							<< "\n\tPLEASE ENTER VALID INPUT (INTEGER ONLY)"
+							<< endl;
 							cin.clear();
 							cin.ignore(1000, '\n');
 							valid = 0;
@@ -509,15 +522,15 @@ void BPlusTree::UIIndexOrLeafNode() {
 					status = findInLeafPages(leafPageVector, pageNumber);
 					if (status == 0) {
 						cout
-								<< "\tGIVEN PAGE NUMBER IS NOT A LEAF PAGE. TRY AGAIN"
-								<< endl;
+						<< "\tGIVEN PAGE NUMBER IS NOT A LEAF PAGE. TRY AGAIN"
+						<< endl;
 					}
 				} while (status == 0);
 				bplusTreeUILeafNode(pageNumber);
 			}
 			break;
 		case 3:
-			cout << "\n\tEXIT from UI of index node and leaf node " << endl;
+			cout << "\n\t Exited from Nodes Display " << endl;
 			break;
 		default:
 			cout << "PLEASE CHOOSE OPTIONS CORRECTLY";
@@ -542,14 +555,14 @@ void BPlusTree::IntRange(int range1, int range2, int incrementFactor) {
 		//memcpy(totalKey, &intKey, sizeof(int));
 		rid.pageNumber = i;
 		rid.slotNumber = (short) i;
-		cout << " in range insert :" << CommonUtil::int_to_string(intKey).c_str() <<"rid: "<< rid.pageNumber <<rid.slotNumber<< endl;
+		//cout << " in range insert :" << CommonUtil::int_to_string(intKey).c_str() <<"rid: "<< rid.pageNumber <<rid.slotNumber<< endl;
 		insertIntoBPlusTree(CommonUtil::int_to_string(intKey).c_str(), rid);
 		count++;
 		intKey = intKey + incrementFactor;
 	}
 	time(&end);
 	diffTime = difftime(end, start);
-	cout << "\t" << count << " keys are inserted" << endl;
+	cout << "\t" << count << " Keys are inserted" << endl;
 	cout << "TOTAL TIME TO COMPLETE (in seconds): " << diffTime << endl;
 }
 
@@ -599,28 +612,8 @@ void BPlusTree::insertDoubleRange(double range1, double range2,
 	cout << "\t" << count << " keys are inserted" << endl;
 	cout << "\tTOTAL TIME TO COMPLETE (in seconds): " << diffTime << endl;
 }
-void BPlusTree::insertLongRange(long range1, long range2, long incrementFactor) {
-	long longKey = range1;
-	int count = 0;
-	char totalKey[indexHeaderPage_->getKeySize()];
-	memset(totalKey, '\0', indexHeaderPage_->colSizes_[0]);
-	RIDStruct rid;
-	time_t start, end;
-	double diffTime;
-	time(&start);
-	for (int i = 0; longKey <= range2; i++) {
-		memcpy(totalKey, &longKey, sizeof(long));
-		rid.pageNumber = i;
-		rid.slotNumber = (unsigned short) i;
-		insertIntoBPlusTree(totalKey, rid);
-		count++;
-		longKey = longKey + incrementFactor;
-	}
-	time(&end);
-	diffTime = difftime(end, start);
-	cout << "\t" << count << " keys are inserted" << endl;
-	cout << "\tTOTAL TIME TO COMPLETE (in seconds): " << diffTime << endl;
-}
+
+
 void BPlusTree::insertVarCharRange(int totalNumOfKeys) {
 	if (totalNumOfKeys <= 1000100) {
 		ifstream in("keys");
@@ -664,6 +657,8 @@ void BPlusTree::insertVarCharRange(int totalNumOfKeys) {
 		cout << "\n\tTotal number of keys should be less than 1000100" << endl;
 	}
 }
+
+
 void BPlusTree::UIInsertRange() {
 	int numOfColumns = indexHeaderPage_->getNoOfColumns();
 	for (int i = 0; i < numOfColumns; i++) {
@@ -765,92 +760,6 @@ void BPlusTree::UIInsertRange() {
 			} while (valid == 0);
 			insertFloatRange(floatRange1, floatRange2, floatIncrementFactor);
 			break;
-		case COL_DOUBLE:
-			do {
-				cout << "\n Enter double starting range : ";
-				cin >> doubleRange1;
-				cin.ignore(numeric_limits<double>::max(), '\n');
-				if (cin.fail()) {
-					cout << "\n\tPLEASE ENTER VALID INPUT (DOUBLE)" << endl;
-					cin.clear();
-					cin.ignore(1000, '\n');
-					valid = 0;
-				} else {
-					valid = 1;
-				}
-			} while (valid == 0);
-			do {
-				cout << "\n Enter double ending range : ";
-				cin >> doubleRange2;
-				cin.ignore(numeric_limits<double>::max(), '\n');
-				if (cin.fail()) {
-					cout << "\n\tPLEASE ENTER VALID INPUT (DOUBLE)" << endl;
-					cin.clear();
-					cin.ignore(1000, '\n');
-					valid = 0;
-				} else {
-					valid = 1;
-				}
-			} while (valid == 0);
-			do {
-				cout << "\n Enter increment factor : ";
-				cin >> doubleIncrementFactor;
-				cin.ignore(numeric_limits<double>::max(), '\n');
-				if (cin.fail()) {
-					cout << "\n\tPLEASE ENTER VALID INPUT (DOUBLE)" << endl;
-					cin.clear();
-					cin.ignore(1000, '\n');
-					valid = 0;
-				} else {
-					valid = 1;
-				}
-			} while (valid == 0);
-
-			insertDoubleRange(doubleRange1, doubleRange2, doubleIncrementFactor);
-			break;
-		case COL_LONG:
-			do {
-				cout << "\n Enter long starting range : ";
-				cin >> longRange1;
-				cin.ignore(numeric_limits<long>::max(), '\n');
-				if (cin.fail()) {
-					cout << "\n\tPLEASE ENTER VALID INPUT (LONG)" << endl;
-					cin.clear();
-					cin.ignore(1000, '\n');
-					valid = 0;
-				} else {
-					valid = 1;
-				}
-			} while (valid == 0);
-			do {
-				cout << "\n Enter long ending range : ";
-				cin >> longRange2;
-				cin.ignore(numeric_limits<long>::max(), '\n');
-				if (cin.fail()) {
-					cout << "\n\tPLEASE ENTER VALID INPUT (LONG)" << endl;
-					cin.clear();
-					cin.ignore(1000, '\n');
-					valid = 0;
-				} else {
-					valid = 1;
-				}
-			} while (valid == 0);
-			do {
-				cout << "\n Enter increment factor : ";
-				cin >> longIncrementFactor;
-				cin.ignore(numeric_limits<long>::max(), '\n');
-				if (cin.fail()) {
-					cout << "\n\tPLEASE ENTER VALID INPUT (LONG)" << endl;
-					cin.clear();
-					cin.ignore(1000, '\n');
-					valid = 0;
-				} else {
-					valid = 1;
-				}
-			} while (valid == 0);
-
-			insertLongRange(longRange1, longRange2, longIncrementFactor);
-			break;
 		case COL_VARCHAR:
 			do {
 				cout << "\nEnter total number of keys  : ";
@@ -872,47 +781,6 @@ void BPlusTree::UIInsertRange() {
 	}
 
 }
-/*void BPlusTree::insertAllRanges(char* range1,char* range2,char* incrementFactor)
- {
-
- }
- */
-/*void BPlusTree::UISetDebugFlag() {
-	cout << "\nSET DEBUG_B FLAG UI\n";
-	cout << "Currently Debug flag : ";
-	if (BPLUSTREE_DEBUG == true) {
-		cout << "SET";
-	} else {
-		cout << "UNSET";
-	}
-	int debugFlag;
-	do {
-		int valid;
-		do {
-			cout << "\n\nSET(1) / UNSET(0) : ";
-			cin >> debugFlag;
-			cin.ignore(numeric_limits<int>::max(), '\n');
-			if (!cin || cin.gcount() != 1) {
-				cout << "\n\tPLEASE ENTER VALID INPUT (INTEGER ONLY)" << endl;
-				cin.clear();
-				cin.ignore(1000, '\n');
-				valid = 0;
-			} else {
-				valid = 1;
-			}
-		} while (valid == 0);
-
-		if (debugFlag == 1) {
-			BPLUSTREE_DEBUG = true;
-			cout << "\n\tDEBUG FLAG IS SETTED" << endl;
-		} else if (debugFlag == 0) {
-			cout << "\n\tDEBUG FLAG IS UNSETTED" << endl;
-			BPLUSTREE_DEBUG = false;
-		} else {
-			cout << "\n\tPLEASE ENTER VALID INPUT (1/0)" << endl;
-		}
-	} while (debugFlag != 0 && debugFlag != 1);
-}*/
 
 void BPlusTree::UIDeleteKey() {
 	int numOfColumns = indexHeaderPage_->getNoOfColumns();
@@ -929,9 +797,9 @@ void BPlusTree::UIDeleteKey() {
 		double doubleKey;
 		long longKey;
 		char varCharKey[indexHeaderPage_->colSizes_[i]],
-				varCharKey1[indexHeaderPage_->colSizes_[i]];
+		varCharKey1[indexHeaderPage_->colSizes_[i]];
 		switch (colType) {
-		case COL_INTEGER:
+		case TYPE_INT:
 			do {
 				cin >> intKey;
 				cin.ignore(numeric_limits<int>::max(), '\n');
@@ -945,7 +813,8 @@ void BPlusTree::UIDeleteKey() {
 					valid = 1;
 				}
 			} while (valid == 0);
-			memcpy(&totalKey[offset], &intKey, sizeof(int));
+			//memcpy(&totalKey[offset], &intKey, sizeof(int));
+			strcpy(&totalKey[offset],CommonUtil::int_to_string(intKey).c_str());
 			break;
 		case COL_FLOAT:
 			do {
@@ -1341,7 +1210,7 @@ void BPlusTree::deleteLongRange(long range1, long range2) {
 }
 void BPlusTree::storeTillRequiredKey(int startLeafPage, const char* totalKey1,
 		const char* totalKey2, std::vector<RIDStruct> &RIDVector, std::vector<
-				string> &keyVector) {
+		string> &keyVector) {
 	char tempKey[indexHeaderPage_->getKeySize()];
 	RIDStruct rid;
 	//	DEBUG_B("start leaf page "<<startLeafPage)
@@ -1354,7 +1223,7 @@ void BPlusTree::storeTillRequiredKey(int startLeafPage, const char* totalKey1,
 			leafNode.getKeyAndRID(i, tempKey, rid);
 			if (((BPlusTreeUtil::keyCompare(tempKey, totalKey1,
 					indexHeaderPage_) == 1) || (BPlusTreeUtil::keyCompare(
-					tempKey, totalKey1, indexHeaderPage_) == 0))
+							tempKey, totalKey1, indexHeaderPage_) == 0))
 					&& ((BPlusTreeUtil::keyCompare(tempKey, totalKey2,
 							indexHeaderPage_) == -1)
 							|| (BPlusTreeUtil::keyCompare(tempKey, totalKey2,
@@ -1365,7 +1234,7 @@ void BPlusTree::storeTillRequiredKey(int startLeafPage, const char* totalKey1,
 				keyVector.push_back(str);
 			}
 			if (BPlusTreeUtil::keyCompare(tempKey, totalKey2, indexHeaderPage_)
-					== 1) {
+			== 1) {
 				break;
 			}
 		}
@@ -1415,10 +1284,10 @@ void BPlusTree::UIInsertRecord() {
 		double doubleKey;
 		long longKey;
 		char varCharKey[indexHeaderPage_->colSizes_[i]],
-				varCharKey1[indexHeaderPage_->colSizes_[i]];
+		varCharKey1[indexHeaderPage_->colSizes_[i]];
 		cout << "\n Enter Key (field" << (i + 1) << ") to Insert : ";
 		switch (colType) {
-		case COL_INTEGER:
+		case TYPE_INT:
 			do {
 				cin >> intKey;
 				cin.ignore(numeric_limits<int>::max(), '\n');
@@ -1429,7 +1298,7 @@ void BPlusTree::UIInsertRecord() {
 					cin.ignore(1000, '\n');
 					valid = 0;
 					cout << "\n Enter Key (field" << (i + 1)
-							<< ") to Insert : ";
+											<< ") to Insert : ";
 				} else {
 					valid = 1;
 				}
@@ -1446,7 +1315,7 @@ void BPlusTree::UIInsertRecord() {
 					cin.ignore(1000, '\n');
 					valid = 0;
 					cout << "\n Enter Key (field" << (i + 1)
-							<< ") to Insert : ";
+											<< ") to Insert : ";
 				} else {
 					valid = 1;
 				}
@@ -1464,7 +1333,7 @@ void BPlusTree::UIInsertRecord() {
 					cin.ignore(1000, '\n');
 					valid = 0;
 					cout << "\n Enter Key (field" << (i + 1)
-							<< ") to Insert : ";
+											<< ") to Insert : ";
 				} else {
 					valid = 1;
 				}
@@ -1481,7 +1350,7 @@ void BPlusTree::UIInsertRecord() {
 					cin.ignore(1000, '\n');
 					valid = 0;
 					cout << "\n Enter Key (field" << (i + 1)
-							<< ") to Insert : ";
+											<< ") to Insert : ";
 				} else {
 					valid = 1;
 				}
@@ -1536,9 +1405,6 @@ void BPlusTree::UISearching() {
 	char searchOp[3];
 	memset(searchOp, '\0', 3);
 	int op;
-//		std::vector<RIDStruct> RIDVector;
-//		std::vector<string> keyVector;
-//		getAllRIDS(RIDVector,keyVector);
 	int inValid = 0;
 	do {
 		inValid = 0;
@@ -1748,8 +1614,8 @@ void BPlusTree::UISearching() {
 				cout << "\n\tKEY NOT FOUND IN TREE" << endl;
 			} else {
 				cout
-						<< "\n******************** SEARCH RESULT ************************"
-						<< endl;
+				<< "\n******************** SEARCH RESULT ************************"
+				<< endl;
 				RIDStruct rid;
 				//			char key[indexHeaderPage_->getKeySize()];
 				for (int i = 0; i < RIDVector.size(); i++) {
@@ -1762,8 +1628,8 @@ void BPlusTree::UISearching() {
 							<< rid.slotNumber << endl;
 				}
 				cout
-						<< "****************** END SEARCH RESULT **********************"
-						<< endl;
+				<< "****************** END SEARCH RESULT **********************"
+				<< endl;
 			}
 		} else {
 			cout << "\n\tRANGE1 SHOULD BE LESS THAN OR EQUAL TO RANGE2\n"
@@ -1874,7 +1740,8 @@ void BPlusTree::UISearching() {
 		time(&start);
 		vector<RIDStruct> RIDVector;
 		vector<string> keyVector;
-		cout << "you should be here dude :"<<endl;
+		//	cout << "you should be here dude :"<<leafNodeNumber<<endl;
+		//	cout<<"Total Key:"<<totalKey<<endl;
 		bplusTreeSearchKeyInLeafNodeWithOp(leafNodeNumber, totalKey, op,
 				RIDVector, keyVector);
 		time(&end);
@@ -1883,8 +1750,8 @@ void BPlusTree::UISearching() {
 			cout << "\n\tKEY NOT FOUND IN TREE" << endl;
 		} else {
 			cout
-					<< "\n******************** SEARCH RESULT ************************"
-					<< endl;
+			<< "\n******************** SEARCH RESULT ************************"
+			<< endl;
 			RIDStruct rid;
 			//			char key[indexHeaderPage_->getKeySize()];
 			for (int i = 0; i < RIDVector.size(); i++) {
@@ -1896,8 +1763,8 @@ void BPlusTree::UISearching() {
 						<< rid.slotNumber << endl;
 			}
 			cout
-					<< "****************** END SEARCH RESULT **********************"
-					<< endl;
+			<< "****************** END SEARCH RESULT **********************"
+			<< endl;
 		}
 	}
 }
@@ -1911,7 +1778,7 @@ void BPlusTree::UIDisplayTree() {
 	int rootPage = indexHeaderPage_->getRootPageNumber();
 	cout << "\n Root Page Number : " << indexHeaderPage_->getRootPageNumber() << endl;
 	cout << " Height of tree     : " << indexHeaderPage_->getHeightOfTree()
-			<< endl;
+							<< endl;
 	cout << "\n\t*****************DISPLAY TREE********************" << endl;
 	if (rootPage != -1) {
 		if (heightOfTree == 0) {
@@ -1934,7 +1801,7 @@ void BPlusTree::bplusTreeSearchKeyInLeafNodeWithOp(int leafPageNumber,
 		while (found == 1) {
 			if (leafPageNumber != -1) {
 				LeafNode leafNode(fd_,indexHeaderPage_, leafPageNumber);
-				//cout << "leaf page number :"<< leafNode.getPageNumber()<<" leaf page right pagenumber :"<< leafNode.getRightPageNumber() <<endl;
+				//	cout << "leaf page number :"<< leafNode.getPageNumber()<<" leaf page right pagenumber :"<< leafNode.getRightPageNumber() <<endl;
 				leafNode.searchKeyInLeafNodeWithOp(totalKey, op,
 						RIDVector, keyVector);
 				leafPageNumber = leafNode.getRightPageNumber();
@@ -1942,13 +1809,13 @@ void BPlusTree::bplusTreeSearchKeyInLeafNodeWithOp(int leafPageNumber,
 			} else {
 				found = 0;
 			}
-//
-//			cout << "root page Number :"<<indexHeaderPage_->getRootPageNumber()<<endl;
-//				IndexNode indexNode(fd_,indexHeaderPage_,indexHeaderPage_->getRootPageNumber());
-//				if(indexNode.getPageType()==INDEX_LEAF_PAGE){
-//
-//				}
-//				indexNode.searchKeyInIndexNodeWithOp(totalKey, op, RIDVector, keyVector);
+			//
+			//			cout << "root page Number :"<<indexHeaderPage_->getRootPageNumber()<<endl;
+			//				IndexNode indexNode(fd_,indexHeaderPage_,indexHeaderPage_->getRootPageNumber());
+			//				if(indexNode.getPageType()==INDEX_LEAF_PAGE){
+			//
+			//				}
+			//				indexNode.searchKeyInIndexNodeWithOp(totalKey, op, RIDVector, keyVector);
 
 		}
 
