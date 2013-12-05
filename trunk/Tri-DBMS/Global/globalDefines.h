@@ -41,6 +41,10 @@
 #define TYPE_DATE 4
 #define TYPE_FLOAT 5
 
+#define SQL_MODE 0
+#define CACHE_MODE 1
+#define INDEX_MODE 2
+#define BULK_MODE 3
 
 //Pour l'index
 #define COL_INTEGER 1
