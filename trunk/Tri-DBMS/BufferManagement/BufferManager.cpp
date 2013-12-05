@@ -5,6 +5,7 @@
  *      Author: ravin
  */
 
+#include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
 #include <unistd.h>
@@ -506,16 +507,16 @@ int BufferManager::hexDump(char *pageContent){
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
 
-//		if(noOfLinesDisplayed==20){
-//			cout << endl << "===============================================================================" <<endl ;
-//			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
-//			char c;
-//			cin >> c;
-//			cout <<  "===============================================================================" <<endl <<endl;
-//			if(c!='c'){
-//				break;
-//			}
-//		}
+		//		if(noOfLinesDisplayed==20){
+		//			cout << endl << "===============================================================================" <<endl ;
+		//			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:" << endl;
+		//			char c;
+		//			cin >> c;
+		//			cout <<  "===============================================================================" <<endl <<endl;
+		//			if(c!='c'){
+		//				break;
+		//			}
+		//		}
 
 		int nread=0;
 		char *buf=new char[16];
@@ -550,6 +551,9 @@ int BufferManager::hexDump(char *pageContent){
 
 		cout << "\n";
 		noOfLinesDisplayed++;
+		if(noOfLinesDisplayed==15){
+			break;
+		}
 		address += 16;
 
 	}
@@ -585,16 +589,16 @@ int BufferManager::hexDump(int cd,int pageNumber){
 	while(ptr<DEFAULT_PAGE_SIZE)
 	{
 
-//		if(noOfLinesDisplayed==20){
-//			cout << endl << "===============================================================================" <<endl ;
-//			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:"<<endl;
-//			char c;
-//			cin >> c;
-//			cout <<  "===============================================================================" <<endl<<endl; ;
-//			if(c!='c'){
-//				break;
-//			}
-//		}
+		//		if(noOfLinesDisplayed==20){
+		//			cout << endl << "===============================================================================" <<endl ;
+		//			cout << "Press 'c' to print rest of the hexdump! Press any other key to stop:"<<endl;
+		//			char c;
+		//			cin >> c;
+		//			cout <<  "===============================================================================" <<endl<<endl; ;
+		//			if(c!='c'){
+		//				break;
+		//			}
+		//		}
 
 		int nread=0;
 		char *buf=new char[16];
@@ -623,12 +627,75 @@ int BufferManager::hexDump(int cd,int pageNumber){
 		cout << "  ";
 		for( int i = 0; i < nread; i++)
 		{
-			if( buf[i] < 32 ) cout << '.';
-			else cout << buf[i];
+			isprint(buf[i])? cout << buf[i]:cout << '.';
 		}
 
 		cout << "\n";
 		noOfLinesDisplayed++;
+		if(noOfLinesDisplayed==15){
+			break;
+		}
+		address += 16;
+		delete[] buf;
+	}
+	delete[] pageContent;
+	return SUCCESS;
+}
+
+
+
+
+int BufferManager::hexDumpFull(int cd,int pageNumber){
+	if(cd<0 || cd>=noOfDBsOpened_){
+		cout << "DATABASE_NOT_OPEN" << endl;
+		return -1;
+	}
+	long int fd;
+	fd=cacheIndex[cd].fd_;
+	cout <<"\n";
+	cout <<
+			"Address               Hexadecimal values                    Printable\n";
+	cout <<
+			"--------  -----------------------------------------------  -------------\n";
+	cout << "\n";
+	unsigned long address = 0;
+	//char c;
+	int ptr=0;
+	char *pageContent=new char[DEFAULT_PAGE_SIZE];
+	memset(pageContent,'0',DEFAULT_PAGE_SIZE);
+	//int err=diskManager_->readDiskFile(fd,pageNumber,DEFAULT_PAGE_SIZE,pageContent);
+	int err=readPage(cd,pageNumber,pageContent);
+	if(err==-1){
+		cout<< endl << "FILE_NOT_OPENED" << endl;
+		return -1;
+	}
+	cout << hex << setfill('0');
+	while(ptr<DEFAULT_PAGE_SIZE)
+	{
+		int nread=0;
+		char *buf=new char[16];
+
+		for( nread = 0; nread < 16 ; nread++,ptr++ ){
+			buf[nread]=pageContent[ptr];
+		}
+		if( nread == 0){
+			break;
+		}
+		cout << setw(4) << address;
+		for( int i = 0; i < nread; i++ )
+		{
+			if( i % 8 == 0 ) cout << ' ';
+			if( i < 16 )
+				cout << ' ' << setw(2) << (unsigned)buf[i];
+			else
+				cout << "   ";
+		}
+		cout << "  ";
+		for( int i = 0; i < nread; i++)
+		{
+			isprint(buf[i])? cout << buf[i]:cout << '.';
+		}
+		cout << "\n";
 		address += 16;
 		delete[] buf;
 	}

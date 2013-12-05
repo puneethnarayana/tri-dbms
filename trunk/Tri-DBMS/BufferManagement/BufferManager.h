@@ -47,6 +47,7 @@ public:
 	int getFreeFrame();
 	int getHitRate();
 	int hexDump(int fd,int pageNumber);
+	int hexDumpFull(int fd,int pageNumber);
 	int hexDump(char *pageContent);
 	bool isInitCache() const;
 	int	memoryUsage();
