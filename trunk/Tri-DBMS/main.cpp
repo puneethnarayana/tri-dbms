@@ -28,10 +28,7 @@ extern int yyparse();
 extern FILE *yyin;
 extern int yy_scan_string(const char *);
 
-int parse_mode=0;
-#define SQL_MODE 0
-#define CACHE_MODE 1
-#define INDEX_MODE 2
+extern int mode;
 
 void cacheConsole(){
 
@@ -44,7 +41,7 @@ void cacheConsole(){
 	int fd,frameNo,pageNo,cacheSize,noOfPages,noOfFrames;
 	char *query_string=new char[256];
 	while(1){
-		cout << endl << endl <<"Cache-Console>>";
+		cout << endl << endl <<"Cache-Console>> ";
 		delete[] query_string;
 		query_string=new char[256];
 		//cin >> command;
@@ -121,6 +118,7 @@ void cacheConsole(){
 			}
 			pageNo=atoi(temp);
 			readPage=new char[DEFAULT_PAGE_SIZE];
+			memset(readPage,0,DEFAULT_PAGE_SIZE);
 			if(buffManager->readPage(fd,pageNo,readPage)!=-1){
 				buffManager->hexDump(readPage);
 			}
@@ -152,6 +150,8 @@ void cacheConsole(){
 			}
 
 			pageContent=new char[DEFAULT_PAGE_SIZE];
+
+			memset(readPage,0,DEFAULT_PAGE_SIZE);
 			pageContent=strtok(NULL,"\n");
 			if(pageContent==NULL){
 				cout << "Wrong Number of Arguments for " << command << endl;
@@ -180,6 +180,21 @@ void cacheConsole(){
 			pageNo=atoi(temp);
 			buffManager->hexDump(fd,pageNo);
 		}
+		else if(strcasecmp(command,"fullhexdump")==0){
+					temp=strtok(NULL," ");
+					if(temp==NULL){
+						cout << "Wrong Number of Arguments for " << command << endl;
+						continue;
+					}
+					fd=atoi(temp);
+					temp=strtok(NULL," ");
+					if(temp==NULL){
+						cout << "Wrong Number of Arguments for " << command << endl;
+						continue;
+					}
+					pageNo=atoi(temp);
+					buffManager->hexDumpFull(fd,pageNo);
+				}
 		else if(strcasecmp(command,"bufferlist")==0){
 			//cout << endl << command;
 			buffManager->displayBufferList();
@@ -261,11 +276,11 @@ int main(int argc, char* argv[] ){
 			char *buffer= new char[buff.length()+1];
 			strcpy(buffer,buff.c_str() );
 
-			if((strcmp(buffer,"cache mode;")==0) || (strcmp(buffer,"CACHE MODE")==0)){
-				parse_mode=CACHE_MODE;
+			if((strcmp(buffer,"cache mode;")==0) || (strcmp(buffer,"CACHE MODE;")==0)){
+				mode=CACHE_MODE;
 				strcpy(buffer,"");
 				cacheConsole();
-				parse_mode=SQL_MODE;
+				mode=SQL_MODE;
 			}
 			else if((strcmp(buffer,"cache on;")==0) || (strcmp(buffer,"CACHE ON;")==0)){
 				prompt="CACHE> ";
@@ -274,16 +289,35 @@ int main(int argc, char* argv[] ){
 				prompt="SQL> ";
 			}
 			else if((strcmp(buffer,"index mode;")==0) || (strcmp(buffer,"INDEX MODE;")==0)){
-				parse_mode=INDEX_MODE;
+				mode=INDEX_MODE;
 				strcpy(buffer,"");
 				indexConsole();
-				parse_mode=SQL_MODE;
+				mode=SQL_MODE;
 			}
 			else if((strcmp(buffer,"index on;")==0) || (strcmp(buffer,"INDEX ON;")==0)){
 				prompt="INDEX> ";
 			}
 			else if((strcmp(buffer,"index off;")==0) || (strcmp(buffer,"INDEX OFF;")==0)){
 				prompt="SQL> ";
+			}
+			else if((strcmp(buffer,"bulk insert")==0) || (strcmp(buffer,"BULK INSERT")==0)){
+				int prevMode= mode;
+				mode=BULK_MODE;
+				char *fname;
+				cout<<"Enter file name: ";
+				cin>>fname;
+				FILE *inputFile= fopen(fname,"r");
+				if (!inputFile) {
+							cout << "Cannot open input file!" << endl;
+							return -1;
+						}
+				yyin = inputFile;
+				do {
+					yyparse();
+				} while (!feof(yyin));
+				cout<<"Phineesh"<<endl;
+				strcpy(buffer,"");
+				mode=prevMode;
 			}
 
 			yy_scan_string(buffer);
