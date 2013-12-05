@@ -37,8 +37,4 @@ int dbSize=0;
 int mode=0;
 char* pageContent=new char[DEFAULT_PAGE_SIZE];
 
-#define SQL_MODE 0
-#define CACHE_MODE 1
-#define INDEX_MODE 2
-
 #endif /* HEADING_H_ */

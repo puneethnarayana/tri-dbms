@@ -117,15 +117,11 @@ query_list:
 
 create_statement:
 		CREATE TABLE table '(' base_table_element_commalist ')' {
-		if(mode==SQL_MODE){
 			dbOps->createTable($3,globalColumnNameList,globalColumnDatatypeList,globalColumnDatasizeList);
 			cout<<"Table "<<$3<<" created successfully with "<<globalColumnNameList.size()<<" column(s)!"<<endl;
 			globalColumnNameList.clear();
 			globalColumnDatatypeList.clear();
 			globalColumnDatasizeList.clear();
-			}
-			else
-		cout<<"Action not permitted in this mode"<<endl;
 		}
 	;
 
@@ -207,7 +203,6 @@ data_type:
 
 createdb_statement:
 		CREATE DATABASE db_name	opt_db_size{
-		if(mode==SQL_MODE){
 		if(dbSize==0)
 			dbOps->createDatabase($3);
 		else
@@ -215,9 +210,7 @@ createdb_statement:
 		cout<<"Database created successfully!"<<endl;
 		dbSize=0;
 		}
-		else
-		cout<<"Action not permitted in this mode"<<endl;
-		}
+
 	;
 
 opt_db_size:
@@ -255,9 +248,12 @@ insert_statement:
 			cout<<"Inserted 1 row successfully!"<<endl;
         	globalColumnValueList.clear();
         	}
-       	else
-		cout<<"Action not permitted in this mode"<<endl;
-		}
+       	else if(mode==BULK_MODE){
+       		cout<<"~~~"<<endl;
+     	  	dbOps->insertIntoTable($3,globalColumnValueList); 
+        	globalColumnValueList.clear();
+       		}
+       	}
 	;
 
 opt_column_commalist:
@@ -314,13 +310,9 @@ where_literal:
 
 delete_statement:
 	DELETE FROM table opt_where_clause {
-	if(mode==SQL_MODE){
 		dbOps->deleteFromTable($3,globalWhereList); 
 		globalWhereList.clear();
 		}
-	else
-		cout<<"Action not permitted in this mode"<<endl;
-	} 
 	;
 
 opt_where_clause:
@@ -429,15 +421,11 @@ scalar_exp_commalist:
 
 update_statement:
 		UPDATE table SET assignment_commalist opt_where_clause {
-			if(mode==SQL_MODE){
 			dbOps->updateTable($2,globalColumnNameList,globalColumnValueList,globalWhereList);
         	globalColumnNameList.clear();
         	globalColumnValueList.clear();
 			globalWhereList.clear();
 			}
-		else
-		cout<<"Action not permitted in this mode"<<endl;
-		}
 	;
 
 assignment_commalist:
@@ -468,13 +456,8 @@ value_exp_commalist:
 
 select_statement:
 		SELECT opt_all_distinct selection FROM table table_exp{
-		if(mode==SQL_MODE){
 			dbOps->selectAllFromTable($5,globalColumnNameList,globalWhereList);
         	globalColumnNameList.clear();
-			globalWhereList.clear();
-			}
-		else
-		cout<<"Action not permitted in this mode"<<endl;
 		}
 	;
 
@@ -527,18 +510,10 @@ drop_statement:
 		
 db_struct:
 		DATABASE db_name{
-		if(mode==SQL_MODE){
 			dbOps->dropDatabase($2);
-			}
-		else
-			cout<<"Action not permitted in this mode"<<endl;
 		}
 	|	TABLE table  {
-		if(mode==SQL_MODE){
 			dbOps->dropTable($2);
-			}
-		else
-			cout<<"Action not permitted in this mode"<<endl;
 		}
 	|	INDEX index_name {
 			dbOps->deleteIndex($2);
@@ -560,31 +535,19 @@ describe_statement:
 
 show_databases:
 	SHOW DATABASES {
-	if(mode==SQL_MODE){
 		dbOps->listDatabases();
-		}
-	else
-		cout<<"Action not permitted in this mode"<<endl;
 	}
 	;
 
 show_tables:
 	SHOW TABLES {
-	if(mode==SQL_MODE){
 		dbOps->listTables();
-		}
-	else
-		cout<<"Action not permitted in this mode"<<endl;
 	}
 	;
 
 use_db:
 	USE db_name {
-	if(mode==SQL_MODE){
 		dbOps->openDatabase($2);
-		}
-	else
-		cout<<"Action not permitted in this mode"<<endl;
 	}
 	;
 
@@ -597,12 +560,8 @@ exit_stmt:
 
 close_db:
 	CLOSE db_name{
-	if(mode==SQL_MODE){
 		dbOps->closeDatabase();
 		cout<<$2<<" database committed to disk"<<endl;
-		}
-	else
-		cout<<"Action not permitted in this mode"<<endl;
 	}
 	;
 
@@ -633,7 +592,6 @@ index_off:
 		cout<<"Index mode off"<<endl;
 	}
 	;
-	
 
 
 %%
