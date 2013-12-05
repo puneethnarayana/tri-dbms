@@ -15,4 +15,5 @@ create table marks(Subject integer, Total integer);
 insert into marks values (1,50);
 select * from marks;
 desc students;
+show tables;
 close st;
